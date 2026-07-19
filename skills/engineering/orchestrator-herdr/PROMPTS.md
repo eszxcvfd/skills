@@ -89,8 +89,8 @@ none|exact question or permission needed
 | `STATUS` | `done` = skill criteria met; `blocked` = needs human; `failed` = cannot proceed |
 | `ARTIFACTS` | Every file/issue the orchestrator **will open and judge** before chaining; paths relative to project root preferred; never empty on `done` if the skill produced output |
 | `VERIFY` | Commands you ran + outcome — orchestrator uses this to spot fake-done |
-| `NEXT_SKILL` | At most one; orchestrator decides spawn — worker does not self-chain |
-| `NEXT_INPUTS` | Concrete paths/ids for the next skill — orchestrator copies these into the next worker prompt |
+| `NEXT_SKILL` | At most one **suggestion**; orchestrator may change it after evaluate — worker never self-chains; user must approve NEXT PLAN before any spawn |
+| `NEXT_INPUTS` | Concrete paths/ids for the next skill — orchestrator copies these into the next worker prompt after user approves |
 | `BLOCKERS` | If `blocked`, must be actionable (what to approve / what to answer) |
 | `NOTES` | Handoff for the **orchestrator brain**: what changed, risks, what to double-check in artifacts |
 

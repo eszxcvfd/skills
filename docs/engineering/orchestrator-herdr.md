@@ -12,13 +12,13 @@ npx skills update orchestrator-herdr
 
 ## What it does
 
-`orchestrator-herdr` turns the coding agent already running in a Herdr pane into a **router and dispatcher**: it maps intent onto project skills, confirms a PLAN with you, then spawns **OpenCode workers** in sibling panes and collects their STATUS files. The defining constraint is that **you stay the orchestrator** — workers run one PRIMARY skill each and write artifacts only under `.scratch/orchestrator/`; the skill never hands control to a separate pi role.
+`orchestrator-herdr` turns the coding agent already running in a Herdr pane into a **router and cycle controller**: plan → your approval → OpenCode subagent → ingest results → evaluate → next plan → your approval again. Workers run one PRIMARY skill each and write artifacts only under `.scratch/orchestrator/`. The skill never auto-chains the next job without a new approval (unless you explicitly set auto-run).
 
 ## When to reach for it
 
 You invoke this by typing `/orchestrator-herdr` — the agent won't reach for it on its own.
 
-Reach for it when you are **inside Herdr** and want multi-agent skill-driven work: several AFK jobs, blocked-handler for permission UIs, STATUS chaining. For a single-session idea→ship path without panes, stay on the main flow via [ask-matt](https://aihero.dev/skills-ask-matt). For a plain context bridge without Herdr, use [handoff](https://aihero.dev/skills-handoff).
+Reach for it when you are **inside Herdr** and want multi-agent skill-driven work with a clear human gate every cycle. For a single-session idea→ship path without panes, stay on the main flow via [ask-matt](https://aihero.dev/skills-ask-matt). For a plain context bridge without Herdr, use [handoff](https://aihero.dev/skills-handoff).
 
 ## Prerequisites
 
@@ -26,17 +26,23 @@ Reach for it when you are **inside Herdr** and want multi-agent skill-driven wor
 - Worker binary available as `opencode` (default).
 - Project skills installed (this set via `npx skills add eszxcvfd/skills` or a linked clone).
 
-## Plan, spawn, STATUS
+## The cycle
 
-The leading loop is **plan-confirm → spawn → STATUS**. Nothing AFK starts until you approve the PLAN (unless you already said to skip). Each worker gets one skill, writes `STATUS.md` under `.scratch/orchestrator/<run-id>/<worker>/`, and does not chain further skills — the orchestrator enqueues the next job from `NEXT_SKILL` and `ARTIFACTS`.
+```text
+PLAN → approve → dispatch subagent → supervise → ingest STATUS/artifacts
+  → evaluate → NEXT PLAN or FINISH → approve → loop
+```
+
+Nothing AFK starts until you approve the PLAN. After the worker stops, the orchestrator must re-read the transcript, open every artifact, quality-gate, then show ORCH + NEXT PLAN and wait again. Command cookbook and anti-patterns live in the skill’s `SKILL.md` and `WORKFLOW.md`.
 
 ## It's working if
 
 - A PLAN block appears and waits for yes before AFK spawns.
 - Workers start with `--no-focus`; prompts go through `herdr pane run`.
-- Each finished job has a parseable `STATUS.md` with `STATUS: done|blocked|failed`.
-- Artifacts never land in `/tmp` or outside the project.
+- After each worker stop, you see an ORCH evaluation grounded in opened files — not only “agent done”.
+- A NEXT PLAN (or FINISH) waits for yes before the next spawn.
+- Each job has parseable `STATUS.md`; artifacts stay under `.scratch/orchestrator/`.
 
 ## Where it fits
 
-A reach-for-it-anytime **standalone** for multi-pane Herdr runs — it sits beside the main flow rather than replacing it, and **dispatches** skills like `/research`, `/implement`, and `/tdd` as workers while you keep HITL steps (`/grill-with-docs`, `/ask-matt`) in the orchestrator pane. Neighbour: [handoff](https://aihero.dev/skills-handoff) for session bridges without Herdr. For the whole map, see [ask-matt](https://aihero.dev/skills-ask-matt).
+A reach-for-it-anytime **standalone** for multi-pane Herdr runs — it **dispatches** skills like `/research`, `/implement`, and `/tdd` as workers while you keep HITL steps in the orchestrator pane. Neighbour: [handoff](https://aihero.dev/skills-handoff). Map: [ask-matt](https://aihero.dev/skills-ask-matt).
