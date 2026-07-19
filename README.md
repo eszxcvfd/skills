@@ -1,74 +1,113 @@
-<p>
-  <a href="https://www.aihero.dev/s/skills-newsletter">
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="https://res.cloudinary.com/total-typescript/image/upload/v1777382277/skills-repo-dark_2x.png">
-      <source media="(prefers-color-scheme: light)" srcset="https://res.cloudinary.com/total-typescript/image/upload/v1777382277/skill-repo-light_2x.png">
-      <img alt="Skills" src="https://res.cloudinary.com/total-typescript/image/upload/v1777382277/skill-repo-light_2x.png" width="369">
-    </picture>
-  </a>
-</p>
+# skills
 
-# Skills For Real Engineers
+Agent skills for real engineering — fork of [mattpocock/skills](https://github.com/mattpocock/skills) plus personal extras (Herdr orchestrator).
 
-[![skills.sh](https://skills.sh/b/mattpocock/skills)](https://skills.sh/mattpocock/skills)
+**Repo:** https://github.com/eszxcvfd/skills
 
-My agent skills that I use every day to do real engineering - not vibe coding.
+Use this README to pull the set into **any other project**.
 
-Developing real applications is hard. Approaches like GSD, BMAD, and Spec-Kit try to help by owning the process. But while doing so, they take away your control and make bugs in the process hard to resolve.
+---
 
-These skills are designed to be small, easy to adapt, and composable. They work with any model. They're based on decades of engineering experience. Hack around with them. Make them your own. Enjoy.
+## Install vào project khác
 
-If you want to keep up with changes to these skills, and any new ones I create, you can join ~60,000 other devs on my newsletter:
+Chọn **một** cách. Làm trong thư mục project đích (app/repo bạn đang code).
 
-[Sign Up To The Newsletter](https://www.aihero.dev/s/skills-newsletter)
-
-## Quickstart (30-second setup)
-
-1. Run the skills.sh installer:
+### A. skills.sh (nhanh — copy skill vào project)
 
 ```bash
-npx skills@latest add mattpocock/skills
+cd /path/to/your-project
+npx skills@latest add eszxcvfd/skills
 ```
 
-2. Pick the skills you want, and which coding agents you want to install them on. **Make sure you select `/setup-matt-pocock-skills`**.
+- Chọn skill cần dùng và agent (Claude Code, Codex, OpenCode, Cursor, …).
+- **Nên tick** `setup-matt-pocock-skills`.
+- Trong agent, chạy `/setup-matt-pocock-skills` một lần/repo (issue tracker, triage labels, docs layout).
 
-3. Run `/setup-matt-pocock-skills` in your agent. It will:
-   - Ask you which issue tracker you want to use (GitHub, Linear, or local files)
-   - Ask you what labels you apply to tickets when you triage them (`/triage` uses labels)
-   - Ask you where you want to save any docs we create
+Cập nhật sau này: chạy lại cùng lệnh `npx skills@latest add eszxcvfd/skills`.
 
-4. Bam - you're ready to go.
+### B. Clone + symlink global (một bản, nhiều project)
 
-## Install as a Claude Code plugin
+Giữ một clone; mọi agent đọc skill qua symlink home:
 
-Prefer a plug-and-play install you don't maintain by hand? These skills also ship as a native [Claude Code plugin](https://code.claude.com/docs/en/plugins). Instead of copying editable files into your repo, the plugin installs the whole skill set as a managed bundle that updates when I ship a new version — you subscribe rather than fork.
-
-Inside Claude Code:
-
-```
-/plugin marketplace add mattpocock/skills
-/plugin install mattpocock-skills@mattpocock
+```bash
+git clone https://github.com/eszxcvfd/skills.git ~/src/skills
+cd ~/src/skills
+./scripts/link-skills.sh
 ```
 
-Or from your shell:
+Script link toàn bộ skill (trừ `deprecated/`) vào:
+
+- `~/.claude/skills` — Claude Code
+- `~/.agents/skills` — Codex / Agent Skills standard
+
+OpenCode / pi: trỏ skill path tới clone, hoặc copy/symlink thêm:
+
+```bash
+# OpenCode user config example — skills.paths
+# "~/.config/opencode/opencode.json" → "skills": { "paths": ["~/src/skills/skills"] }
+
+mkdir -p ~/.pi/agent/skills
+# optional: link personal orchestrator for pi
+ln -sfn ~/src/skills/skills/personal/orchestrator-herdr ~/.pi/agent/skills/orchestrator-herdr
+```
+
+Cập nhật:
+
+```bash
+cd ~/src/skills && git pull && ./scripts/link-skills.sh
+```
+
+### C. Git submodule / subtree (skill nằm trong monorepo)
+
+```bash
+cd /path/to/your-project
+git submodule add https://github.com/eszxcvfd/skills.git vendor/skills
+# hoặc sparse: chỉ lấy skills/engineering + skills/productivity
+```
+
+Rồi cấu hình agent trỏ vào `vendor/skills/skills` (hoặc copy promoted buckets vào `.agents/skills` / `.claude/skills` của project).
+
+### D. Claude Code plugin (upstream managed bundle)
+
+Plugin chính thức vẫn từ upstream Matt (read-only, auto-update theo release của ông ấy):
 
 ```bash
 claude plugin marketplace add mattpocock/skills
 claude plugin install mattpocock-skills@mattpocock
 ```
 
-Then run `/setup-matt-pocock-skills` once per repo, exactly as in the quickstart above.
+Dùng **A hoặc B** nếu bạn muốn bản **fork này** (có `orchestrator-herdr` và chỉnh sửa riêng).
 
-Two ways to install, two philosophies:
+---
 
-- **[skills.sh](https://skills.sh/mattpocock/skills)** copies the skills into your project so you can hack on them and make them your own.
-- **The plugin** keeps them as a read-only, always-current bundle you don't edit — best when you just want my set to work and follow along as it evolves.
+## Sau khi cài — checklist 1 project
 
-> Using Codex or another agent? The [skills.sh installer](https://skills.sh/mattpocock/skills) already installs these skills into Codex and other Agent-Skills-standard harnesses today. A native Codex plugin is on the roadmap — see [`.agents/adr/0002-ship-as-a-claude-code-plugin.md`](./.agents/adr/0002-ship-as-a-claude-code-plugin.md).
+1. `/setup-matt-pocock-skills` trong agent (tracker + labels + docs).
+2. Router: `/ask-matt` khi không chắc skill nào.
+3. Flow thường: `/grill-with-docs` → `/to-spec` → `/to-tickets` → `/implement`.
+4. (Tuỳ chọn) Herdr multi-agent: cài [Herdr](https://herdr.dev), integration `pi` + `opencode`, dùng skill [`orchestrator-herdr`](./skills/personal/orchestrator-herdr/SKILL.md) — pi điều phối, worker OpenCode chạy từng skill project.
 
-## Why These Skills Exist
+---
 
-I built these skills as a way to fix common failure modes I see with Claude Code, Codex, and other coding agents.
+## Layout repo
+
+```
+skills/
+  engineering/   # promoted — code work (install vào project)
+  productivity/  # promoted — workflow
+  personal/      # setup riêng (orchestrator-herdr, …) — không ship plugin
+  misc/          # hiếm dùng
+  in-progress/   # draft
+  deprecated/    # bỏ
+```
+
+Promoted = an toàn copy sang project khác. `personal/` mang theo nếu bạn dùng Herdr orchestrator.
+
+---
+
+## Why these skills exist
+
+Upstream framing (Matt Pocock) — common agent failure modes and the skills that fix them:
 
 ### #1: The Agent Didn't Do What I Want
 
@@ -211,3 +250,17 @@ General workflow tools, not code-specific.
 **Model-invoked**
 
 - **[grilling](./skills/productivity/grilling/SKILL.md)** — Interview the user relentlessly about a plan, decision, or idea until every branch of the decision tree is resolved. The reusable loop behind `grill-me` and `grill-with-docs`.
+
+### Personal (this fork)
+
+Not in the Claude plugin set. Install via clone/link or pick them in skills.sh if listed.
+
+- **[orchestrator-herdr](./skills/personal/orchestrator-herdr/SKILL.md)** — Pi on Herdr routes project skills (`ask-matt` map) to OpenCode worker panes.
+- **[edit-article](./skills/personal/edit-article/SKILL.md)** — Edit and improve articles.
+- **[obsidian-vault](./skills/personal/obsidian-vault/SKILL.md)** — Notes in an Obsidian vault.
+
+---
+
+## Upstream
+
+Based on [mattpocock/skills](https://github.com/mattpocock/skills). Newsletter / original docs: [aihero.dev](https://www.aihero.dev/s/skills-newsletter).
