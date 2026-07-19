@@ -1,120 +1,156 @@
 ---
 name: orchestrator-herdr
-description: "Herdr orchestrator: plan → approve → worker → read results → next plan → approve. Project skills only."
+description: "Herdr orchestrator: multi-worker plan, skill-driven prompts, mandatory ingest/analyze before next cycle."
 disable-model-invocation: true
 ---
 
 # Orchestrator (Herdr)
 
-You coordinate. Workers execute one project skill each. Requires `HERDR_ENV=1`.
+You **coordinate only**. Workers run project skills. `HERDR_ENV=1` required.
 
 ```text
-PLAN → user y/n → dispatch worker → wait idle → ingest → evaluate → NEXT PLAN / FINISH → user y/n → …
+route many jobs → PLAN (approve) → dispatch N workers
+  → each stop: INGEST + quality-gate + ORCH (mandatory)
+  → NEXT PLAN / FINISH (approve) → …
 ```
+
+Worker finish ≠ success. Never chain or finish without ingest.
 
 | You | Worker |
 |-----|--------|
-| Route skill, plan, herdr CLI, read results, next plan | One PRIMARY SKILL + `STATUS.md` under `.scratch/orchestrator/` |
+| Route, plan, herdr, ingest, analyze, next plan | 1 PRIMARY SKILL + STATUS under `.scratch/orchestrator/` |
 
-Default worker binary: `opencode` (or what the user names).
+Default binary: `opencode`.
 
 ## Rules
 
-1. Stay in orchestrator pane (`--no-focus` on spawns).
-2. One skill per worker. No auto-chain without a new user **y** on PLAN/NEXT PLAN.
-3. PLAN skill must exist in the **project** (`.agents/skills`, `.claude/skills`, or `skills/engineering|productivity`). Inventory + open `ask-matt` if present, else [ROUTING.md](ROUTING.md).
-4. Artifacts only under `.scratch/orchestrator/<run-id>/`.
-5. Idle/done ≠ success — read STATUS + artifacts first.
-6. Prefer **reuse** idle worker when same role/cwd fits; else spawn. **Close** run-owned workers when not reusing or on FINISH — do it, don't ask.
-7. Never close your own pane or panes you didn't create.
+1. `--no-focus` spawns. Stay in orchestrator pane.
+2. **One skill per worker.** Many workers OK (parallel if no data edge; else sequence).
+3. Skills from **project inventory** only. Open `ask-matt` or [ROUTING.md](ROUTING.md). Verify `SKILL.md` on disk. Match skill → work.
+4. Build each prompt from that skill’s **real requirements** (see Dispatch) — not a vague “do the task”.
+5. Artifacts only under `.scratch/orchestrator/<run-id>/`.
+6. After **every** worker stop: **Ingest → quality-gate → ORCH** before any next spawn or “done”.
+7. No next AFK job without user **y** on PLAN/NEXT PLAN (unless user said auto-run).
+8. Reuse idle worker when same role/cwd fits; else spawn. **Close** run-owned when not reusing / FINISH — don’t ask.
+9. Never close your pane or foreign panes.
 
-## Herdr flow (verified)
+## Herdr (verified)
 
 ```bash
-herdr integration status
-herdr agent list
+herdr integration status && herdr agent list
 
-# spawn (or skip if reusing idle $WORKER)
 herdr agent start "$WORKER" --cwd "$PWD" --split right --no-focus -- opencode
-herdr agent list   # note pane_id
+herdr agent list   # pane_id
 
 herdr agent send "$WORKER" "$(cat "$PROMPT_FILE")"
 herdr pane send-keys "$PANE_ID" Enter
 
 herdr agent wait "$WORKER" --status idle --timeout 120000000
 herdr agent read "$WORKER" --source recent
-# + cat STATUS.md + Read each ARTIFACTS path
 
-# when not reusing / FINISH:
-herdr pane close "$PANE_ID"
+herdr pane close "$PANE_ID"   # if not reusing
 ```
 
-Blocked: `herdr agent read … visible` → user if needed → `agent send` + `send-keys Enter` → wait idle again.  
-Fallback dispatch only if send+Enter fails: `herdr pane run "$PANE_ID" "…"`.
+Blocked: `agent read` visible → handle → send + Enter → wait idle.  
+Fallback: `herdr pane run` if send+Enter fails.
 
-## Cycle
+## 1. Route → multi-job PLAN
 
-### 1. PLAN (wait for y)
+Map **whole user goal** to jobs: `{ skill, path, mode, worker, depends_on, out }`.
 
-Pick **one** installed skill for this atom of work.
+- Multiple AFK skills → multiple workers (e.g. research ∥ diagnose if independent; implement after research).
+- HITL (`grill-*`, `ask-matt`, triage Q&A) → **this** pane.
+- Each job: skill exists + `match` why it fits.
 
 ```text
-PLAN (cycle N):
-- skill: <name> | path: <.agents/skills/.../SKILL.md> | mode: AFK|HITL | worker: <name>
-- match: <why this skill>
-- worker: reuse <name> | spawn <name>
-- out: .scratch/orchestrator/<run-id>/<worker>/
-- goal: <one line>
+PLAN (run <id>):
+- [1] skill: <name> | path: .agents/skills/<name>/SKILL.md | AFK|HITL | worker: <w1> | depends: none | out: .scratch/orchestrator/<id>/<w1>/
+      match: …
+- [2] skill: <name> | path: … | worker: <w2> | depends: <w1|none> | out: …
+      match: …
+parallel: <none | 1+2 if no data edge>
+goal: <one line>
 Proceed? (y/n)
 ```
 
-HITL skills (`grill-*`, `ask-matt`, triage Q&A): run in **this** pane. AFK: worker.
+**Wait for y.**
 
-### 2. Dispatch
+## 2. Dispatch (skill requirements → prompt)
+
+For each ready job (deps satisfied):
 
 ```bash
-RUN=".scratch/orchestrator/<run-id>"; ART="$RUN/$WORKER"; mkdir -p "$ART"
-# write PROMPT.txt from PROMPTS.md → send + Enter (flow above)
+RUN=".scratch/orchestrator/<id>"; ART="$RUN/$WORKER"; mkdir -p "$ART"
+PROMPT_FILE="$ART/PROMPT.txt"
+# 1) Read SKILL_PATH fully (or enough to extract steps + DONE/completion criteria)
+# 2) Write PROMPT_FILE = PROMPTS.md template filled with:
+#    PRIMARY SKILL, SKILL_PATH,
+#    SKILL_REQUIREMENTS: bullet the skill’s steps/completion criteria (quoted from SKILL.md),
+#    INPUTS, USER INTENT, ARTIFACT_DIR, STATUS_FILE
+# 3) herdr flow: send + Enter (reuse idle same role if OK)
 printf '%s\t%s\n' "$WORKER" "$PANE_ID" >> "$RUN/workers.tsv"
 ```
 
-### 3. Ingest + evaluate
+Parallel: start all independent ready jobs, then wait/ingest **each**.
+
+## 3. Ingest (mandatory — every worker stop)
+
+Do **all**, in order. Skipping = failure.
 
 ```bash
-herdr agent read "$WORKER" --source recent
-cat "$ART/STATUS.md"
-# open every ## ARTIFACTS path
+herdr agent read "$WORKER" --source recent          # A transcript
+cat "$ART/STATUS.md"                                # B STATUS
+# C Read tool: every path under ## ARTIFACTS (+ NOTES paths)
 ```
 
-Missing STATUS → one `agent send` “write STATUS.md now…” + Enter + wait; still missing → failed.
+No STATUS → one send “Write STATUS.md now at … schema. Do no other work.” + Enter + wait; still missing → `failed`.
+
+**Quality gate** (your judgment, not worker’s claim):
+
+- STATUS matches transcript + files on disk?
+- Skill completion criteria from SKILL.md actually met?
+- Artifacts usable as next INPUTS?
+- STATUS `done` but empty/wrong artifacts → `failed` / rework — **do not** advance.
+
+## 4. ORCH decision (mandatory before next action)
 
 ```text
 ORCH:
-- job: <worker>/<skill> → done|blocked|failed
-- evidence: <1–3 bullets>
-- quality: pass|fail
-- next: <skill|finish|rework>
+- job: <worker>/<skill> → done|blocked|failed|rework
+- evidence: <from STATUS + opened files>
+- quality_gate: pass|fail — <why>
+- decision: next-plan|retry|rework|finish|ask-user
+- next_hint: <skill + inputs | none>
 ```
 
-### 4. NEXT PLAN or FINISH (wait for y)
+| Outcome | Action |
+|---------|--------|
+| pass + more jobs in PLAN ready | dispatch those (still within approved PLAN) |
+| pass + need new skill not in PLAN | **NEXT PLAN** → wait y |
+| pass + nothing left | **FINISH** → wait y |
+| blocked | user; then resume or re-plan |
+| fail / gate fail | one tighter retry or ask user |
+| rework | same/new worker + fix instructions from analysis |
+
+**Loop:** every stop → §3 → §4. Never wait-idle → “all done”.
+
+## 5. NEXT PLAN / FINISH (wait for y)
 
 ```text
-NEXT PLAN (cycle N+1):
-- skill: <name> | path: … | worker: reuse|spawn <name>
-- match: …
-- inputs: <paths from artifacts>
-- out: .scratch/orchestrator/<run-id>/<worker>/
+NEXT PLAN:
+- [n] skill: … | path: … | worker: reuse|spawn … | depends: … | out: …
+  match: … | inputs: <from artifacts>
 Proceed? (y/n)
 ```
 
 ```text
 FINISH:
-- summary + artifact paths
-- closing workers: <names>
+- jobs + statuses + artifact paths you opened
+- closing: <workers>
 ```
 
-On **y** for FINISH (or when a worker won't be reused): `herdr pane close` those panes immediately — no extra confirm.
+On FINISH y or worker not reused: `herdr pane close` immediately.
 
-## Prompt / STATUS
+## Refs
 
-See [PROMPTS.md](PROMPTS.md). Map: [ROUTING.md](ROUTING.md).
+[PROMPTS.md](PROMPTS.md) · [ROUTING.md](ROUTING.md) · [WORKFLOW.md](WORKFLOW.md)

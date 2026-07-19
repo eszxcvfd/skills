@@ -8,20 +8,16 @@ npx skills add eszxcvfd/skills --skill=orchestrator-herdr
 
 ## What it does
 
-User-invoked Herdr orchestrator: **PLAN → approve → worker → ingest → NEXT PLAN → approve**. One project skill per worker; STATUS under `.scratch/orchestrator/`. Reuse idle workers when useful; close them when done (no extra confirm).
-
-## When
-
-Inside Herdr (`HERDR_ENV=1`), multi-step skill work with human gates. Invoke `/orchestrator-herdr`.
+User-invoked Herdr orchestrator: multi-job PLAN, workers each run one **project** skill with requirements copied from that skill’s SKILL.md, then **mandatory ingest** (STATUS + open artifacts + quality-gate + ORCH) before any next step. Approve gates on PLAN / NEXT PLAN / FINISH.
 
 ## Flow
 
 ```text
-herdr integration status → agent list → agent start
-→ agent send + send-keys Enter → agent wait idle → agent read
-→ pane close if not reusing
+route → PLAN (y/n) → N workers (send+Enter) → ingest each → ORCH → NEXT/FINISH (y/n)
 ```
+
+Worker idle is not success. Parallel only with no data edge.
 
 ## Fits
 
-Standalone beside [ask-matt](https://aihero.dev/skills-ask-matt); dispatches research/implement/tdd/… as workers.
+`/orchestrator-herdr` inside Herdr. Map: [ask-matt](https://aihero.dev/skills-ask-matt).
