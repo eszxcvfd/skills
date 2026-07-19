@@ -51,10 +51,11 @@ Full prompt/STATUS shapes: [PROMPTS.md](PROMPTS.md). Routing map: [ROUTING.md](R
 7. Artifacts **only** under `<project>/.scratch/orchestrator/` — never `/tmp`.
 8. “Worker finished” ≠ success. Success = ingested STATUS + quality gate + your evaluation.
 9. **Never spawn the next job** until the user approves the **NEXT PLAN** for that cycle (unless they said once: “auto-run all cycles” / “no confirm”).
-10. Do not close panes you did not create unless asked.
+10. Only close panes **you** spawned for this run (see **Reuse & close**). Never close the orchestrator pane or panes you did not create unless the user asks.
 11. Do **not** start `pi` unless the user asks for pi.
 12. You are the **brain**. After every worker stop: **D → E → F** before any new dispatch.
 13. **Every PLAN / NEXT PLAN job must name a real project skill** that fits the work (see **Skill selection**). No freeform “just implement” without a skill.
+14. **Prefer reusing** an idle worker when it fits; **not mandatory** — spawn fresh when context would pollute the next job. **Close** workers you no longer intend to reuse.
 
 ---
 
@@ -88,28 +89,46 @@ STATUS_FILE="$ART/STATUS.md"
 } >> "$RUN/ORCH-LOG.md"
 ```
 
-### 2. Spawn subagent (OpenCode)
+### 2. Obtain subagent — reuse first, else spawn (OpenCode)
+
+**Reuse is preferred when safe, never required.**
 
 ```bash
-# Prefer named agent start (returns JSON — parse name + pane id)
-herdr agent start "$WORKER" --cwd "$PROJECT_ROOT" --split right --no-focus -- opencode
+herdr agent list
+# Look for an idle worker you own from this run (same or compatible role).
+```
 
-# Resolve ids from JSON (do not invent)
+| Decide | When |
+|--------|------|
+| **Reuse** | Same role/skill family, status `idle` or `done`, same `cwd`/project, prior context helps or is harmless, user did not demand a clean agent |
+| **Spawn new** | Different skill family, need clean context (e.g. after tickets→implement, failed quality gate, polluted chat), no idle peer, or reuse would confuse the model |
+| **Close then spawn** | Old worker idle but wrong role / bloated — close it, start fresh name |
+
+**Reuse path:**
+
+```bash
+herdr agent get "$WORKER"          # must be idle|done, opencode, your pane
+# PANE_ID from JSON
+herdr pane run "$PANE_ID" "$(cat "$PROMPT_FILE")"
+# Track in ORCH-LOG: worker_action: reuse name=... pane=...
+```
+
+**Spawn path:**
+
+```bash
+herdr agent start "$WORKER" --cwd "$PROJECT_ROOT" --split right --no-focus -- opencode
 herdr agent list
 herdr agent get "$WORKER"
-# PANE_ID=... from list/get JSON (pane_id field)
-
-# Wait until TUI ready (idle)
+# PANE_ID=... from JSON
 herdr wait agent-status "$PANE_ID" --status idle --timeout 60000
-# fallback poll:
-#   herdr agent get "$WORKER"   # every 2s, up to 60s
+# Track: worker_action: spawn name=... pane=...
+# Record pane_id in $RUN/workers.tsv for later close
+printf '%s\t%s\t%s\n' "$(date -Iseconds)" "$WORKER" "$PANE_ID" >> "$RUN/workers.tsv"
 ```
 
 Layout: wide → `--split right`; tall → `--split down`.
 
-Reuse: if `herdr agent get "$WORKER"` shows idle OpenCode with same role, **skip start** and only `pane run`.
-
-Fresh context: new name (`implement-2`) after tickets→implement or after failed quality gate.
+Fresh name examples: `implement-2`, `review-2` when you keep the old pane for possible reuse or after close.
 
 ### 3. Write prompt file then dispatch (avoids shell-quoting bugs)
 
@@ -198,6 +217,8 @@ Quality gate fails if: empty artifacts on claimed done, STATUS contradicts trans
 
 Before printing: re-run **Skill selection** for the next atom of work (same inventory rules). `NEXT_SKILL` from the worker is only a hint — you must still map it to an **installed** project skill or reject it.
 
+Also decide **worker lifecycle** for the just-finished and next jobs (reuse / keep idle / close).
+
 Print **exactly** one of these, then **stop and wait** (do not spawn yet):
 
 **More work:**
@@ -206,11 +227,13 @@ Print **exactly** one of these, then **stop and wait** (do not spawn yet):
 NEXT PLAN (cycle N+1):
 - skill: <exact-folder-name> | path: <skills/.../SKILL.md> | mode: AFK|HITL | worker: <name>
 - match: <why this project skill fits the remaining gap>
+- worker_lifecycle: reuse <name> | spawn <name> | close <old> then spawn <new>
 - depends: <prior worker/artifacts>
 - inputs:
   - <concrete path or id from artifacts>
 - out: .scratch/orchestrator/<run-id>/<worker>/
 - why: <1–2 sentences from evaluation>
+- close_now: <none|pane ids/names no longer needed>
 Proceed? (y/n/edit)
 ```
 
@@ -222,10 +245,33 @@ FINISH:
 - artifacts: ...
 - verify: ...
 - residual risks: ...
+- close_workers: <all run-owned idle workers | list | none — user keeps them>
 Accept finish? (y/n)
 ```
 
-Only after **y** (or user edit then y): go to **Dispatch** for that plan, or end.
+Only after **y** (or user edit then y): apply `close_now` / `close_workers` if listed, then **Dispatch** or end.
+
+### 8. Close workers (when not reusing)
+
+After user approves a plan that says close, or FINISH with close, or you know a worker will not be reused:
+
+```bash
+# Only panes you started this run (see $RUN/workers.tsv)
+herdr agent get "$WORKER"          # confirm still your worker
+herdr pane close "$PANE_ID"
+# Log: closed name=... pane=... reason=not-reusing|finish|wrong-role
+```
+
+| Do close | Do not close |
+|----------|----------------|
+| Worker you spawned; idle/done; no further job for it | Orchestrator pane (`$HERDR_PANE_ID`) |
+| FINISH approved with `close_workers` | Panes you did not create |
+| NEXT PLAN says `close_now` / replace role | Still `working` or `blocked` (wait or ask user) |
+| User says “đóng worker / cleanup” | User said keep workers open |
+
+Default on **FINISH**: close run-owned workers unless user said keep them or `close_workers: none`.
+
+Default **mid-run**: keep idle workers if a later cycle might reuse the same role; close when switching skill family with no plan to return, or when panes clutter the tab.
 
 Skip confirm **only** if user already said “auto-run all cycles” / “just run it” for this whole run.
 
@@ -261,6 +307,7 @@ Prefer **one AFK job per cycle**. Parallel only if independent and user wants sp
 PLAN (cycle 1):
 - skill: <exact-folder-name> | path: <skills/.../SKILL.md or .agents/skills/.../SKILL.md> | mode: AFK|HITL | worker: <name> | depends: none | out: .scratch/orchestrator/<run-id>/<worker>/
 - match: <one line: why this project skill fits the user task>
+- worker_lifecycle: spawn <name> | reuse <name>
 HITL (this agent): <none|list with skill names>
 goal: <user goal one line>
 skill_source: project-inventory + ask-matt|ROUTING
@@ -305,6 +352,7 @@ herdr pane run <pane> "<prompt>"
 herdr pane read <pane> --source visible|recent-unwrapped --lines N
 herdr agent read <name> --source recent-unwrapped --lines N
 herdr pane send-keys <pane> enter
+herdr pane close <pane>     # only run-owned workers when not reusing
 herdr agent focus <name>    # only if user wants
 ```
 

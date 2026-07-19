@@ -21,12 +21,35 @@ This is the **only** supported orchestration pattern. One **cycle** at a time.
 | Rule | Detail |
 |------|--------|
 | Identity | Sibling pane, default binary `opencode` |
-| Scope | Exactly one PRIMARY SKILL |
+| Scope | Exactly one PRIMARY SKILL per dispatch |
 | Output | `STATUS.md` + files under `ARTIFACT_DIR` |
 | No chain | Must not invoke other skills or spawn peers |
-| No memory | Does not see prior cycles unless you put paths in INPUTS |
+| Memory | Pane keeps chat history — reuse only when that helps; else fresh spawn |
+| Lifecycle | Prefer **reuse** idle fit; optional. **Close** when done and not reusing |
 
-You own: routing, approvals, herdr control, analysis, next plan.
+You own: routing, approvals, herdr control, reuse/close, analysis, next plan.
+
+## Reuse & close
+
+**Reuse (optional, preferred when safe):**
+
+- `herdr agent list` → idle/done worker, same project cwd, compatible role/skill family
+- Skip `agent start`; only `pane run` with new PROMPT + new `ARTIFACT_DIR` for this cycle
+- Note `worker_lifecycle: reuse <name>` in PLAN
+
+**Spawn new when:**
+
+- No suitable idle worker, or context would pollute (new skill family, post-failure, tickets→implement clean start)
+- User wants a clean agent
+
+**Close when:**
+
+- FINISH and no intent to keep workers (default: close run-owned)
+- NEXT PLAN will not use that worker again (wrong role / clutter)
+- User asks to cleanup
+- Command: `herdr pane close <pane_id>` only for panes **you** started (`$RUN/workers.tsv`)
+
+Never close the orchestrator pane. Never close foreign panes.
 
 ## What you must write each cycle
 
@@ -84,6 +107,9 @@ Bad NEXT PLAN: “continue”, “fix stuff”, skill not in inventory, inputs =
 - Put artifacts in `/tmp` or outside the project
 - Multi-skill prompt in one worker
 - Skip NEXT PLAN approval “to save time” (unless user set auto-run)
+- Always spawn duplicates while an idle compatible worker sits unused (wasteful — prefer reuse when safe)
+- Leave finished run workers open forever with no plan to reuse (close on FINISH by default)
+- Close panes you did not create
 
 ## Example run (narrative)
 
