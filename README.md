@@ -220,7 +220,7 @@ Skills I use daily for code work.
 - **[to-tickets](./skills/engineering/to-tickets/SKILL.md)** — Break any plan, spec, or conversation into a set of tracer-bullet tickets, each declaring its blocking edges — written as text in a local file, or as native blocking links on a real tracker.
 - **[implement](./skills/engineering/implement/SKILL.md)** — Build the work described by a spec or set of tickets, driving `/tdd` at pre-agreed seams and closing out with `/code-review` before committing.
 - **[wayfinder](./skills/engineering/wayfinder/SKILL.md)** — Plan a huge chunk of work, more than one agent session can hold, as a shared map of investigation tickets on the issue tracker — resolve them one at a time until the way to the destination is clear.
-- **[orchestrator-herdr](./skills/engineering/orchestrator-herdr/SKILL.md)** — On Herdr: plan-confirm, route project skills, spawn OpenCode workers with STATUS under `.scratch/orchestrator/`.
+- **[orchestrator-herdr](./skills/engineering/orchestrator-herdr/SKILL.md)** — Herdr mission control: DAG plan, spawn/reuse OpenCode workers, enforce one-skill prompts, ingest STATUS/artifacts, and quality-gate before next work.
 
 **Model-invoked**
 

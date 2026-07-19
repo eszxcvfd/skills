@@ -4,20 +4,42 @@ Quickstart:
 npx skills add eszxcvfd/skills --skill=orchestrator-herdr
 ```
 
+```bash
+npx skills update orchestrator-herdr
+```
+
 [Source](https://github.com/eszxcvfd/skills/tree/main/skills/engineering/orchestrator-herdr)
 
 ## What it does
 
-User-invoked Herdr orchestrator: multi-job PLAN, workers each run one **project** skill with requirements copied from that skill’s SKILL.md, then **mandatory ingest** (STATUS + open artifacts + quality-gate + ORCH) before any next step. Approve gates on PLAN / NEXT PLAN / FINISH.
+`orchestrator-herdr` turns the current coding agent into mission control for Herdr. It decomposes a user goal into a dependency graph, asks you to approve the PLAN, then spawns or reuses OpenCode workers in sibling panes.
+
+Its defining constraint is evidence-before-motion: every worker gets exactly one project skill with copied `SKILL.md` requirements, and the orchestrator must ingest transcript, `STATUS.md`, artifacts, and quality-gate evidence before it can dispatch the next step.
+
+## When to reach for it
+
+- **Invocation mode.** You invoke this by typing `/orchestrator-herdr` inside Herdr; the agent will not reach for it on its own.
+- **Trigger boundary.** Reach for it when one goal should be split across multiple skill-bounded agents, especially when independent research, implementation, review, or diagnosis can run in parallel. For single-pane work, use [ask-matt](https://aihero.dev/skills-ask-matt) and the normal flow skills directly.
+
+## Prerequisites
+
+You need Herdr running with `HERDR_ENV=1`, the Herdr integration working, and an `opencode` worker command available. The skill writes orchestration artifacts under `.scratch/orchestrator/<run-id>/`.
 
 ## Flow
 
 ```text
-route → PLAN (y/n) → N workers (send+Enter) → ingest each → ORCH → NEXT/FINISH (y/n)
+mission → DAG PLAN (y/n) → Herdr workers → ingest each stop → ORCH decision → NEXT PLAN or FINISH (y/n)
 ```
 
-Worker idle is not success. Parallel only with no data edge.
+Workers are not autonomous free agents. Each one receives a prompt containing one primary skill, concrete inputs, a dedicated artifact directory, and a required `STATUS.md` schema. The orchestrator decides whether outputs are accepted, retried, reworked, blocked, or turned into a new approved plan.
 
-## Fits
+## It's working if
 
-`/orchestrator-herdr` inside Herdr. Map: [ask-matt](https://aihero.dev/skills-ask-matt).
+- You see a PLAN that names jobs, skills, dependencies, workers, and an approval boundary.
+- Worker prompts quote real requirements from the chosen skill's `SKILL.md`.
+- Every idle worker is followed by transcript + `STATUS.md` + artifact inspection before the next dispatch.
+- The final answer lists accepted jobs, opened artifacts, verification, risks, and closed run-owned panes.
+
+## Where it fits
+
+This is a crossing-session orchestration skill for the engineering flow: it sits above [research](https://aihero.dev/skills-research), [implement](https://aihero.dev/skills-implement), [tdd](https://aihero.dev/skills-tdd), [code-review](https://aihero.dev/skills-code-review), and [diagnosing-bugs](https://aihero.dev/skills-diagnosing-bugs) when the work benefits from multiple Herdr panes. The map remains [ask-matt](https://aihero.dev/skills-ask-matt).

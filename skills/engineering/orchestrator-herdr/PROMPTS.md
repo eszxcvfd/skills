@@ -1,72 +1,100 @@
-# Worker prompt + STATUS
+# Worker Prompt + STATUS Contract
 
-Dispatch: `herdr agent send <name> "$(cat PROMPT.txt)"` then `herdr pane send-keys <pane_id> Enter`.
+Dispatch with Herdr:
 
-Orchestrator **must** open the skill’s SKILL.md and copy its steps/completion criteria into `SKILL_REQUIREMENTS` before send.
-
-## Prompt template
-
-```text
-You are a worker under a Herdr orchestrator.
-
-PRIMARY SKILL: «exact folder name»
-SKILL_PATH: «path — open and follow this file»
-Load SKILL_PATH. Obey every step and completion criterion below.
-Do not chain other skills. Do not skip interview/research steps the skill requires.
-
-PROJECT ROOT: «abs»
-ARTIFACT_DIR: «.scratch/orchestrator/<run-id>/<worker>/»
-STATUS_FILE: «ARTIFACT_DIR/STATUS.md»
-Create ARTIFACT_DIR. Write skill outputs here when the skill has no fixed path. Never /tmp.
-
-SKILL_REQUIREMENTS (from SKILL.md — execute all):
-«- step / criterion 1
-«- step / criterion 2
-«- DONE WHEN / completion lines from the skill»
-
-INPUTS (concrete):
-«- paths, issue ids, prior artifacts»
-
-USER INTENT:
-«paragraph»
-
-CONSTRAINTS:
-- Only PRIMARY SKILL scope
-- If blocked on human/approval: STATUS: blocked + BLOCKERS, stop
-- When finished: write STATUS_FILE (schema below) and print the same block as final message
-
-DONE WHEN:
-- Every SKILL_REQUIREMENTS item satisfied, AND
-- STATUS_FILE exists with schema below
+```bash
+herdr agent send <worker> "$(cat PROMPT.txt)"
+herdr pane send-keys <pane_id> Enter
 ```
 
-## STATUS.md
+The orchestrator must open the selected `SKILL.md` and copy real workflow requirements into `SKILL_REQUIREMENTS` before dispatch.
+
+## Prompt Template
+
+```text
+You are a worker agent controlled by a Herdr orchestrator.
+
+JOB_ID: «job id»
+RUN_ID: «run id»
+PRIMARY SKILL: «exact skill folder name»
+SKILL_PATH: «path to SKILL.md»
+
+Load SKILL_PATH first. Follow that skill exactly, limited to this job.
+
+PROJECT_ROOT: «absolute path»
+ARTIFACT_DIR: «.scratch/orchestrator/<run-id>/<job-id>/»
+STATUS_FILE: «ARTIFACT_DIR/STATUS.md»
+
+MISSION CONTEXT:
+«short context from the user mission and approved plan»
+
+JOB OBJECTIVE:
+«one concrete outcome this worker owns»
+
+INPUTS:
+«- concrete paths, issue IDs, prior artifact paths, user facts»
+
+DEPENDENCIES ALREADY ACCEPTED BY ORCHESTRATOR:
+«- job ids and artifacts, or none»
+
+SKILL_REQUIREMENTS (copied from SKILL.md; satisfy all that apply):
+«- workflow step / constraint / done criterion 1»
+«- workflow step / constraint / done criterion 2»
+«- completion criteria»
+
+CONSTRAINTS:
+- Execute only PRIMARY SKILL for JOB OBJECTIVE.
+- Do not chain to another primary skill.
+- Do not ask the user directly. If human input is required, write STATUS: blocked with a precise question and stop.
+- Write outputs to ARTIFACT_DIR unless PRIMARY SKILL explicitly requires repo changes.
+- If you change repo files, list every changed path in STATUS.md.
+- Verify your work when the skill or repo provides a verification path.
+- When done or blocked, write STATUS_FILE using the schema below and print the same status block as your final response.
+
+DONE WHEN:
+- Every relevant SKILL_REQUIREMENTS item is satisfied.
+- STATUS_FILE exists.
+- All artifacts and changed files are listed in STATUS_FILE.
+- Verification results or blockers are explicit.
+```
+
+## STATUS.md Schema
 
 ```markdown
 # STATUS
 
 STATUS: done|blocked|failed
-SKILL: «name»
-WORKER: «name»
-RUN_ID: «id»
+RUN_ID: «run id»
+JOB_ID: «job id»
+SKILL: «primary skill»
+WORKER: «worker name»
+
+## SUMMARY
+- «what was accomplished, or why it blocked/failed»
 
 ## ARTIFACTS
-- path   # orchestrator will open each
+- «path the orchestrator must open»
+
+## CHANGED_FILES
+- none
 
 ## VERIFY
-- `cmd` → result
+- `cmd or check` -> «result»
 
-## NEXT_SKILL
-none|«hint only»
+## NEXT_SKILL_HINT
+none|«hint only; orchestrator decides»
 
 ## NEXT_INPUTS
-- paths/ids for next worker
+- «paths/facts useful for dependent jobs»
 
 ## BLOCKERS
-none|question
+none|«precise question or missing prerequisite»
 
-## NOTES
-- what changed, risks, what orch should re-check
+## RISKS
+- none|«known risk, uncertainty, unverified area»
+
+## NOTES_FOR_ORCHESTRATOR
+- «what to inspect closely during quality gate»
 ```
 
-`NEXT_SKILL` is a hint. Orchestrator ingests, quality-gates, then plans with the user.
+`NEXT_SKILL_HINT` is advisory only. The orchestrator must ingest, quality-gate, and get approval for any new out-of-plan work.
