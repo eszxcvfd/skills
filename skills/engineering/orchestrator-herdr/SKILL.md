@@ -94,7 +94,14 @@ Each `implement` after tickets → prefer a **new** worker (clean context).
 
 ### 5. Wait loop + blocked-handler
 
-Poll until terminal state (cap e.g. 15–30 min per job; tell user on timeout):
+Prefer a long status wait (Herdr timeout is **ms**):
+
+```bash
+herdr wait agent-status <worker> --status done --timeout 120000000
+# 120000000 ms = 120000 s (~33h). On timeout or API error, fall back to poll.
+```
+
+Else poll until terminal state (same overall cap ~120000 s; tell user on timeout):
 
 ```bash
 herdr agent get <worker>
@@ -157,6 +164,7 @@ test "${HERDR_ENV:-}" = 1
 herdr agent list
 herdr agent start <name> --cwd PATH --split right|down --no-focus -- opencode
 herdr wait agent-status <t> --status idle|working|blocked|done --timeout MS
+# worker job complete: --status done --timeout 120000000  (120000 s)
 herdr pane run <pane_id> "<prompt>"
 herdr pane read <pane_id> --source visible|recent-unwrapped --lines N
 herdr pane send-keys <pane_id> enter
