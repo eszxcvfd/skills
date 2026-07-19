@@ -1,119 +1,62 @@
-# Worker prompt + STATUS schema
+# Worker prompt + STATUS
 
-Dispatch (verified): `herdr agent send <name> "<prompt>"` then
-`herdr pane send-keys <pane_id> Enter`. Fallback: `herdr pane run`.
-Worker has no shared memory with the orchestrator across new spawns (reuse keeps chat).
+Dispatch: `herdr agent send <name> "<prompt>"` then `herdr pane send-keys <pane_id> Enter`.
 
-Paths are always **inside the project** under `.scratch/orchestrator/`.
-
-## Prompt template
-
-Copy and fill every `«…»` field:
+## Prompt
 
 ```text
-You are an OpenCode worker under a coding-agent orchestrator in Herdr.
-(The parent agent spawned you via herdr; it is not pi unless named.)
+You are a worker under a Herdr orchestrator.
 
-PRIMARY SKILL (mandatory): «exact-skill-folder-name from PLAN»
-SKILL_PATH (mandatory): «path verified by orchestrator, e.g. .agents/skills/implement/SKILL.md»
-Load and follow that skill completely:
-  - Open SKILL_PATH (must exist). Fallback only if path wrong: skills/engineering/ or skills/productivity/ or .agents/skills/
-  - Obey every step and completion criterion
-  - Do not invoke or chain other skills — orchestrator will chain
-  - Do not skip to coding if the skill requires interview/research/review first
+PRIMARY SKILL: «name»
+SKILL_PATH: «verified path to SKILL.md»
+Load SKILL_PATH and complete only that skill. Do not chain other skills.
 
-PROJECT ROOT: «abs-project-root»
-CWD: «abs-cwd»
-
-ARTIFACT_DIR: «abs-or-rel .scratch/orchestrator/<run-id>/<worker>/»
+PROJECT ROOT: «abs»
+ARTIFACT_DIR: «.scratch/orchestrator/<run-id>/<worker>/»
 STATUS_FILE: «ARTIFACT_DIR/STATUS.md»
-Create ARTIFACT_DIR if missing. Write all notes/reports the skill would save
-into ARTIFACT_DIR when the skill does not already mandate a path. Prefer
-ARTIFACT_DIR over any /tmp or home path.
+Create ARTIFACT_DIR. Prefer it over /tmp.
 
-INPUTS (complete paths / issue ids / git fixed-point — not vague):
-«- bullet list»
+INPUTS:
+«- concrete paths / ids»
 
 USER INTENT:
-«one paragraph»
+«paragraph»
 
 CONSTRAINTS:
-- Only what PRIMARY SKILL requires; no drive-by refactors
-- Never request access outside PROJECT ROOT unless INPUTS explicitly require it
-- If blocked on a human decision or approval UI, stop and write STATUS.md with STATUS: blocked and BLOCKERS
-- When the skill says commit, commit; otherwise leave the tree as the skill requires
-- Do not start a second skill
+- Only PRIMARY SKILL work
+- If blocked, write STATUS.md with STATUS: blocked and stop
+- When done, write STATUS_FILE (schema below) and print the same block
 
-DONE WHEN:
-- PRIMARY SKILL completion criteria are met, and
-- STATUS_FILE exists with the schema below
-
-Before you finish, write STATUS_FILE exactly in the STATUS schema (overwrite OK).
-Also print the same STATUS block as your final chat message.
+DONE WHEN: skill criteria met AND STATUS_FILE written.
 ```
 
-## STATUS.md schema (mandatory)
-
-Worker creates/overwrites `STATUS_FILE` as Markdown with **these headings/fields**
-(plain lines, machine-scannable):
+## STATUS.md
 
 ```markdown
 # STATUS
 
 STATUS: done|blocked|failed
-SKILL: «primary skill name»
-WORKER: «herdr agent name»
-RUN_ID: «run-id»
+SKILL: «name»
+WORKER: «name»
+RUN_ID: «id»
 
 ## ARTIFACTS
-- path/or/url/or/#issue — one per line
+- path
 
 ## VERIFY
-- `command` → result summary
+- `cmd` → result
 
 ## NEXT_SKILL
-none|«skill-name»
+none|«suggestion only»
 
 ## NEXT_INPUTS
-- bullets for the orchestrator to pass downstream (paths, ids)
+- paths/ids for orchestrator
 
 ## BLOCKERS
-none|exact question or permission needed
+none|question
 
 ## NOTES
-- short handoff for orchestrator only
+- handoff
 ```
 
-### Field rules
-
-| Field | Rule |
-|-------|------|
-| `STATUS` | `done` = skill criteria met; `blocked` = needs human; `failed` = cannot proceed |
-| `ARTIFACTS` | Every file/issue the orchestrator **will open and judge** before chaining; paths relative to project root preferred; never empty on `done` if the skill produced output |
-| `VERIFY` | Commands you ran + outcome — orchestrator uses this to spot fake-done |
-| `NEXT_SKILL` | At most one **suggestion**; orchestrator may change it after evaluate — worker never self-chains; user must approve NEXT PLAN before any spawn |
-| `NEXT_INPUTS` | Concrete paths/ids for the next skill — orchestrator copies these into the next worker prompt after user approves |
-| `BLOCKERS` | If `blocked`, must be actionable (what to approve / what to answer) |
-| `NOTES` | Handoff for the **orchestrator brain**: what changed, risks, what to double-check in artifacts |
-
-## Follow-up: missing STATUS
-
-If the worker goes idle without `STATUS_FILE` — send via `agent send` + `send-keys Enter`:
-
-```text
-Write STATUS.md now at the ARTIFACT_DIR path from your instructions, using the orchestrator STATUS schema (STATUS/SKILL/ARTIFACTS/VERIFY/NEXT_SKILL/NEXT_INPUTS/BLOCKERS/NOTES). Do no other work.
-```
-
-## Follow-up: user answered a blocker
-
-```text
-Orchestrator relay from user:
-«user answer»
-
-Resume PRIMARY SKILL. Update STATUS.md when finished (or still blocked).
-```
-
-Same dispatch: `herdr agent send` + `herdr pane send-keys Enter`.
-
-Parent agent identity in STATUS NOTES may say `parent: opencode|claude|codex|…`
-(the orchestrator pane), never assume pi.
+`NEXT_SKILL` is a hint. Orchestrator + user decide the real next plan.
