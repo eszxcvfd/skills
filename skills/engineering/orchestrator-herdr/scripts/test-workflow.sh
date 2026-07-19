@@ -17,6 +17,9 @@ done
 
 grep -q 'NEXT PLAN' "$SKILL_DIR/SKILL.md" && ok "SKILL has NEXT PLAN" || bad "SKILL missing NEXT PLAN"
 grep -q 'Proceed? (y/n' "$SKILL_DIR/SKILL.md" && ok "SKILL waits for approval" || bad "SKILL missing Proceed gate"
+grep -q 'Skill selection' "$SKILL_DIR/SKILL.md" && ok "SKILL skill selection" || bad "SKILL missing skill selection"
+grep -q 'project skill' "$SKILL_DIR/SKILL.md" && ok "SKILL project skill rule" || bad "SKILL missing project skill"
+grep -q 'match:' "$SKILL_DIR/SKILL.md" && ok "SKILL PLAN match field" || bad "SKILL missing match field"
 grep -q 'quality_gate' "$SKILL_DIR/SKILL.md" && ok "SKILL has quality_gate" || bad "SKILL missing quality_gate"
 grep -q 'Never spawn the next job' "$SKILL_DIR/SKILL.md" && ok "no auto-chain rule" || bad "missing no auto-chain"
 grep -q 'herdr pane run' "$SKILL_DIR/SKILL.md" && ok "cookbook pane run" || bad "missing pane run"
@@ -38,13 +41,17 @@ mkdir -p "$W1" "$W2"
 # --- cycle 1 PLAN shape (orchestrator would print & wait) ---
 cat > "$RUN/cycle1-PLAN.txt" <<EOF
 PLAN (cycle 1):
-- skill: deep-research | mode: AFK | worker: research | depends: none | out: .scratch/orchestrator/$RUN_ID/research/
+- skill: research | path: .agents/skills/research/SKILL.md | mode: AFK | worker: research | depends: none | out: .scratch/orchestrator/$RUN_ID/research/
+- match: primary-source investigation fits project research skill
 goal: evidence for smallest fix
+skill_source: project-inventory + ask-matt
 workers: opencode
 run-id: $RUN_ID
 Proceed? (y/n)
 EOF
 grep -q 'Proceed?' "$RUN/cycle1-PLAN.txt" && ok "cycle1 PLAN gate" || bad "cycle1 PLAN"
+grep -q 'path:' "$RUN/cycle1-PLAN.txt" && ok "cycle1 PLAN has path" || bad "cycle1 PLAN path"
+grep -q 'match:' "$RUN/cycle1-PLAN.txt" && ok "cycle1 PLAN has match" || bad "cycle1 PLAN match"
 
 # user y → mock worker output
 cat > "$W1/findings.md" <<'EOF'
@@ -96,7 +103,8 @@ ORCH (cycle 1):
 - gaps: no code change yet
 - recommendation: next_skill=implement
 NEXT PLAN (cycle 2):
-- skill: implement | mode: AFK | worker: implement
+- skill: implement | path: .agents/skills/implement/SKILL.md | mode: AFK | worker: implement
+- match: build from findings — project implement skill
 - inputs:
   - .scratch/orchestrator/$RUN_ID/research/findings.md
   - path: src/foo.ts
@@ -106,6 +114,7 @@ Proceed? (y/n/edit)
 EOF
 grep -q 'NEXT PLAN' "$RUN/cycle1-ORCH.txt" && ok "cycle1 NEXT PLAN" || bad "cycle1 NEXT PLAN"
 grep -q 'Proceed?' "$RUN/cycle1-ORCH.txt" && ok "cycle1 second gate" || bad "cycle1 second gate"
+grep -q 'path: .agents/skills/implement' "$RUN/cycle1-ORCH.txt" && ok "cycle1 NEXT PLAN skill path" || bad "cycle1 NEXT PLAN path"
 
 # --- cycle 2 after user y ---
 mkdir -p "$PROJECT/src"

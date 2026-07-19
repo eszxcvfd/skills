@@ -33,7 +33,7 @@ PLAN → approve → dispatch subagent → supervise → ingest STATUS/artifacts
   → evaluate → NEXT PLAN or FINISH → approve → loop
 ```
 
-Nothing AFK starts until you approve the PLAN. After the worker stops, the orchestrator must re-read the transcript, open every artifact, quality-gate, then show ORCH + NEXT PLAN and wait again. Command cookbook and anti-patterns live in the skill’s `SKILL.md` and `WORKFLOW.md`.
+Nothing AFK starts until you approve the PLAN. Each PLAN / NEXT PLAN must **pick a real skill installed in the project** (inventory + `ask-matt` / routing, verified `SKILL.md` path, plus a one-line `match:`). After the worker stops, the orchestrator must re-read the transcript, open every artifact, quality-gate, then show ORCH + NEXT PLAN and wait again. Command cookbook and anti-patterns live in the skill’s `SKILL.md` and `WORKFLOW.md`.
 
 ## It's working if
 

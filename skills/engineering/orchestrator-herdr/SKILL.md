@@ -54,6 +54,7 @@ Full prompt/STATUS shapes: [PROMPTS.md](PROMPTS.md). Routing map: [ROUTING.md](R
 10. Do not close panes you did not create unless asked.
 11. Do **not** start `pi` unless the user asks for pi.
 12. You are the **brain**. After every worker stop: **D → E → F** before any new dispatch.
+13. **Every PLAN / NEXT PLAN job must name a real project skill** that fits the work (see **Skill selection**). No freeform “just implement” without a skill.
 
 ---
 
@@ -195,13 +196,16 @@ Quality gate fails if: empty artifacts on claimed done, STATUS contradicts trans
 
 ### 7. NEXT PLAN → wait for approval (mandatory)
 
+Before printing: re-run **Skill selection** for the next atom of work (same inventory rules). `NEXT_SKILL` from the worker is only a hint — you must still map it to an **installed** project skill or reject it.
+
 Print **exactly** one of these, then **stop and wait** (do not spawn yet):
 
 **More work:**
 
 ```text
 NEXT PLAN (cycle N+1):
-- skill: <name> | mode: AFK|HITL | worker: <name>
+- skill: <exact-folder-name> | path: <skills/.../SKILL.md> | mode: AFK|HITL | worker: <name>
+- match: <why this project skill fits the remaining gap>
 - depends: <prior worker/artifacts>
 - inputs:
   - <concrete path or id from artifacts>
@@ -229,21 +233,45 @@ Skip confirm **only** if user already said “auto-run all cycles” / “just r
 
 ## Cycle steps (checklist)
 
-### A. Initial PLAN (cycle 1)
+### A. Initial PLAN (cycle 1) — skill selection first
 
-Route via project `ask-matt` or [ROUTING.md](ROUTING.md). Prefer **one AFK job per cycle** (clearest approve loop). Parallel only if independent and user wants speed.
+**Skill selection (mandatory before any PLAN block):**
+
+1. **Inventory project skills** (in the **user’s project** cwd, not only this skills repo):
+   ```bash
+   # Prefer project-local installs
+   ls -1 .agents/skills 2>/dev/null
+   ls -1 .claude/skills 2>/dev/null
+   # Or linked / vendored skill trees
+   find skills/engineering skills/productivity -name SKILL.md 2>/dev/null | head -200
+   ```
+2. **Read the router**: open project `ask-matt` (`**/ask-matt/SKILL.md` or `.agents/skills/ask-matt`) when present; else [ROUTING.md](ROUTING.md).
+3. **Map user intent → one skill per job** using situation tables (grill / research / implement / tdd / code-review / …). Prefer promoted engineering + productivity skills.
+4. **Verify the skill exists on disk** before naming it:
+   ```bash
+   # examples — pick the path that actually exists
+   test -f .agents/skills/<name>/SKILL.md || test -f skills/engineering/<name>/SKILL.md || test -f skills/productivity/<name>/SKILL.md
+   ```
+5. **Open that skill’s `SKILL.md` description** (and enough of the body) to confirm it matches the job. If no skill fits → either HITL `ask-matt` with the user, or an explicit **HITL (this agent)** line with `skill: none (orchestrator)` and why — never invent a fake skill name.
+6. Put the **exact skill folder name** in PLAN (same string the worker will load as PRIMARY SKILL).
+
+Prefer **one AFK job per cycle**. Parallel only if independent and user wants speed.
 
 ```text
 PLAN (cycle 1):
-- skill: <name> | mode: AFK|HITL | worker: <name> | depends: none | out: .scratch/orchestrator/<run-id>/<worker>/
-HITL (this agent): <none|list>
+- skill: <exact-folder-name> | path: <skills/.../SKILL.md or .agents/skills/.../SKILL.md> | mode: AFK|HITL | worker: <name> | depends: none | out: .scratch/orchestrator/<run-id>/<worker>/
+- match: <one line: why this project skill fits the user task>
+HITL (this agent): <none|list with skill names>
 goal: <user goal one line>
+skill_source: project-inventory + ask-matt|ROUTING
 workers: opencode
 run-id: <id>
 Proceed? (y/n)
 ```
 
-**Wait for y.** Then mkdir run dir → B.
+Invalid PLAN (do not show / do not proceed): missing `skill`, skill not on disk, `match` empty, or skill name guessed without inventory.
+
+**Wait for y.** Then mkdir run dir → B. Pass `PRIMARY SKILL: <exact-folder-name>` and the verified `path` in the worker prompt ([PROMPTS.md](PROMPTS.md)).
 
 ### B–C. Dispatch + supervise
 
