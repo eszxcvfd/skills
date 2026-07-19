@@ -62,6 +62,7 @@ Two model-invoked references that run *beneath* the other skills — each the si
 
 - **`/handoff`** — when a thread is full or you need to branch off (e.g. into a `/prototype` session), this compacts the conversation into a markdown file. You don't continue in place — you **open a new session and reference that file** to carry the context across. It's the bridge between context windows, in either direction. Use it when you want a **fresh session** but need the **current conversation preserved**.
 - **`/compact`** (built-in) — stay in the **same conversation**, letting the earlier turns be summarized. Use it at **intentional breaks between phases**, when you don't mind losing the verbatim history. Don't compact mid-phase — the agent can lose its way. `/handoff` forks; `/compact` continues.
+- **`/orchestrator-herdr`** — when you are **inside Herdr** (`HERDR_ENV=1`) and want the **coding agent already in this pane** to route project skills, confirm a PLAN, and **spawn OpenCode workers** in sibling panes with STATUS under `.scratch/orchestrator/`. Not a separate pi role; not for single-pane one-shot work — use the main flow skills directly then.
 
 ## Standalone
 

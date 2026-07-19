@@ -1,0 +1,5 @@
+interface:
+  display_name: "Orchestrator (Herdr)"
+  short_description: "Route skills and spawn OpenCode workers on Herdr"
+policy:
+  allow_implicit_invocation: false

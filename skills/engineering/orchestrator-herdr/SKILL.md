@@ -1,6 +1,7 @@
 ---
 name: orchestrator-herdr
-description: "Coding-agent orchestrator on Herdr: plan-confirm, route via project skills, spawn OpenCode workers with STATUS artifacts under .scratch/orchestrator/. Use for multi-agent orchestration, skill-driven delegation, herd / điều phối — not a separate pi role."
+description: "Coding-agent orchestrator on Herdr — plan-confirm, route project skills, spawn OpenCode workers with STATUS under .scratch/orchestrator/."
+disable-model-invocation: true
 ---
 
 # Orchestrator — coding agent → OpenCode workers (Herdr)

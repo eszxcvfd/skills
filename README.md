@@ -45,10 +45,6 @@ OpenCode / pi: trỏ skill path tới clone, hoặc copy/symlink thêm:
 ```bash
 # OpenCode user config example — skills.paths
 # "~/.config/opencode/opencode.json" → "skills": { "paths": ["~/src/skills/skills"] }
-
-mkdir -p ~/.pi/agent/skills
-# optional: link personal orchestrator for pi
-ln -sfn ~/src/skills/skills/personal/orchestrator-herdr ~/.pi/agent/skills/orchestrator-herdr
 ```
 
 Cập nhật:
@@ -85,7 +81,7 @@ Dùng **A hoặc B** nếu bạn muốn bản **fork này** (có `orchestrator-h
 1. `/setup-matt-pocock-skills` trong agent (tracker + labels + docs).
 2. Router: `/ask-matt` khi không chắc skill nào.
 3. Flow thường: `/grill-with-docs` → `/to-spec` → `/to-tickets` → `/implement`.
-4. (Tuỳ chọn) Herdr multi-agent: cài [Herdr](https://herdr.dev), integration `opencode` (và agent bạn đang dùng), skill [`orchestrator-herdr`](./skills/personal/orchestrator-herdr/SKILL.md) — **coding agent** điều phối, spawn **OpenCode** workers theo skill project.
+4. (Tuỳ chọn) Herdr multi-agent: cài [Herdr](https://herdr.dev), integration `opencode` (và agent bạn đang dùng), rồi `/orchestrator-herdr` — **coding agent** điều phối, spawn **OpenCode** workers theo skill project.
 
 ---
 
@@ -95,13 +91,13 @@ Dùng **A hoặc B** nếu bạn muốn bản **fork này** (có `orchestrator-h
 skills/
   engineering/   # promoted — code work (install vào project)
   productivity/  # promoted — workflow
-  personal/      # setup riêng (orchestrator-herdr, …) — không ship plugin
+  personal/      # setup riêng — không ship plugin
   misc/          # hiếm dùng
   in-progress/   # draft
   deprecated/    # bỏ
 ```
 
-Promoted = an toàn copy sang project khác. `personal/` mang theo nếu bạn dùng Herdr orchestrator.
+Promoted = an toàn copy sang project khác (kể cả `orchestrator-herdr`).
 
 ---
 
@@ -224,6 +220,7 @@ Skills I use daily for code work.
 - **[to-tickets](./skills/engineering/to-tickets/SKILL.md)** — Break any plan, spec, or conversation into a set of tracer-bullet tickets, each declaring its blocking edges — written as text in a local file, or as native blocking links on a real tracker.
 - **[implement](./skills/engineering/implement/SKILL.md)** — Build the work described by a spec or set of tickets, driving `/tdd` at pre-agreed seams and closing out with `/code-review` before committing.
 - **[wayfinder](./skills/engineering/wayfinder/SKILL.md)** — Plan a huge chunk of work, more than one agent session can hold, as a shared map of investigation tickets on the issue tracker — resolve them one at a time until the way to the destination is clear.
+- **[orchestrator-herdr](./skills/engineering/orchestrator-herdr/SKILL.md)** — On Herdr: plan-confirm, route project skills, spawn OpenCode workers with STATUS under `.scratch/orchestrator/`.
 
 **Model-invoked**
 
@@ -253,9 +250,8 @@ General workflow tools, not code-specific.
 
 ### Personal (this fork)
 
-Not in the Claude plugin set. Install via clone/link or pick them in skills.sh if listed.
+Not in the Claude plugin / skills.sh promoted set. Install via clone + `link-skills.sh`.
 
-- **[orchestrator-herdr](./skills/personal/orchestrator-herdr/SKILL.md)** — Coding agent on Herdr routes project skills (`ask-matt` map) and spawns OpenCode worker panes.
 - **[edit-article](./skills/personal/edit-article/SKILL.md)** — Edit and improve articles.
 - **[obsidian-vault](./skills/personal/obsidian-vault/SKILL.md)** — Notes in an Obsidian vault.
 
