@@ -1,32 +1,39 @@
 ---
 name: orchestrator-herdr
-description: "Pi orchestrator on Herdr: plan-confirm, route via project skills, spawn OpenCode workers with STATUS artifacts under .scratch/orchestrator/. Use for multi-agent orchestration, skill-driven delegation, herd / pi điều phối."
+description: "Coding-agent orchestrator on Herdr: plan-confirm, route via project skills, spawn OpenCode workers with STATUS artifacts under .scratch/orchestrator/. Use for multi-agent orchestration, skill-driven delegation, herd / điều phối — not a separate pi role."
 ---
 
-# Orchestrator — skills → OpenCode (Herdr)
+# Orchestrator — coding agent → OpenCode workers (Herdr)
 
-You are the **orchestrator**. You do **not** run heavy skill bodies yourself.
-You route, confirm a plan, spawn workers, handle blocks, parse STATUS, chain.
+**You** are the orchestrator: whatever coding agent is already running in this
+Herdr pane (OpenCode, Claude Code, Codex, …). You do **not** hand control to pi.
+
+You route project skills, confirm a plan, **spawn OpenCode workers** in sibling
+panes, handle blocks, parse STATUS, chain. You do **not** run heavy skill bodies
+yourself when a worker should.
 
 Requires `HERDR_ENV=1`. Else stop: not inside Herdr.
 Also use skill `herdr` for CLI details.
 
 | Who | Does |
 |-----|------|
-| **You (pi)** | route, PLAN, herdr, blocked-handler, parse STATUS, merge |
-| **Worker (`opencode`)** | one PRIMARY SKILL end-to-end + write STATUS artifact |
+| **You (this coding agent)** | route, PLAN, herdr CLI, blocked-handler, parse STATUS, merge, talk to user |
+| **Worker** | `opencode` in another pane — one PRIMARY SKILL + STATUS artifact |
+
+Default worker binary: **`opencode`**. Other worker agents only if the user names them.
 
 ## Hard rules
 
 1. `--no-focus` on AFK spawns. Stay in the orchestrator pane.
 2. One PRIMARY SKILL per worker. Workers must not chain other skills.
 3. Parallel only with no data edge; else sequence.
-4. HITL skills: you (or focused pane). AFK skills: background workers. See [ROUTING.md](ROUTING.md).
+4. HITL skills: you (or focused pane). AFK skills: background OpenCode workers. See [ROUTING.md](ROUTING.md).
 5. Parse herdr IDs from JSON only. Prefer `herdr agent start`.
 6. Dispatch prompts **only** via `herdr pane run` (text + Enter). Never rely on `agent send` alone.
-7. Artifacts **only** under `<project>/.scratch/orchestrator/` — never `/tmp` or paths outside the project (avoids permission walls).
+7. Artifacts **only** under `<project>/.scratch/orchestrator/` — never `/tmp` or paths outside the project.
 8. Done = STATUS file says `done` **and** skill completion criteria hold — not merely idle TUI.
 9. Do not close panes you did not create unless asked (or user set cleanup).
+10. Do **not** start `pi` as orchestrator or worker unless the user explicitly asks for pi.
 
 ## Steps
 
@@ -44,7 +51,8 @@ Print exactly this shape, then **wait for user yes** (skip only if user already 
 ```text
 PLAN:
 - skill: <name> | mode: AFK|HITL | worker: <name> | depends: <none|worker> | out: .scratch/orchestrator/<run-id>/<worker>/
-HITL (orchestrator): <none|list>
+HITL (this agent): <none|list>
+workers: opencode
 run-id: <YYYYMMDD-HHMM-short>
 Proceed? (y/n)
 ```
@@ -56,7 +64,6 @@ Proceed? (y/n)
 ```bash
 RUN=".scratch/orchestrator/<run-id>"
 mkdir -p "$RUN"
-# optional: echo PLAN > "$RUN/PLAN.md"
 ```
 
 **Completion:** `$RUN` exists inside the project root.
@@ -69,8 +76,8 @@ For each ready job (deps satisfied):
 herdr agent start <worker> --cwd "<project-root>" --split right --no-focus -- opencode
 # tall UI: --split down
 herdr agent list   # pane_id from JSON
-# wait idle — prefer wait; on API error, poll agent get every 2s up to 60s
 herdr wait agent-status <worker> --status idle --timeout 60000
+# on wait API error: poll `herdr agent get <worker>` every 2s up to 60s
 herdr pane run <pane_id> "<prompt from PROMPTS.md>"
 ```
 
@@ -79,8 +86,8 @@ Fill the prompt from [PROMPTS.md](PROMPTS.md). Set:
 - `ARTIFACT_DIR` = `.scratch/orchestrator/<run-id>/<worker>/`
 - `STATUS_FILE` = `$ARTIFACT_DIR/STATUS.md`
 
-Reuse an **idle** worker with the same skill name when possible; else spawn fresh.
-Fresh context required after tickets → each `implement` should be a new worker or clearly reset prompt.
+Reuse an **idle** OpenCode worker with the same role name when possible; else spawn fresh.
+Each `implement` after tickets → prefer a **new** worker (clean context).
 
 **Completion:** `pane run` issued; worker left `working` or soon after.
 
@@ -89,8 +96,7 @@ Fresh context required after tickets → each `implement` should be a new worker
 Poll until terminal state (cap e.g. 15–30 min per job; tell user on timeout):
 
 ```bash
-herdr agent get <worker>          # or wait agent-status
-# status: working | blocked | idle | done | unknown
+herdr agent get <worker>
 ```
 
 | Status | Action |
@@ -105,7 +111,7 @@ herdr agent get <worker>          # or wait agent-status
 
 1. `herdr pane read <pane_id> --source visible --lines 60`
 2. Classify:
-   - **Permission / approval UI** (Allow once, y/n tool) → tell user which pane + what is asked; do **not** auto-approve destructive git/network. User may say “approve” → `herdr pane send-keys <pane> enter` (or the key they specify) **once**.
+   - **Permission / approval UI** → tell user which pane + what is asked; do **not** auto-approve destructive git/network. If user says “approve” → `herdr pane send-keys <pane> enter` **once**.
    - **Skill needs human decision** → paste question to user; on answer `herdr pane run <pane_id> "<answer>"`.
    - **Unclear** → user looks at pane (`herdr agent focus <worker>` only if they ask).
 3. Resume poll after handling.
@@ -116,7 +122,6 @@ herdr agent get <worker>          # or wait agent-status
 
 ```bash
 herdr pane read <pane_id> --source recent-unwrapped --lines 120
-# primary signal:
 cat .scratch/orchestrator/<run-id>/<worker>/STATUS.md
 ```
 
@@ -126,7 +131,7 @@ Require [PROMPTS.md](PROMPTS.md) STATUS schema. If file missing: one follow-up
 herdr pane run <pane_id> "Write STATUS.md now at ARTIFACT_DIR per orchestrator schema. Do no other work."
 ```
 
-then re-wait. Still missing → mark job `failed` in your summary.
+then re-wait. Still missing → mark job `failed`.
 
 **Completion:** `STATUS.md` with `STATUS: done|blocked|failed` parsed, or job failed.
 
@@ -134,15 +139,15 @@ then re-wait. Still missing → mark job `failed` in your summary.
 
 - `STATUS: done` + `NEXT_SKILL:` → enqueue next job with INPUTS from `ARTIFACTS:`.
 - `STATUS: blocked` → user.
-- `STATUS: failed` → report; do not silent-retry more than once.
+- `STATUS: failed` → report; at most one silent retry.
 - All jobs done → one user-facing summary (skills, artifact paths, verify commands).
 
 **Completion:** no pending AFK jobs without a terminal STATUS; user has the merge report.
 
-## HITL (orchestrator pane)
+## HITL (this pane)
 
 Run yourself: `ask-matt`, `grill-with-docs` / `grill-me`, triage Q&A, wayfinder charting.
-Never mark HITL done without user decisions recorded (CONTEXT/ADR/ticket as that skill says).
+Never mark HITL done without user decisions recorded.
 
 ## Quick herdr
 

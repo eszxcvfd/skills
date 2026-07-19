@@ -10,7 +10,8 @@ Paths are always **inside the project** under `.scratch/orchestrator/`.
 Copy and fill every `«…»` field:
 
 ```text
-You are an OpenCode worker under a pi orchestrator in Herdr.
+You are an OpenCode worker under a coding-agent orchestrator in Herdr.
+(The parent agent spawned you via herdr; it is not pi unless named.)
 
 PRIMARY SKILL (mandatory): «skill-name»
 Load and follow that skill completely:
@@ -106,3 +107,6 @@ Orchestrator relay from user:
 
 Resume PRIMARY SKILL. Update STATUS.md when finished (or still blocked).
 ```
+
+Parent agent identity in STATUS NOTES may say `parent: opencode|claude|codex|…`
+(the orchestrator pane), never assume pi.

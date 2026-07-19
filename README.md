@@ -85,7 +85,7 @@ Dùng **A hoặc B** nếu bạn muốn bản **fork này** (có `orchestrator-h
 1. `/setup-matt-pocock-skills` trong agent (tracker + labels + docs).
 2. Router: `/ask-matt` khi không chắc skill nào.
 3. Flow thường: `/grill-with-docs` → `/to-spec` → `/to-tickets` → `/implement`.
-4. (Tuỳ chọn) Herdr multi-agent: cài [Herdr](https://herdr.dev), integration `pi` + `opencode`, dùng skill [`orchestrator-herdr`](./skills/personal/orchestrator-herdr/SKILL.md) — pi điều phối, worker OpenCode chạy từng skill project.
+4. (Tuỳ chọn) Herdr multi-agent: cài [Herdr](https://herdr.dev), integration `opencode` (và agent bạn đang dùng), skill [`orchestrator-herdr`](./skills/personal/orchestrator-herdr/SKILL.md) — **coding agent** điều phối, spawn **OpenCode** workers theo skill project.
 
 ---
 
@@ -255,7 +255,7 @@ General workflow tools, not code-specific.
 
 Not in the Claude plugin set. Install via clone/link or pick them in skills.sh if listed.
 
-- **[orchestrator-herdr](./skills/personal/orchestrator-herdr/SKILL.md)** — Pi on Herdr routes project skills (`ask-matt` map) to OpenCode worker panes.
+- **[orchestrator-herdr](./skills/personal/orchestrator-herdr/SKILL.md)** — Coding agent on Herdr routes project skills (`ask-matt` map) and spawns OpenCode worker panes.
 - **[edit-article](./skills/personal/edit-article/SKILL.md)** — Edit and improve articles.
 - **[obsidian-vault](./skills/personal/obsidian-vault/SKILL.md)** — Notes in an Obsidian vault.
 
