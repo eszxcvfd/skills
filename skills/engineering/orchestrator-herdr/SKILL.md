@@ -47,7 +47,7 @@ Full prompt/STATUS shapes: [PROMPTS.md](PROMPTS.md). Routing map: [ROUTING.md](R
 3. Parallel only with no data edge; else one worker per cycle (preferred).
 4. HITL skills run in **this** pane; AFK skills → background workers ([ROUTING.md](ROUTING.md)).
 5. Parse herdr IDs from **JSON only**. Prefer `herdr agent start`.
-6. Task text **only** via `herdr pane run` (text + Enter). Never `agent send` alone for prompts.
+6. Dispatch = **`herdr agent send` + `herdr pane send-keys <pane_id> Enter`** (verified). Never `agent send` alone without Enter. (`pane run` only as fallback if send+Enter fails.)
 7. Artifacts **only** under `<project>/.scratch/orchestrator/` — never `/tmp`.
 8. “Worker finished” ≠ success. Success = ingested STATUS + quality gate + your evaluation.
 9. **Never spawn the next job** until the user approves the **NEXT PLAN** for that cycle (unless they said once: “auto-run all cycles” / “no confirm”).
@@ -59,138 +59,166 @@ Full prompt/STATUS shapes: [PROMPTS.md](PROMPTS.md). Routing map: [ROUTING.md](R
 
 ---
 
-## Command cookbook (copy-paste)
+## Verified Herdr flow (end-to-end)
 
-Timeouts are **milliseconds**. `120000000` ms = 120000 s.
+Use this sequence for every AFK worker job. Timeouts are **milliseconds**.
+
+```bash
+# 1. Integrations + environment
+test "${HERDR_ENV:-}" = 1 || { echo "not in Herdr"; exit 1; }
+herdr integration status
+
+# 2. See current agents
+herdr agent list
+
+# 3. Spawn worker (default binary: opencode; swap argv if user named another)
+#    Example names: research, implement, helper-omp
+WORKER="research"
+herdr agent start "$WORKER" --cwd "$PWD" --split right --no-focus -- opencode
+# other agents e.g.:  -- omp --no-title
+#                     -- claude
+#                     -- codex
+
+# 4. Note pane_id from JSON
+herdr agent list
+# PANE_ID=...   # parse pane_id for $WORKER — never invent
+
+# 5–6. Dispatch prompt (send text, then Enter) — verified pair
+# Write prompt to $ART/PROMPT.txt first if long (PROMPTS.md)
+herdr agent send "$WORKER" "$(cat "$PROMPT_FILE")"
+herdr pane send-keys "$PANE_ID" Enter
+
+# 7. Wait until idle again (job finished or ready)
+#    Long jobs: raise timeout (e.g. 120000000). Default sample: 120000 ms.
+herdr agent wait "$WORKER" --status idle --timeout 120000000
+
+# 8. Read transcript
+herdr agent read "$WORKER" --source recent
+# then open STATUS.md + every ARTIFACT path (see Ingest)
+
+# 9. Close if one-shot / not reusing
+herdr pane close "$PANE_ID"
+```
+
+**Reuse** (skip 3; keep same `$WORKER` / `$PANE_ID`): steps 2 → 5–8 only. Close (9) only when no further use.
+
+**Blocked mid-job:** `herdr agent read "$WORKER" --source visible` → handle → `herdr agent send` + `send-keys Enter` → `herdr agent wait … idle` again.
+
+---
+
+## Command cookbook (detail)
 
 ### 0. Preconditions
 
 ```bash
 test "${HERDR_ENV:-}" = 1 || { echo "not in Herdr"; exit 1; }
+herdr integration status
 printf 'orch pane=%s ws=%s tab=%s\n' "$HERDR_PANE_ID" "$HERDR_WORKSPACE_ID" "$HERDR_TAB_ID"
 herdr agent list
-herdr pane list --workspace "$HERDR_WORKSPACE_ID"
 ```
 
 ### 1. Run directory
 
 ```bash
-PROJECT_ROOT="$(pwd)"   # or absolute project root
+PROJECT_ROOT="$(pwd)"
 RUN_ID="$(date +%Y%m%d-%H%M)-$(printf '%04x' $RANDOM)"
 RUN="$PROJECT_ROOT/.scratch/orchestrator/$RUN_ID"
-WORKER="w1"             # short role name, e.g. research / implement / review
+WORKER="research"       # role name, e.g. research / implement / review
 ART="$RUN/$WORKER"
 mkdir -p "$ART"
 STATUS_FILE="$ART/STATUS.md"
-# append cycle header
+PROMPT_FILE="$ART/PROMPT.txt"
 {
   echo "# ORCH-LOG $RUN_ID"
   echo "- started: $(date -Iseconds)"
 } >> "$RUN/ORCH-LOG.md"
 ```
 
-### 2. Obtain subagent — reuse first, else spawn (OpenCode)
+### 2. Obtain subagent — reuse first, else spawn
 
 **Reuse is preferred when safe, never required.**
 
 ```bash
 herdr agent list
-# Look for an idle worker you own from this run (same or compatible role).
+# idle compatible worker you own? → reuse. else spawn.
 ```
 
 | Decide | When |
 |--------|------|
-| **Reuse** | Same role/skill family, status `idle` or `done`, same `cwd`/project, prior context helps or is harmless, user did not demand a clean agent |
-| **Spawn new** | Different skill family, need clean context (e.g. after tickets→implement, failed quality gate, polluted chat), no idle peer, or reuse would confuse the model |
-| **Close then spawn** | Old worker idle but wrong role / bloated — close it, start fresh name |
+| **Reuse** | Same role/skill family, `idle`, same cwd/project, context OK |
+| **Spawn new** | Clean context needed, no idle peer, different skill family |
+| **Close then spawn** | Wrong role / bloated idle worker |
 
-**Reuse path:**
-
-```bash
-herdr agent get "$WORKER"          # must be idle|done, opencode, your pane
-# PANE_ID from JSON
-herdr pane run "$PANE_ID" "$(cat "$PROMPT_FILE")"
-# Track in ORCH-LOG: worker_action: reuse name=... pane=...
-```
-
-**Spawn path:**
+**Spawn:**
 
 ```bash
 herdr agent start "$WORKER" --cwd "$PROJECT_ROOT" --split right --no-focus -- opencode
 herdr agent list
-herdr agent get "$WORKER"
-# PANE_ID=... from JSON
-herdr wait agent-status "$PANE_ID" --status idle --timeout 60000
-# Track: worker_action: spawn name=... pane=...
-# Record pane_id in $RUN/workers.tsv for later close
+# PANE_ID from JSON for $WORKER
+herdr agent wait "$WORKER" --status idle --timeout 60000   # TUI ready
 printf '%s\t%s\t%s\n' "$(date -Iseconds)" "$WORKER" "$PANE_ID" >> "$RUN/workers.tsv"
 ```
 
-Layout: wide → `--split right`; tall → `--split down`.
+Layout: wide → `--split right`; tall → `--split down`. Optional: omit `--split` if defaults are fine.
 
-Fresh name examples: `implement-2`, `review-2` when you keep the old pane for possible reuse or after close.
-
-### 3. Write prompt file then dispatch (avoids shell-quoting bugs)
+### 3. Dispatch (verified: send + Enter)
 
 ```bash
-PROMPT_FILE="$ART/PROMPT.txt"
-# Write full worker prompt (see PROMPTS.md) into $PROMPT_FILE with Write tool.
-# Then send file contents + Enter:
-herdr pane run "$PANE_ID" "$(cat "$PROMPT_FILE")"
+# Write full worker prompt into $PROMPT_FILE (PROMPTS.md)
+herdr agent send "$WORKER" "$(cat "$PROMPT_FILE")"
+herdr pane send-keys "$PANE_ID" Enter
 ```
 
-Must set inside prompt: `PRIMARY SKILL`, `ARTIFACT_DIR=$ART`, `STATUS_FILE=$STATUS_FILE`, concrete `INPUTS`, `USER INTENT`.
+Must set in prompt: `PRIMARY SKILL`, `SKILL_PATH`, `ARTIFACT_DIR=$ART`, `STATUS_FILE`, `INPUTS`, `USER INTENT`.
 
-### 4. Supervise until stop
+Fallback only if send+Enter fails: `herdr pane run "$PANE_ID" "$(cat "$PROMPT_FILE")"`.
+
+### 4. Supervise until idle
 
 ```bash
-# optional: confirm it started working
-herdr wait agent-status "$PANE_ID" --status working --timeout 120000
-
-# long wait for completion (background tab → often "done")
-herdr wait agent-status "$PANE_ID" --status done --timeout 120000000
-
-# If user is watching that pane, completion may be "idle" instead — poll:
+herdr agent wait "$WORKER" --status idle --timeout 120000000
+# On timeout/API error, poll:
 herdr agent get "$WORKER"
-# terminal for ingest when status is done OR idle (after work had started)
 ```
 
 | `agent_status` | Action |
 |----------------|--------|
-| `working` | poll 5–15s; if stuck >2 min → `pane read` peek |
-| `blocked` | blocked-handler (below) |
-| `done` or `idle` after work | **go to Ingest** |
-| `unknown` | `pane read`; respawn once if no agent UI |
+| `working` | keep waiting / poll 5–15s; peek with `herdr agent read` if stuck >2 min |
+| `blocked` | blocked-handler |
+| `idle` after work started | **Ingest** |
+| `done` | treat like finished-unseen → **Ingest** (then may show idle) |
+| `unknown` | `herdr agent read`; respawn once if no agent UI |
 
 **Blocked-handler:**
 
 ```bash
-herdr pane read "$PANE_ID" --source visible --lines 80
+herdr agent read "$WORKER" --source visible
+# or: herdr pane read "$PANE_ID" --source visible --lines 80
 ```
 
-- Permission UI → tell user pane + request; **no** auto-approve destructive ops. User says approve → `herdr pane send-keys "$PANE_ID" enter` once.
-- Needs decision → paste question; answer → `herdr pane run "$PANE_ID" "<answer>"`.
-- Unclear → offer `herdr agent focus "$WORKER"` only if user wants.
+- Permission UI → tell user; no auto-approve destructive. User approves → `herdr pane send-keys "$PANE_ID" Enter` once.
+- Needs decision → `herdr agent send "$WORKER" "<answer>"` then `herdr pane send-keys "$PANE_ID" Enter`.
+- Unclear → `herdr agent focus "$WORKER"` only if user wants.
 
-### 5. Ingest (mandatory commands)
+### 5. Ingest (mandatory)
 
 ```bash
-# A. Transcript
-herdr pane read "$PANE_ID" --source recent-unwrapped --lines 200
-# or: herdr agent read "$WORKER" --source recent-unwrapped --lines 200
+# A. Transcript (verified)
+herdr agent read "$WORKER" --source recent
+# optional more lines: herdr agent read "$WORKER" --source recent-unwrapped --lines 200
 
 # B. STATUS contract
 test -f "$STATUS_FILE" && cat "$STATUS_FILE"
 
-# C. List + read every artifact path from STATUS ## ARTIFACTS
-#    Use Read tool on each path — listing alone is not enough.
+# C. Open every path under ## ARTIFACTS (Read tool — not list-only)
 ```
 
 Missing STATUS — one recovery:
 
 ```bash
-herdr pane run "$PANE_ID" "Write STATUS.md now at $STATUS_FILE using orchestrator STATUS schema. Do no other work."
-herdr wait agent-status "$PANE_ID" --status done --timeout 600000
+herdr agent send "$WORKER" "Write STATUS.md now at $STATUS_FILE using orchestrator STATUS schema. Do no other work."
+herdr pane send-keys "$PANE_ID" Enter
+herdr agent wait "$WORKER" --status idle --timeout 600000
 # re-run ingest A–C
 ```
 
@@ -253,13 +281,13 @@ Only after **y** (or user edit then y): apply `close_now` / `close_workers` if l
 
 ### 8. Close workers (when not reusing)
 
-After user approves a plan that says close, or FINISH with close, or you know a worker will not be reused:
+After user approves close, FINISH, or one-shot task done:
 
 ```bash
 # Only panes you started this run (see $RUN/workers.tsv)
-herdr agent get "$WORKER"          # confirm still your worker
+herdr agent get "$WORKER"
 herdr pane close "$PANE_ID"
-# Log: closed name=... pane=... reason=not-reusing|finish|wrong-role
+# Log: closed name=... pane=... reason=one-shot|not-reusing|finish
 ```
 
 | Do close | Do not close |
@@ -340,21 +368,21 @@ Cookbook §7. **Wait for y.** Loop or stop.
 
 ---
 
-## Quick reference
+## Quick reference (verified order)
 
 ```bash
-test "${HERDR_ENV:-}" = 1
+herdr integration status
 herdr agent list
-herdr agent start <name> --cwd PATH --split right|down --no-focus -- opencode
-herdr agent get <name|pane>
-herdr wait agent-status <pane> --status idle|working|blocked|done|unknown --timeout MS
-herdr pane run <pane> "<prompt>"
-herdr pane read <pane> --source visible|recent-unwrapped --lines N
-herdr agent read <name> --source recent-unwrapped --lines N
-herdr pane send-keys <pane> enter
-herdr pane close <pane>     # only run-owned workers when not reusing
-herdr agent focus <name>    # only if user wants
+herdr agent start <name> --cwd "$PWD" --split right --no-focus -- opencode
+herdr agent list                          # note pane_id
+herdr agent send <name> "<prompt>"
+herdr pane send-keys <pane_id> Enter
+herdr agent wait <name> --status idle --timeout 120000000
+herdr agent read <name> --source recent
+herdr pane close <pane_id>                # if one-shot / not reusing
 ```
+
+Also: `herdr agent get` · `herdr agent focus` (user asked) · `herdr pane run` (fallback only)
 
 `idle` = ready/seen · `done` = finished unseen · `working` = busy · `blocked` = needs input
 

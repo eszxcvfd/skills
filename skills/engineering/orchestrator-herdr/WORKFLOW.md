@@ -7,7 +7,7 @@ This is the **only** supported orchestration pattern. One **cycle** at a time.
 ```text
 1. PLAN          You propose exactly what the next subagent will do
 2. APPROVE       User says y / n / edit  ← hard gate
-3. DISPATCH      herdr agent start + pane run (see SKILL cookbook)
+3. DISPATCH      verified: agent start → agent send → send-keys Enter → agent wait idle → agent read
 4. WORK          Subagent runs ONE primary skill; writes STATUS + artifacts
 5. INGEST        You re-read transcript, STATUS, and every artifact file
 6. EVALUATE      You judge quality, gaps, user-goal progress
@@ -34,7 +34,7 @@ You own: routing, approvals, herdr control, reuse/close, analysis, next plan.
 **Reuse (optional, preferred when safe):**
 
 - `herdr agent list` → idle/done worker, same project cwd, compatible role/skill family
-- Skip `agent start`; only `pane run` with new PROMPT + new `ARTIFACT_DIR` for this cycle
+- Skip `agent start`; `agent send` + `send-keys Enter` with new PROMPT + new `ARTIFACT_DIR`
 - Note `worker_lifecycle: reuse <name>` in PLAN
 
 **Spawn new when:**

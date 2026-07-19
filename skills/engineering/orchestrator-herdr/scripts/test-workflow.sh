@@ -25,8 +25,12 @@ grep -q 'Prefer reusing' "$SKILL_DIR/SKILL.md" && ok "SKILL prefer reuse rule" |
 grep -q 'Reuse & close' "$SKILL_DIR/WORKFLOW.md" && ok "WORKFLOW reuse/close" || bad "WORKFLOW missing reuse/close"
 grep -q 'quality_gate' "$SKILL_DIR/SKILL.md" && ok "SKILL has quality_gate" || bad "SKILL missing quality_gate"
 grep -q 'Never spawn the next job' "$SKILL_DIR/SKILL.md" && ok "no auto-chain rule" || bad "missing no auto-chain"
-grep -q 'herdr pane run' "$SKILL_DIR/SKILL.md" && ok "cookbook pane run" || bad "missing pane run"
-grep -q 'herdr wait agent-status' "$SKILL_DIR/SKILL.md" && ok "cookbook wait" || bad "missing wait"
+grep -q 'herdr agent send' "$SKILL_DIR/SKILL.md" && ok "cookbook agent send" || bad "missing agent send"
+grep -q 'herdr pane send-keys' "$SKILL_DIR/SKILL.md" && ok "cookbook send-keys Enter" || bad "missing send-keys"
+grep -q 'herdr agent wait' "$SKILL_DIR/SKILL.md" && ok "cookbook agent wait" || bad "missing agent wait"
+grep -q 'herdr agent read' "$SKILL_DIR/SKILL.md" && ok "cookbook agent read" || bad "missing agent read"
+grep -q 'herdr integration status' "$SKILL_DIR/SKILL.md" && ok "cookbook integration status" || bad "missing integration status"
+grep -q 'Verified Herdr flow' "$SKILL_DIR/SKILL.md" && ok "verified flow section" || bad "missing verified flow"
 grep -q 'hard gate' "$SKILL_DIR/WORKFLOW.md" && ok "WORKFLOW hard gate" || bad "WORKFLOW missing hard gate"
 grep -q 'Anti-patterns' "$SKILL_DIR/WORKFLOW.md" && ok "WORKFLOW anti-patterns" || bad "WORKFLOW missing anti-patterns"
 grep -q 'user must approve NEXT PLAN' "$SKILL_DIR/PROMPTS.md" && ok "PROMPTS approve note" || bad "PROMPTS missing approve note"
@@ -170,12 +174,17 @@ test ! -f "$RUN/AUTO_CHAINED" && ok "no auto-chain marker" || bad "auto-chain sh
 echo "== 3. Herdr smoke (if available) =="
 if [[ "${HERDR_ENV:-}" == "1" ]] && command -v herdr >/dev/null 2>&1; then
   ok "HERDR_ENV=1 and herdr on PATH"
+  if herdr integration status >/dev/null 2>&1; then
+    ok "herdr integration status works"
+  else
+    ok "herdr integration status skipped/failed (non-fatal)"
+  fi
   if herdr agent list >/dev/null 2>&1; then
     ok "herdr agent list works"
   else
     bad "herdr agent list failed"
   fi
-  # Non-destructive: split a shell, write STATUS via shell, read back — no opencode required
+  # Verified-style flow on bash worker: start → list pane → send → Enter → read → close
   SMOKE_NAME="orch-smoke-$$"
   set +e
   START_JSON=$(herdr agent start "$SMOKE_NAME" --cwd "$PROJECT" --split right --no-focus -- bash 2>&1)
@@ -185,44 +194,34 @@ if [[ "${HERDR_ENV:-}" == "1" ]] && command -v herdr >/dev/null 2>&1; then
     bad "agent start bash: $START_JSON"
   else
     ok "agent start bash"
-    # give shell a moment
     sleep 1
+    herdr agent list >"$RUN/agent-list.json" 2>&1 || true
     PANE=$(herdr agent get "$SMOKE_NAME" 2>/dev/null | sed -n 's/.*"pane_id"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -1)
     if [[ -z "${PANE:-}" ]]; then
-      # try list
-      herdr agent list >"$RUN/agent-list.json" 2>&1 || true
       PANE=$(sed -n 's/.*"pane_id"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$RUN/agent-list.json" | tail -1)
     fi
     if [[ -n "${PANE:-}" ]]; then
       ok "resolved pane_id=$PANE"
-      herdr pane run "$PANE" "mkdir -p .scratch/orchestrator/$RUN_ID/smoke && printf '%s\n' '# STATUS' '' 'STATUS: done' 'SKILL: smoke' > .scratch/orchestrator/$RUN_ID/smoke/STATUS.md && echo SMOKE_OK"
-      sleep 1
-      if [[ -f "$PROJECT/.scratch/orchestrator/$RUN_ID/smoke/STATUS.md" ]]; then
-        ok "smoke worker wrote STATUS via pane run"
+      CMD="mkdir -p '$PROJECT/.scratch/orchestrator/$RUN_ID/smoke' && printf '%s\n' '# STATUS' '' 'STATUS: done' 'SKILL: smoke' > '$PROJECT/.scratch/orchestrator/$RUN_ID/smoke/STATUS.md' && echo SMOKE_OK"
+      # Prefer verified pair; fallback pane run for bare bash if send path fails
+      if herdr agent send "$SMOKE_NAME" "$CMD" >/dev/null 2>&1; then
+        herdr pane send-keys "$PANE" Enter >/dev/null 2>&1 || true
+        ok "dispatch via agent send + send-keys Enter"
       else
-        # shell may need cwd; try absolute
-        herdr pane run "$PANE" "mkdir -p '$PROJECT/.scratch/orchestrator/$RUN_ID/smoke' && echo 'STATUS: done' > '$PROJECT/.scratch/orchestrator/$RUN_ID/smoke/STATUS.md' && echo SMOKE_OK"
-        sleep 1
-        test -f "$PROJECT/.scratch/orchestrator/$RUN_ID/smoke/STATUS.md" && ok "smoke STATUS abs path" || bad "smoke STATUS not written"
+        herdr pane run "$PANE" "$CMD" >/dev/null 2>&1 || true
+        ok "dispatch via pane run fallback"
       fi
-      # read may lag one frame; retry a few times / sources
+      sleep 1
+      test -f "$PROJECT/.scratch/orchestrator/$RUN_ID/smoke/STATUS.md" && ok "smoke STATUS written" || bad "smoke STATUS not written"
       : >"$RUN/smoke-read.txt"
       for _try in 1 2 3 4 5; do
-        herdr pane read "$PANE" --source recent-unwrapped --lines 40 >"$RUN/smoke-read.txt" 2>&1 || true
-        [[ -s "$RUN/smoke-read.txt" ]] && break
-        herdr pane read "$PANE" --source visible --lines 40 >"$RUN/smoke-read.txt" 2>&1 || true
+        herdr agent read "$SMOKE_NAME" --source recent >"$RUN/smoke-read.txt" 2>&1 || true
         [[ -s "$RUN/smoke-read.txt" ]] && break
         herdr agent read "$SMOKE_NAME" --source recent-unwrapped --lines 40 >"$RUN/smoke-read.txt" 2>&1 || true
         [[ -s "$RUN/smoke-read.txt" ]] && break
         sleep 0.4
       done
-      if [[ -s "$RUN/smoke-read.txt" ]]; then
-        ok "pane/agent read returned output"
-      else
-        # STATUS file already proved pane run; empty scrollback is non-fatal on bare bash
-        ok "pane read empty (non-fatal; STATUS write already verified)"
-      fi
-      # cleanup smoke pane if close works
+      [[ -s "$RUN/smoke-read.txt" ]] && ok "agent read returned output" || ok "agent read empty (non-fatal; STATUS ok)"
       herdr pane close "$PANE" >/dev/null 2>&1 && ok "closed smoke pane" || ok "smoke pane left (close skipped)"
     else
       bad "could not resolve pane_id for smoke agent"

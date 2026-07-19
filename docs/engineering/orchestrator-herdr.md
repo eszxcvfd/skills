@@ -38,7 +38,7 @@ Nothing AFK starts until you approve the PLAN. Each PLAN / NEXT PLAN must **pick
 ## It's working if
 
 - A PLAN block appears and waits for yes before AFK spawns.
-- Workers start with `--no-focus`; prompts go through `herdr pane run`.
+- Workers start via `herdr agent start`; prompts use `herdr agent send` + `pane send-keys Enter`; wait with `herdr agent wait --status idle`; read with `herdr agent read`.
 - After each worker stop, you see an ORCH evaluation grounded in opened files — not only “agent done”.
 - A NEXT PLAN (or FINISH) waits for yes before the next spawn.
 - Each job has parseable `STATUS.md`; artifacts stay under `.scratch/orchestrator/`.

@@ -1,7 +1,8 @@
 # Worker prompt + STATUS schema
 
-Use **only** `herdr pane run <pane_id> "<entire prompt>"`.
-Worker has no shared memory with the orchestrator.
+Dispatch (verified): `herdr agent send <name> "<prompt>"` then
+`herdr pane send-keys <pane_id> Enter`. Fallback: `herdr pane run`.
+Worker has no shared memory with the orchestrator across new spawns (reuse keeps chat).
 
 Paths are always **inside the project** under `.scratch/orchestrator/`.
 
@@ -97,7 +98,7 @@ none|exact question or permission needed
 
 ## Follow-up: missing STATUS
 
-If the worker goes idle without `STATUS_FILE`:
+If the worker goes idle without `STATUS_FILE` — send via `agent send` + `send-keys Enter`:
 
 ```text
 Write STATUS.md now at the ARTIFACT_DIR path from your instructions, using the orchestrator STATUS schema (STATUS/SKILL/ARTIFACTS/VERIFY/NEXT_SKILL/NEXT_INPUTS/BLOCKERS/NOTES). Do no other work.
@@ -111,6 +112,8 @@ Orchestrator relay from user:
 
 Resume PRIMARY SKILL. Update STATUS.md when finished (or still blocked).
 ```
+
+Same dispatch: `herdr agent send` + `herdr pane send-keys Enter`.
 
 Parent agent identity in STATUS NOTES may say `parent: opencode|claude|codex|…`
 (the orchestrator pane), never assume pi.
