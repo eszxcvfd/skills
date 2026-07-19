@@ -35,6 +35,8 @@ Default worker binary: **`opencode`**. Other worker agents only if the user name
 8. Done = STATUS file says `done` **and** skill completion criteria hold — not merely idle TUI.
 9. Do not close panes you did not create unless asked (or user set cleanup).
 10. Do **not** start `pi` as orchestrator or worker unless the user explicitly asks for pi.
+11. **Never** treat “worker idle/done” as success by itself. You **must** re-read results (step 6–7) before any next spawn, user summary, or plan change.
+12. You are the **brain**: workers only execute one skill. Coordination, quality check, and chaining happen **only** after you ingest their output in **this** pane.
 
 ## Steps
 
@@ -94,14 +96,14 @@ Each `implement` after tickets → prefer a **new** worker (clean context).
 
 ### 5. Wait loop + blocked-handler
 
-Prefer a long status wait (Herdr timeout is **ms**):
+Prefer a long status wait (Herdr timeout is **ms**). Treat **either** `done` or `idle` (after work started) as “agent stopped — now ingest”:
 
 ```bash
 herdr wait agent-status <worker> --status done --timeout 120000000
-# 120000000 ms = 120000 s (~33h). On timeout or API error, fall back to poll.
+# 120000000 ms = 120000 s. On timeout/API error, poll instead.
 ```
 
-Else poll until terminal state (same overall cap ~120000 s; tell user on timeout):
+Else poll until terminal state (same overall cap; tell user on timeout):
 
 ```bash
 herdr agent get <worker>
@@ -109,9 +111,9 @@ herdr agent get <worker>
 
 | Status | Action |
 |--------|--------|
-| `working` | keep polling (5–15s) |
-| `blocked` | **blocked-handler** (below) |
-| `done` or `idle` after work started | collect STATUS |
+| `working` | keep polling (5–15s); optional mid-flight `pane read` if stalled >2 min |
+| `blocked` | **blocked-handler** (below) — then resume wait |
+| `done` or `idle` after work started | **immediately** step 6 (ingest) — do not skip |
 | `unknown` | `pane read`; if no agent UI, respawn once |
 | wait CLI errors | fall back to poll `agent get` + `pane read` |
 
@@ -124,33 +126,89 @@ herdr agent get <worker>
    - **Unclear** → user looks at pane (`herdr agent focus <worker>` only if they ask).
 3. Resume poll after handling.
 
-**Completion:** worker finished or user aborted the job.
+**Completion:** worker stopped (`done`/`idle`) or user aborted — **then always step 6**.
 
-### 6. Collect STATUS
+### 6. Ingest results (mandatory — do not skip)
+
+When the worker stops, you **re-read and understand** the outcome in this pane before any coordination decision. Spawning the next job or telling the user “done” **without this step is a failure**.
+
+Run **all** of the following in order:
 
 ```bash
-herdr pane read <pane_id> --source recent-unwrapped --lines 120
+# A. Transcript — what the worker actually said/did
+herdr pane read <pane_id> --source recent-unwrapped --lines 200
+
+# B. STATUS contract
 cat .scratch/orchestrator/<run-id>/<worker>/STATUS.md
+
+# C. Every path listed under ## ARTIFACTS (and any paths in NOTES)
+#    Read each file (or enough of it) to judge quality — do not only list paths.
 ```
 
-Require [PROMPTS.md](PROMPTS.md) STATUS schema. If file missing: one follow-up
+If `STATUS.md` is missing: one follow-up, then re-wait and repeat A–C:
 
 ```bash
 herdr pane run <pane_id> "Write STATUS.md now at ARTIFACT_DIR per orchestrator schema. Do no other work."
 ```
 
-then re-wait. Still missing → mark job `failed`.
+Still missing → mark job `failed` and go to step 7 with that outcome.
 
-**Completion:** `STATUS.md` with `STATUS: done|blocked|failed` parsed, or job failed.
+Parse into a structured mental model (you may write it to `$RUN/ORCH-LOG.md`):
 
-### 7. Chain or finish
+| Field | From |
+|-------|------|
+| `status` | `STATUS:` line |
+| `artifacts[]` | `## ARTIFACTS` — **you have opened each** |
+| `verify[]` | `## VERIFY` — note whether credible |
+| `next_skill` | `## NEXT_SKILL` |
+| `next_inputs[]` | `## NEXT_INPUTS` + paths from artifacts |
+| `blockers` | `## BLOCKERS` |
+| `notes` | `## NOTES` + gaps you saw in transcript vs STATUS |
 
-- `STATUS: done` + `NEXT_SKILL:` → enqueue next job with INPUTS from `ARTIFACTS:`.
-- `STATUS: blocked` → user.
-- `STATUS: failed` → report; at most one silent retry.
-- All jobs done → one user-facing summary (skills, artifact paths, verify commands).
+**Quality gate (orchestrator judgment — not the worker’s word alone):**
 
-**Completion:** no pending AFK jobs without a terminal STATUS; user has the merge report.
+- Does STATUS match the transcript and files on disk?
+- Are skill completion criteria actually met (not just claimed)?
+- Are artifacts usable as INPUTS for the next skill?
+- If STATUS says `done` but artifacts are empty/wrong/contradict transcript → treat as `failed` or re-dispatch a fix job; **do not** blindly chain.
+
+**Completion:** STATUS parsed **and** artifacts read **and** quality gate applied. Only then step 7.
+
+### 7. Analyze → coordinate (the actual orchestration)
+
+**After** step 6 only. Decide the next move from evidence, not from “agent finished”.
+
+Print a short **ORCH decision** (to the user or `$RUN/ORCH-LOG.md`) before acting:
+
+```text
+ORCH:
+- job: <worker>/<skill> → <done|blocked|failed|rework>
+- evidence: <1–3 bullets from STATUS + artifacts>
+- decision: <chain|ask-user|retry|rework|finish>
+- next: <skill + inputs | none>
+```
+
+Then act:
+
+| Outcome | Action |
+|---------|--------|
+| `done` + usable artifacts + `NEXT_SKILL` set or plan has a dependent | Enqueue/spawn next AFK job; pass **concrete** INPUTS from artifacts/`NEXT_INPUTS` (full paths, issue ids). Back to step 4 for that job. |
+| `done` + plan has more ready jobs (deps satisfied) | Spawn next ready job (parallel only if no data edge). |
+| `done` + nothing left | **Finish report** (below). |
+| `blocked` | Stop chain; present `BLOCKERS` + relevant artifact/transcript excerpt to user; after answer, `pane run` resume or re-plan. |
+| `failed` or quality gate fail | Report why; **at most one** silent retry with a tighter prompt, else ask user. |
+| `rework` | Same or new worker with INPUTS = prior artifacts + explicit fix instructions derived from your analysis. |
+
+**Finish report** (only when every planned AFK job has a terminal ingested STATUS):
+
+- skills run + final status each
+- artifact paths (what you actually read)
+- verify commands / residual risks
+- recommended next human step if any
+
+**Loop rule:** after every worker stop → **step 6 → step 7** → (maybe step 4). Never jump from step 5 to “all done”.
+
+**Completion:** no pending AFK job without an **ingested** terminal STATUS; user has the merge/finish report grounded in artifacts.
 
 ## HITL (this pane)
 
