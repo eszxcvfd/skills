@@ -24,6 +24,7 @@ Load SKILL_PATH first. Follow that skill exactly, limited to this job.
 PROJECT_ROOT: «absolute path»
 ARTIFACT_DIR: «.scratch/orchestrator/<run-id>/<job-id>/»
 STATUS_FILE: «ARTIFACT_DIR/STATUS.md»
+AGENT_TIMEBOX: 60 minutes
 
 MISSION CONTEXT:
 «short context from the user mission and approved plan»
@@ -49,6 +50,7 @@ CONSTRAINTS:
 - Write outputs to ARTIFACT_DIR unless PRIMARY SKILL explicitly requires repo changes.
 - If you change repo files, list every changed path in STATUS.md.
 - Verify your work when the skill or repo provides a verification path.
+- Run for at most 60 minutes. If the timebox is reached, stop and write STATUS_FILE with the best current status.
 - When done or blocked, write STATUS_FILE using the schema below and print the same status block as your final response.
 
 DONE WHEN:

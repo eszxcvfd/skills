@@ -74,6 +74,8 @@ claude plugin install mattpocock-skills@mattpocock
 
 Dùng **A hoặc B** nếu bạn muốn bản **fork này** (có `orchestrator-herdr` và chỉnh sửa riêng).
 
+Riêng `/orchestrator-herdr`: Herdr worker mặc định chạy bằng command `omp`, nên máy/project đích cần có `omp` trong `PATH` trước khi dùng flow multi-agent.
+
 ---
 
 ## Sau khi cài — checklist 1 project
@@ -81,7 +83,7 @@ Dùng **A hoặc B** nếu bạn muốn bản **fork này** (có `orchestrator-h
 1. `/setup-matt-pocock-skills` trong agent (tracker + labels + docs).
 2. Router: `/ask-matt` khi không chắc skill nào.
 3. Flow thường: `/grill-with-docs` → `/to-spec` → `/to-tickets` → `/implement`.
-4. (Tuỳ chọn) Herdr multi-agent: cài [Herdr](https://herdr.dev), integration `opencode` (và agent bạn đang dùng), rồi `/orchestrator-herdr` — **coding agent** điều phối, spawn **OpenCode** workers theo skill project.
+4. (Tuỳ chọn) Herdr multi-agent: cài [Herdr](https://herdr.dev), integration `omp` (và agent bạn đang dùng), rồi `/orchestrator-herdr` — **coding agent** điều phối, spawn **OMP** workers theo skill project, mỗi worker chạy tối đa 60 phút và có alert khi dừng.
 
 ---
 
@@ -220,7 +222,7 @@ Skills I use daily for code work.
 - **[to-tickets](./skills/engineering/to-tickets/SKILL.md)** — Break any plan, spec, or conversation into a set of tracer-bullet tickets, each declaring its blocking edges — written as text in a local file, or as native blocking links on a real tracker.
 - **[implement](./skills/engineering/implement/SKILL.md)** — Build the work described by a spec or set of tickets, driving `/tdd` at pre-agreed seams and closing out with `/code-review` before committing.
 - **[wayfinder](./skills/engineering/wayfinder/SKILL.md)** — Plan a huge chunk of work, more than one agent session can hold, as a shared map of investigation tickets on the issue tracker — resolve them one at a time until the way to the destination is clear.
-- **[orchestrator-herdr](./skills/engineering/orchestrator-herdr/SKILL.md)** — Herdr mission control: DAG plan, spawn/reuse OpenCode workers, enforce one-skill prompts, ingest STATUS/artifacts, and quality-gate before next work.
+- **[orchestrator-herdr](./skills/engineering/orchestrator-herdr/SKILL.md)** — Herdr mission control: DAG plan, spawn/reuse OMP workers for 60 minutes, alert on worker stop, enforce one-skill prompts, ingest STATUS/artifacts, and quality-gate before next work.
 
 **Model-invoked**
 

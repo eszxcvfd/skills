@@ -12,7 +12,7 @@ npx skills update orchestrator-herdr
 
 ## What it does
 
-`orchestrator-herdr` turns the current coding agent into mission control for Herdr. It decomposes a user goal into a dependency graph, asks you to approve the PLAN, then spawns or reuses OpenCode workers in sibling panes.
+`orchestrator-herdr` turns the current coding agent into mission control for Herdr. It decomposes a user goal into a dependency graph, asks you to approve the PLAN, then spawns or reuses OMP workers in sibling panes.
 
 Its defining constraint is evidence-before-motion: every worker gets exactly one project skill with copied `SKILL.md` requirements, and the orchestrator must ingest transcript, `STATUS.md`, artifacts, and quality-gate evidence before it can dispatch the next step.
 
@@ -23,7 +23,7 @@ Its defining constraint is evidence-before-motion: every worker gets exactly one
 
 ## Prerequisites
 
-You need Herdr running with `HERDR_ENV=1`, the Herdr integration working, and an `opencode` worker command available. The skill writes orchestration artifacts under `.scratch/orchestrator/<run-id>/`.
+You need Herdr running with `HERDR_ENV=1`, the Herdr integration working, and an `omp` worker command available. The skill writes orchestration artifacts under `.scratch/orchestrator/<run-id>/`.
 
 ## Flow
 
@@ -31,7 +31,7 @@ You need Herdr running with `HERDR_ENV=1`, the Herdr integration working, and an
 mission → DAG PLAN (y/n) → Herdr workers → ingest each stop → ORCH decision → NEXT PLAN or FINISH (y/n)
 ```
 
-Workers are not autonomous free agents. Each one receives a prompt containing one primary skill, concrete inputs, a dedicated artifact directory, and a required `STATUS.md` schema. The orchestrator decides whether outputs are accepted, retried, reworked, blocked, or turned into a new approved plan.
+Workers are not autonomous free agents. Each one receives a prompt containing one primary skill, concrete inputs, a dedicated artifact directory, a required `STATUS.md` schema, and a 60-minute timebox. The orchestrator fires one Herdr alert when a worker stops or times out, then decides whether outputs are accepted, retried, reworked, blocked, or turned into a new approved plan.
 
 ## It's working if
 

@@ -21,15 +21,17 @@ This is the tight loop for a real Herdr orchestrator. The orchestrator owns the 
 2. Copy its workflow, constraints, and done criteria into `SKILL_REQUIREMENTS`.
 3. Write `PROMPT.txt` and create an artifact dir for the job.
 4. Spawn/reuse a Herdr agent with `--no-focus`, send the prompt, then press Enter in that pane.
-5. Dispatch independent jobs in parallel; sequence jobs with data/file dependencies.
+5. Give each worker a 60-minute timebox, and make the prompt say it runs for 60 minutes.
+6. Dispatch independent jobs in parallel; sequence jobs with data/file dependencies.
 
 ## 3. Ingest Every Stop
 
-1. Wait for worker idle.
-2. Read the worker transcript with Herdr.
-3. Read `STATUS.md`.
-4. Open every listed artifact and relevant changed repo file.
-5. If `STATUS.md` is missing, request only that file once; still missing means failed.
+1. Wait for worker idle or its 60-minute timeout.
+2. Fire one Herdr notification alert for that stopped worker.
+3. Read the worker transcript with Herdr.
+4. Read `STATUS.md`.
+5. Open every listed artifact and relevant changed repo file.
+6. If `STATUS.md` is missing, request only that file once; still missing means failed.
 
 ## 4. Quality Gate
 

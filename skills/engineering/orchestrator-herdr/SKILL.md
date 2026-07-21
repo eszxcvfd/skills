@@ -1,6 +1,6 @@
 ---
 name: orchestrator-herdr
-description: "True Herdr orchestrator: decompose a goal into a DAG, spawn/reuse OpenCode agents, enforce skill contracts, ingest evidence, and decide the next cycle."
+description: "True Herdr orchestrator: decompose a goal into a DAG, spawn/reuse OMP agents, enforce skill contracts, ingest evidence, and decide the next cycle."
 disable-model-invocation: true
 ---
 
@@ -26,7 +26,9 @@ Worker idle is only a signal to inspect. It is never proof of completion.
 |-------------------|-------------------|
 | Understand mission, route skills, build DAG, ask for approval, spawn agents, monitor, ingest, quality-gate, re-plan, close panes | Execute exactly one primary skill, write artifacts, write `STATUS.md`, stop |
 
-Default worker command: `opencode`.
+Default worker command: `omp`.
+
+Default AFK worker timebox: 60 minutes per agent. Every worker prompt must state that it runs for 60 minutes.
 
 Run-owned files live only under `.scratch/orchestrator/<run-id>/` unless a worker's primary skill explicitly requires a repo file change.
 
@@ -39,9 +41,10 @@ Run-owned files live only under `.scratch/orchestrator/<run-id>/` unless a worke
 5. Treat the work as a DAG: run independent jobs in parallel, sequence jobs with data or file dependencies, and record each dependency.
 6. After every worker stop, ingest transcript, `STATUS.md`, and every listed artifact before deciding anything.
 7. Quality-gate using your judgment. A worker claiming `done` does not pass if artifacts are missing, unverifiable, off-skill, or unusable as next inputs.
-8. No new unapproved AFK work after the current approved plan. Use `NEXT PLAN` and wait for user `y`, unless the user explicitly granted auto-run.
-9. Reuse an idle worker only when the same role, cwd, and context still fit. Otherwise spawn a fresh worker.
-10. Close only panes you created for this run, and close them when finished or no longer reusable.
+8. Fire exactly one Herdr notification alert when a worker stops or hits its 60-minute timeout, then ingest evidence before deciding anything.
+9. No new unapproved AFK work after the current approved plan. Use `NEXT PLAN` and wait for user `y`, unless the user explicitly granted auto-run.
+10. Reuse an idle worker only when the same role, cwd, and context still fit. Otherwise spawn a fresh worker.
+11. Close only panes you created for this run, and close them when finished or no longer reusable.
 
 ## Preflight
 
@@ -74,7 +77,7 @@ mkdir -p "$RUN_DIR"
 Start or reuse an agent:
 
 ```bash
-herdr agent start "$WORKER" --cwd "$PROJECT_ROOT" --split right --no-focus -- opencode
+herdr agent start "$WORKER" --cwd "$PROJECT_ROOT" --split right --no-focus -- omp
 herdr agent list
 ```
 
@@ -88,7 +91,9 @@ herdr pane send-keys "$PANE_ID" Enter
 Wait and ingest:
 
 ```bash
-herdr agent wait "$WORKER" --status idle --timeout 120000000
+# 60 minutes per worker agent (3,600,000 ms)
+herdr agent wait "$WORKER" --status idle --timeout 3600000
+herdr notification show "Worker stopped: $WORKER" --body "60-minute agent window ended or worker is idle; ingest STATUS.md and artifacts before continuing." --sound done
 herdr agent read "$WORKER" --source recent
 ```
 
@@ -151,10 +156,10 @@ For each approved ready `AFK` job:
 
 1. Read the selected `SKILL.md` and extract concrete requirements.
 2. Create `.scratch/orchestrator/<run-id>/<job-id>/`.
-3. Write `PROMPT.txt` using [PROMPTS.md](PROMPTS.md), including a `SKILL_REQUIREMENTS` section copied from the selected skill.
+3. Write `PROMPT.txt` using [PROMPTS.md](PROMPTS.md), including a `SKILL_REQUIREMENTS` section copied from the selected skill and the 60-minute agent timebox.
 4. Start or reuse the Herdr agent.
 5. Send the prompt and press Enter.
-6. Record worker name, pane ID, job ID, skill, and artifact dir in `$RUN_DIR/workers.tsv`.
+6. Record worker name, pane ID, job ID, skill, artifact dir, and 60-minute deadline in `$RUN_DIR/workers.tsv`.
 
 Run all independent ready jobs before waiting if they do not touch the same files or depend on each other's outputs.
 
