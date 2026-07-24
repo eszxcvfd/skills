@@ -1,6 +1,6 @@
 ---
 name: architecture-council
-description: Use before hard-to-reverse architecture decisions: database or schema changes, tenancy/auth models, service decomposition, module boundaries, public API contracts, core framework/state choices, infrastructure dependencies, queues/retries/storage/deployment topology, or repeated workarounds that suggest the current architecture is becoming a dead end. Convene independent proposals, challenge assumptions, verify evidence, and record an ADR with guardrails, lock level, migration path, and reopen conditions.
+description: "Use before hard-to-reverse architecture decisions: database or schema changes, tenancy/auth models, service decomposition, module boundaries, public API contracts, core framework/state choices, infrastructure dependencies, queues/retries/storage/deployment topology, or repeated workarounds that suggest the current architecture is becoming a dead end. Convene independent proposals, challenge assumptions, verify evidence, and record an ADR with guardrails, lock level, migration path, and reopen conditions."
 ---
 
 # Architecture Council
