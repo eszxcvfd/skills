@@ -28,6 +28,7 @@ Never spawn `ask-matt`; it is the orchestrator's map. Never spawn another user-i
 | Sharpen idea in a codebase | `grill-with-docs` | HITL | `grill` |
 | No codebase, pure plan grill | `grill-me` | HITL | `grill` |
 | Design needs runnable answer | `prototype` | AFK | `proto` |
+| Hard-to-reverse architecture decision | `architecture-council` | HITL verdict + AFK evidence | `council` |
 | Thread → published spec | `to-spec` | AFK if grilled | `spec` |
 | Spec/plan → tracer tickets | `to-tickets` | AFK if spec exists | `tickets` |
 | Build one ticket/spec | `implement` | AFK (tdd+review inside) | `impl` |
@@ -50,6 +51,7 @@ thread when possible. Each `implement` = fresh worker + ticket/spec in INPUTS.
 | Situation | Skill | Mode |
 |-----------|--------|------|
 | Deepening opportunities | `improve-codebase-architecture` | HITL pick |
+| Architecture lock / ADR reopening | `architecture-council` | HITL verdict + AFK evidence |
 | Deep-module shape | `codebase-design` | with design work |
 | Domain terms / ADR | `domain-modeling` | often with grill |
 
@@ -75,6 +77,6 @@ thread when possible. Each `implement` = fresh worker + ticket/spec in INPUTS.
 
 **HITL** — user must answer in-band: grill*, triage questions, wayfinder HITL tickets, teach, setup, ask-matt.
 
-**AFK** — safe background when inputs are complete: research, implement, tdd, code-review, diagnosing-bugs, prototype, resolving-merge-conflicts, to-spec, to-tickets.
+**AFK** — safe background when inputs are complete: research, implement, tdd, code-review, diagnosing-bugs, prototype, resolving-merge-conflicts, to-spec, to-tickets. `architecture-council` can delegate proposal/evidence rounds AFK, but the verdict and any locked ADR approval stay HITL unless the user explicitly granted auto-run.
 
 **ORCH_ONLY** — always in this pane: building PLAN/NEXT PLAN, merging worker outputs, judging quality gates, deciding dependencies, closing panes, and final reporting.

@@ -21,7 +21,7 @@ npx skills@latest add eszxcvfd/skills
 
 - Chọn skill cần dùng và agent (Claude Code, Codex, OpenCode, Cursor, …).
 - **Nên tick** `setup-matt-pocock-skills`.
-- Trong agent, chạy `/setup-matt-pocock-skills` một lần/repo (issue tracker, triage labels, docs layout).
+- Trong agent, chạy `/setup-matt-pocock-skills` một lần/repo (issue tracker, triage labels, domain docs, control docs).
 
 Cập nhật sau này: chạy lại cùng lệnh `npx skills@latest add eszxcvfd/skills`.
 
@@ -63,16 +63,22 @@ git submodule add https://github.com/eszxcvfd/skills.git vendor/skills
 
 Rồi cấu hình agent trỏ vào `vendor/skills/skills` (hoặc copy promoted buckets vào `.agents/skills` / `.claude/skills` của project).
 
-### D. Claude Code plugin (upstream managed bundle)
+### D. Claude Code plugin từ GitHub fork này
 
-Plugin chính thức vẫn từ upstream Matt (read-only, auto-update theo release của ông ấy):
+Cài trực tiếp marketplace plugin được ship trong repo GitHub này:
 
 ```bash
-claude plugin marketplace add mattpocock/skills
-claude plugin install mattpocock-skills@mattpocock
+claude plugin marketplace add eszxcvfd/skills
+claude plugin install mattpocock-skills@eszxcvfd
 ```
 
-Dùng **A hoặc B** nếu bạn muốn bản **fork này** (có `orchestrator-herdr` và chỉnh sửa riêng).
+Cập nhật sau này:
+
+```bash
+claude plugin update mattpocock-skills@eszxcvfd
+```
+
+Nếu chỉ muốn bản upstream gốc của Matt, dùng `claude plugin marketplace add mattpocock/skills` rồi `claude plugin install mattpocock-skills@mattpocock`.
 
 Riêng `/orchestrator-herdr`: Herdr worker mặc định chạy bằng command `omp`, nên máy/project đích cần có `omp` trong `PATH` trước khi dùng flow multi-agent.
 
@@ -217,22 +223,23 @@ Skills I use daily for code work.
 - **[grill-with-docs](./skills/engineering/grill-with-docs/SKILL.md)** — Grilling session that also builds your project's domain model, sharpening terminology and updating `CONTEXT.md` and ADRs inline.
 - **[triage](./skills/engineering/triage/SKILL.md)** — Move issues through a state machine of triage roles.
 - **[improve-codebase-architecture](./skills/engineering/improve-codebase-architecture/SKILL.md)** — Scan a codebase for deepening opportunities, present them as a visual HTML report, then grill through whichever one you pick.
-- **[setup-matt-pocock-skills](./skills/engineering/setup-matt-pocock-skills/SKILL.md)** — Configure this repo for the engineering skills (issue tracker, triage labels, domain doc layout). Run once per repo before using the other engineering skills.
-- **[to-spec](./skills/engineering/to-spec/SKILL.md)** — Turn the current conversation into a spec and publish it to the issue tracker. No interview — just synthesizes what you've already discussed.
-- **[to-tickets](./skills/engineering/to-tickets/SKILL.md)** — Break any plan, spec, or conversation into a set of tracer-bullet tickets, each declaring its blocking edges — written as text in a local file, or as native blocking links on a real tracker.
-- **[implement](./skills/engineering/implement/SKILL.md)** — Build the work described by a spec or set of tickets, driving `/tdd` at pre-agreed seams and closing out with `/code-review` before committing.
+- **[setup-matt-pocock-skills](./skills/engineering/setup-matt-pocock-skills/SKILL.md)** — Configure this repo for the engineering skills (issue tracker, triage labels, domain docs, and root control docs). Run once per repo before using the other engineering skills.
+- **[to-spec](./skills/engineering/to-spec/SKILL.md)** — Turn the current conversation into a spec with architecture placement, runtime invariants, and required proof. No interview — just synthesizes what you've already discussed.
+- **[to-tickets](./skills/engineering/to-tickets/SKILL.md)** — Break any plan, spec, or conversation into tracer-bullet tickets with blocking edges, control notes, and required proof — local markdown or native tracker links.
+- **[implement](./skills/engineering/implement/SKILL.md)** — Build the work described by a spec or set of tickets, maintaining `ACTIVE_EXECUTION_PLAN.md`, driving `/tdd`, proving per policy, and closing with `/code-review` before committing.
 - **[wayfinder](./skills/engineering/wayfinder/SKILL.md)** — Plan a huge chunk of work, more than one agent session can hold, as a shared map of investigation tickets on the issue tracker — resolve them one at a time until the way to the destination is clear.
 - **[orchestrator-herdr](./skills/engineering/orchestrator-herdr/SKILL.md)** — Herdr mission control: DAG plan, spawn/reuse OMP workers for 60 minutes, alert on worker stop, enforce one-skill prompts, ingest STATUS/artifacts, and quality-gate before next work.
 
 **Model-invoked**
 
+- **[architecture-council](./skills/engineering/architecture-council/SKILL.md)** — Decide hard-to-reverse architecture changes with independent proposals, challenge, verification, ADR guardrails, lock level, and reopen conditions.
 - **[prototype](./skills/engineering/prototype/SKILL.md)** — Build a throwaway prototype to answer a design question — a runnable terminal app for state/logic questions, or several radically different UI variations toggleable from one route.
 - **[diagnosing-bugs](./skills/engineering/diagnosing-bugs/SKILL.md)** — Disciplined diagnosis loop for hard bugs and performance regressions: reproduce → minimise → hypothesise → instrument → fix → regression-test.
 - **[research](./skills/engineering/research/SKILL.md)** — Investigate a question against high-trust primary sources and capture the findings as a cited Markdown file in the repo, run as a background agent.
 - **[tdd](./skills/engineering/tdd/SKILL.md)** — Test-driven development with a red-green-refactor loop. Builds features or fixes bugs one vertical slice at a time.
 - **[domain-modeling](./skills/engineering/domain-modeling/SKILL.md)** — Actively build and sharpen a project's domain model — challenge terms against the glossary, stress-test with edge-case scenarios, and update `CONTEXT.md` and ADRs inline.
 - **[codebase-design](./skills/engineering/codebase-design/SKILL.md)** — Shared discipline and vocabulary for designing deep modules: a lot of behaviour behind a small interface, placed at a clean seam, testable through that interface.
-- **[code-review](./skills/engineering/code-review/SKILL.md)** — Two-axis review of the diff since a fixed point: **Standards** (does it follow the repo's coding standards, plus a Fowler smell baseline?) and **Spec** (does it faithfully implement the originating issue/PRD?), run as parallel sub-agents so neither pollutes the other.
+- **[code-review](./skills/engineering/code-review/SKILL.md)** — Two-axis review of the diff since a fixed point: **Standards** (including control docs and Fowler smells) and **Spec**, plus a proof gate.
 - **[resolving-merge-conflicts](./skills/engineering/resolving-merge-conflicts/SKILL.md)** — Work through an in-progress git merge or rebase conflict hunk by hunk, resolving by intent traced to each side's primary source, then finish the operation — never `--abort`.
 
 ### Productivity

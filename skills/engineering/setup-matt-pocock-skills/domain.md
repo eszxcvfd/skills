@@ -7,6 +7,10 @@ How the engineering skills should consume this repo's domain documentation when 
 - **`CONTEXT.md`** at the repo root, or
 - **`CONTEXT-MAP.md`** at the repo root if it exists — it points at one `CONTEXT.md` per context. Read each one relevant to the topic.
 - **`docs/adr/`** — read ADRs that touch the area you're about to work in. In multi-context repos, also check `src/<context>/docs/adr/` for context-scoped decisions.
+- **`ARCHITECTURE.md`** — read the owner map, routing, allowed dependencies, and code placement rules before structural work.
+- **`RUNTIME_CONSTITUTION.md`** — read runtime invariants before touching jobs, retries, external calls, data ownership, security, concurrency, or failure paths.
+- **`PROCESS_AND_PROOF_POLICY.md`** — read the proof requirements before claiming a task is complete.
+- **`ACTIVE_EXECUTION_PLAN.md`** — when present, read the active task scope, steps, risks, and verification commands before continuing or reviewing work.
 
 If any of these files don't exist, **proceed silently**. Don't flag their absence; don't suggest creating them upfront. The `/domain-modeling` skill (reached via `/grill-with-docs` and `/improve-codebase-architecture`) creates them lazily when terms or decisions actually get resolved.
 

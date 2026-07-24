@@ -42,4 +42,4 @@ Workers are not autonomous free agents. Each one receives a prompt containing on
 
 ## Where it fits
 
-This is a crossing-session orchestration skill for the engineering flow: it sits above [research](https://aihero.dev/skills-research), [implement](https://aihero.dev/skills-implement), [tdd](https://aihero.dev/skills-tdd), [code-review](https://aihero.dev/skills-code-review), and [diagnosing-bugs](https://aihero.dev/skills-diagnosing-bugs) when the work benefits from multiple Herdr panes. The map remains [ask-matt](https://aihero.dev/skills-ask-matt).
+This is a crossing-session orchestration skill for the engineering flow: it sits above [research](https://aihero.dev/skills-research), [architecture-council](https://aihero.dev/skills-architecture-council), [implement](https://aihero.dev/skills-implement), [tdd](https://aihero.dev/skills-tdd), [code-review](https://aihero.dev/skills-code-review), and [diagnosing-bugs](https://aihero.dev/skills-diagnosing-bugs) when the work benefits from multiple Herdr panes. The map remains [ask-matt](https://aihero.dev/skills-ask-matt).

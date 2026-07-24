@@ -1,0 +1,3 @@
+interface:
+  display_name: "Architecture Council"
+  short_description: "Decide hard-to-reverse architecture changes"

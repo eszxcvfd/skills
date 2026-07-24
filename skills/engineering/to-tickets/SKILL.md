@@ -1,6 +1,6 @@
 ---
 name: to-tickets
-description: Break a plan, spec, or the current conversation into a set of tracer-bullet tickets, each declaring its blocking edges, published to the configured tracker — edges as text in one file per ticket locally, or native blocking links on a real tracker.
+description: Break a plan, spec, or conversation into tracer-bullet tickets with blocking edges, architecture placement, affected runtime invariants, and required proof, published to the configured tracker.
 disable-model-invocation: true
 ---
 
@@ -18,7 +18,7 @@ Work from whatever is already in the conversation context. If the user passes a 
 
 ### 2. Explore the codebase (optional)
 
-If you have not already explored the codebase, do so to understand the current state of the code. Ticket titles and descriptions should use the project's domain glossary vocabulary, and respect ADRs in the area you're touching.
+If you have not already explored the codebase, do so to understand the current state of the code. Ticket titles and descriptions should use the project's domain glossary vocabulary. Read `ARCHITECTURE.md`, `RUNTIME_CONSTITUTION.md`, `PROCESS_AND_PROOF_POLICY.md`, and relevant ADRs in the area you're touching.
 
 Look for opportunities to prefactor the code to make the implementation easier. "Make the change easy, then make the easy change."
 
@@ -46,6 +46,7 @@ Present the proposed breakdown as a numbered list. For each ticket, show:
 - **Title**: short descriptive name
 - **Blocked by**: which other tickets (if any) must complete first
 - **What it delivers**: the end-to-end behaviour this ticket makes work
+- **Control notes**: owner module, affected runtime invariants, and minimum proof required
 
 Ask the user:
 
@@ -76,6 +77,12 @@ Do NOT close or modify any parent issue.
 
 **Status:** ready-for-agent
 
+**Architecture placement:** owner module, allowed dependencies, and public contracts this ticket must respect.
+
+**Affected runtime invariants:** `RC-XX` entries from `RUNTIME_CONSTITUTION.md`, or "None identified".
+
+**Required proof:** minimum evidence from `PROCESS_AND_PROOF_POLICY.md`.
+
 - [ ] Acceptance criterion 1
 - [ ] Acceptance criterion 2
 
@@ -95,6 +102,12 @@ The end-to-end behaviour this ticket makes work, from the user's perspective —
 
 - [ ] Criterion 1
 - [ ] Criterion 2
+
+## Control notes
+
+- Architecture placement: owner module, allowed dependencies, and public contracts this ticket must respect.
+- Affected runtime invariants: `RC-XX` entries from `RUNTIME_CONSTITUTION.md`, or "None identified".
+- Required proof: minimum evidence from `PROCESS_AND_PROOF_POLICY.md`.
 
 ## Blocked by
 

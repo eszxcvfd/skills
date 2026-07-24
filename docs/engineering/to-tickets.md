@@ -14,7 +14,7 @@ npx skills update to-tickets
 
 `to-tickets` breaks a plan, spec, or the current conversation into a set of **tickets** — each a tracer-bullet vertical slice — and publishes them to your configured tracker, with every ticket declaring the tickets that block it.
 
-Every ticket is a **tracer bullet** — a thin *vertical* slice that cuts through all integration layers end-to-end (schema, API, UI, tests), never a horizontal slice of one layer. A completed slice is demoable or verifiable on its own, which is what makes each ticket safe to hand to an agent.
+Every ticket is a **tracer bullet** — a thin *vertical* slice that cuts through all integration layers end-to-end (schema, API, UI, tests), never a horizontal slice of one layer. A completed slice is demoable or verifiable on its own, and each ticket carries the control notes an agent needs: architecture placement, affected runtime invariants, and required proof.
 
 ## When to reach for it
 
@@ -39,6 +39,8 @@ The edges live in the ticket regardless of medium; the medium only decides wheth
 
 The whole skill turns on one distinction. A **horizontal** slice ships one layer of the change — all the schema, or all the API — and nothing works until every layer lands. A **vertical** slice, the tracer bullet, ships one narrow path through *every* layer at once, so it can be demoed the moment it's done.
 
+Before slicing, `to-tickets` reads `ARCHITECTURE.md`, `RUNTIME_CONSTITUTION.md`, `PROCESS_AND_PROOF_POLICY.md`, and relevant ADRs. Each ticket names the owner module, public contracts or dependency rules it must respect, the runtime invariants it may touch, and the minimum proof required before `/implement` can call the slice done.
+
 Before slicing, `to-tickets` looks for prefactoring — "make the change easy, then make the easy change" — and orders that work first. It then quizzes you on the breakdown (granularity, blocking edges, what to merge or split) before publishing anything, and publishes blockers first so each ticket's "Blocked by" can reference a real ticket.
 
 ## The wide-refactor exception
@@ -53,4 +55,4 @@ One shape breaks the tracer-bullet rule: a **wide refactor** — a single mechan
 grill-with-docs → to-spec → to-tickets → implement → code-review
 ```
 
-It sits between [to-spec](https://aihero.dev/skills-to-spec), which hands it a settled spec with user stories to slice against, and [implement](https://aihero.dev/skills-implement), which builds each ticket, driving [tdd](https://aihero.dev/skills-tdd) internally to write the tests test-first, before its [code-review](https://aihero.dev/skills-code-review) pass. Work the frontier one ticket per fresh context, clearing between them. When you're unsure which skill or flow fits, [ask-matt](https://aihero.dev/skills-ask-matt) routes you.
+It sits between [to-spec](https://aihero.dev/skills-to-spec), which hands it a settled spec with user stories and control notes to slice against, and [implement](https://aihero.dev/skills-implement), which builds each ticket by creating `ACTIVE_EXECUTION_PLAN.md`, driving [tdd](https://aihero.dev/skills-tdd) internally, and proving the work before its [code-review](https://aihero.dev/skills-code-review) pass. Work the frontier one ticket per fresh context, clearing between them. When you're unsure which skill or flow fits, [ask-matt](https://aihero.dev/skills-ask-matt) routes you.

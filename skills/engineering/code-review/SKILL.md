@@ -1,11 +1,11 @@
 ---
 name: code-review
-description: Review the changes since a fixed point (commit, branch, tag, or merge-base) along two axes — Standards (does the code follow this repo's documented coding standards?) and Spec (does the code match what the originating issue/PRD asked for?). Runs both reviews in parallel sub-agents and reports them side by side. Use when the user wants to review a branch, a PR, work-in-progress changes, or asks to "review since X".
+description: Review the changes since a fixed point (commit, branch, tag, or merge-base) along Standards and Spec axes, including architecture/runtime/proof control docs and a proof gate. Use when the user wants to review a branch, PR, work-in-progress changes, or asks to "review since X".
 ---
 
 Two-axis review of the diff between `HEAD` and a fixed point the user supplies:
 
-- **Standards** — does the code conform to this repo's documented coding standards?
+- **Standards** — does the code conform to this repo's documented coding standards and control docs?
 - **Spec** — does the code faithfully implement the originating issue / PRD / spec?
 
 Both axes run as **parallel sub-agents** so they don't pollute each other's context, then this skill aggregates their findings.
@@ -31,9 +31,16 @@ Look for the originating spec, in this order:
 3. A PRD/spec file under `docs/`, `specs/`, or `.scratch/` matching the branch name or feature.
 4. If nothing is found, ask the user where the spec is. If they say there isn't one, the **Spec** sub-agent will skip and report "no spec available".
 
-### 3. Identify the standards sources
+### 3. Identify the standards and control sources
 
-Anything in the repo that documents how code should be written, such as `CODING_STANDARDS.md` or `CONTRIBUTING.md`.
+Anything in the repo that documents how code should be written or constrained, such as `CODING_STANDARDS.md`, `CONTRIBUTING.md`, `ARCHITECTURE.md`, `RUNTIME_CONSTITUTION.md`, `PROCESS_AND_PROOF_POLICY.md`, relevant ADRs, and `ACTIVE_EXECUTION_PLAN.md` if present.
+
+Treat the control docs as binding review inputs:
+
+- `ARCHITECTURE.md` answers whether code went in the right module and respected allowed dependencies.
+- `RUNTIME_CONSTITUTION.md` answers whether runtime invariants were preserved.
+- `PROCESS_AND_PROOF_POLICY.md` answers what evidence is required before done can be claimed.
+- `ACTIVE_EXECUTION_PLAN.md` answers whether the diff stayed within the active scope and ran the planned checks.
 
 On top of whatever the repo documents, the Standards axis always carries the **smell baseline** below — a fixed set of Fowler code smells (_Refactoring_, ch.3) that applies even when a repo documents nothing. Two rules bind it:
 
@@ -62,8 +69,8 @@ Send a single message with two `Agent` tool calls. Use the `general-purpose` sub
 **Standards sub-agent prompt** — include:
 
 - The full diff command and commit list.
-- The list of standards-source files you found in step 3, **plus the smell baseline from step 3** pasted in full — the sub-agent has no other access to it.
-- The brief: "Report — per file/hunk where relevant — (a) every place the diff violates a documented standard: cite the standard (file + the rule); and (b) any baseline smell you spot: name it and quote the hunk. Distinguish hard violations from judgement calls — documented-standard breaches can be hard, but baseline smells are always judgement calls, and a documented repo standard overrides the baseline. Skip anything tooling enforces. Under 400 words."
+- The list of standards/control-source files you found in step 3, **plus the smell baseline from step 3** pasted in full — the sub-agent has no other access to it.
+- The brief: "Report — per file/hunk where relevant — (a) every place the diff violates a documented standard or control doc: cite the source file and rule; (b) any architecture placement, runtime invariant, proof-policy, or active-plan scope issue; and (c) any baseline smell you spot: name it and quote the hunk. Distinguish hard violations from judgement calls — documented-standard/control-doc breaches can be hard, but baseline smells are always judgement calls, and a documented repo standard overrides the baseline. Skip anything tooling enforces. Under 500 words."
 
 **Spec sub-agent prompt** — include:
 
@@ -73,11 +80,13 @@ Send a single message with two `Agent` tool calls. Use the `general-purpose` sub
 
 If the spec is missing, skip the Spec sub-agent and note this in the final report.
 
-### 5. Aggregate
+### 5. Aggregate and proof-gate
 
 Present the two reports under `## Standards` and `## Spec` headings, verbatim or lightly cleaned. Do **not** merge or rerank findings — the two axes are deliberately separate (see _Why two axes_).
 
-End with a one-line summary: total findings per axis, and the worst issue _within each axis_ (if any). Don't pick a single winner across axes — that's the reranking the separation exists to prevent.
+Then add a `## Proof Gate` section. Read `PROCESS_AND_PROOF_POLICY.md` and `ACTIVE_EXECUTION_PLAN.md` if present, list the required proof for the change types in the diff, and mark each as `provided`, `missing`, or `unverified`. If required proof is missing, the review cannot say the change is done even if Standards and Spec have no findings.
+
+End with a one-line summary: total findings per axis, proof-gate status, and the worst issue _within each axis_ (if any). Don't pick a single winner across axes — that's the reranking the separation exists to prevent.
 
 ## Why two axes
 

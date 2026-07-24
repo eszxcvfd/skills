@@ -1,0 +1,39 @@
+decision: "<chosen architecture>"
+status: accepted
+confidence: 0.0
+lock_level: "soft|guarded|locked"
+adr_path: "docs/adr/0000-slug.md"
+why:
+  - "<reason>"
+rejected:
+  "<option>":
+    reason: "<why rejected>"
+evidence:
+  verified:
+    - claim: "<claim>"
+      support: "<path/doc/spike>"
+  likely:
+    - claim: "<claim>"
+      caveat: "<caveat>"
+  unverified:
+    - "<claim>"
+  contradicted:
+    - claim: "<claim>"
+      evidence: "<evidence>"
+guardrails:
+  - "<rule future agents must preserve>"
+migration_plan:
+  - "<step>"
+rollback_strategy:
+  - "<step>"
+reopen_when:
+  - "<observable condition>"
+control_doc_updates:
+  architecture_md:
+    - "<owner map/routing/dependency/public contract update, or none>"
+  runtime_constitution_md:
+    - "<runtime invariant update, or none>"
+  process_and_proof_policy_md:
+    - "<proof requirement update, or none>"
+implementation_notes:
+  - "<what code work may now do or must avoid>"

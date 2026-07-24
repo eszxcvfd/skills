@@ -1,6 +1,6 @@
 ---
 name: setup-matt-pocock-skills
-description: Configure this repo for the engineering skills — set up its issue tracker, triage label vocabulary, and domain doc layout. Run once before first use of the other engineering skills.
+description: Configure this repo for the engineering skills — set up its issue tracker, triage labels, domain docs, and root control docs. Run once before first use of the other engineering skills.
 disable-model-invocation: true
 ---
 
@@ -11,6 +11,7 @@ Scaffold the per-repo configuration that the engineering skills assume:
 - **Issue tracker** — where issues live (GitHub by default; local markdown is also supported out of the box)
 - **Triage labels** — the strings used for the five canonical triage roles
 - **Domain docs** — where `CONTEXT.md` and ADRs live, and the consumer rules for reading them
+- **Control docs** — where architecture ownership, runtime invariants, proof requirements, and active execution state live
 
 This is a prompt-driven skill, not a deterministic script. Explore, present what you found, confirm with the user, then write.
 
@@ -24,6 +25,7 @@ Look at the current repo to understand its starting state. Read whatever exists;
 - `AGENTS.md` and `CLAUDE.md` at the repo root — does either exist? Is there already an `## Agent skills` section in either?
 - `CONTEXT.md` and `CONTEXT-MAP.md` at the repo root
 - `docs/adr/` and any `src/*/docs/adr/` directories
+- `ARCHITECTURE.md`, `RUNTIME_CONSTITUTION.md`, `PROCESS_AND_PROOF_POLICY.md`, and `ACTIVE_EXECUTION_PLAN.md` at the repo root
 - `docs/agents/` — does this skill's prior output already exist?
 - `.scratch/` — sign that a local-markdown issue tracker convention is already in use
 - Is the `triage` skill installed? (a `triage` skill folder alongside this one, or `triage` in your available skills.) This decides whether Section B runs at all.
@@ -60,12 +62,22 @@ The defaults are the five canonical roles, each label string equal to its name: 
 
 Offer **multi-context** — a root `CONTEXT-MAP.md` pointing to per-context `CONTEXT.md` files — only when exploration found monorepo signals. Then confirm which layout they want.
 
+**Section D — Control docs.** Default to a strict repo control loop:
+
+- `ARCHITECTURE.md` — owner map, allowed dependencies, routing, and where new code belongs
+- `RUNTIME_CONSTITUTION.md` — runtime invariants that must not be violated
+- `PROCESS_AND_PROOF_POLICY.md` — required proof before an agent may claim done
+- `ACTIVE_EXECUTION_PLAN.md` — task-local working memory, created by `/implement` when work starts and archived or deleted when work finishes
+
+If the first three files are missing, propose creating them from the seed templates. If they already exist, do not overwrite them; add only missing headings after user confirmation. Do not create `ACTIVE_EXECUTION_PLAN.md` during setup unless the user is already starting an implementation task.
+
 ### 3. Confirm and edit
 
 Show the user a draft of:
 
 - The `## Agent skills` block to add to whichever of `CLAUDE.md` / `AGENTS.md` is being edited (see step 4 for selection rules)
 - The contents of `docs/agents/issue-tracker.md`, `docs/agents/domain.md`, and `docs/agents/triage-labels.md` (the last only when `triage` is installed)
+- The proposed root control docs: `ARCHITECTURE.md`, `RUNTIME_CONSTITUTION.md`, and `PROCESS_AND_PROOF_POLICY.md` when they are missing or need missing headings added
 
 Let them edit before writing.
 
@@ -97,6 +109,10 @@ The block:
 ### Domain docs
 
 [one-line summary of layout — "single-context" or "multi-context"]. See `docs/agents/domain.md`.
+
+### Control docs
+
+Architecture, runtime invariants, proof requirements, and current execution state live in `ARCHITECTURE.md`, `RUNTIME_CONSTITUTION.md`, `PROCESS_AND_PROOF_POLICY.md`, and task-local `ACTIVE_EXECUTION_PLAN.md`.
 ```
 
 Include the `### Triage labels` sub-block, and write `docs/agents/triage-labels.md`, only when `triage` is installed and Section B ran. When it isn't, both are omitted.
@@ -108,9 +124,13 @@ Then write the docs files using the seed templates in this skill folder as a sta
 - [issue-tracker-local.md](./issue-tracker-local.md) — local-markdown issue tracker
 - [triage-labels.md](./triage-labels.md) — label mapping (only if `triage` is installed)
 - [domain.md](./domain.md) — domain doc consumer rules + layout
+- [architecture.md](./architecture.md) — seed for root `ARCHITECTURE.md`
+- [runtime-constitution.md](./runtime-constitution.md) — seed for root `RUNTIME_CONSTITUTION.md`
+- [process-and-proof-policy.md](./process-and-proof-policy.md) — seed for root `PROCESS_AND_PROOF_POLICY.md`
+- [active-execution-plan.md](./active-execution-plan.md) — template for task-local `ACTIVE_EXECUTION_PLAN.md` (do not create during setup unless active work is starting)
 
 For "other" issue trackers, write `docs/agents/issue-tracker.md` from scratch using the user's description.
 
 ### 5. Done
 
-Tell the user the setup is complete and which engineering skills will now read from these files. Mention they can edit `docs/agents/*.md` directly later — re-running this skill is only necessary if they want to switch issue trackers or restart from scratch.
+Tell the user the setup is complete and which engineering skills will now read from these files. Mention they can edit `docs/agents/*.md` and the root control docs directly later, but structural changes to `ARCHITECTURE.md` should go through `/architecture-council` or an ADR. Re-running this skill is only necessary if they want to switch issue trackers or restart from scratch.

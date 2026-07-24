@@ -1,6 +1,6 @@
 ---
 name: to-spec
-description: Turn the current conversation into a spec and publish it to the project issue tracker — no interview, just synthesis of what you've already discussed.
+description: Turn the current conversation into a spec with architecture placement, runtime invariants, and required proof, then publish it to the project issue tracker — no interview, just synthesis.
 disable-model-invocation: true
 ---
 
@@ -10,9 +10,9 @@ The issue tracker and triage label vocabulary should have been provided to you �
 
 ## Process
 
-1. Explore the repo to understand the current state of the codebase, if you haven't already. Use the project's domain glossary vocabulary throughout the spec, and respect any ADRs in the area you're touching.
+1. Explore the repo to understand the current state of the codebase, if you haven't already. Use the project's domain glossary vocabulary throughout the spec. Read `ARCHITECTURE.md`, `RUNTIME_CONSTITUTION.md`, `PROCESS_AND_PROOF_POLICY.md`, and relevant ADRs in the area you're touching.
 
-2. Sketch out the seams at which you're going to test the feature. Existing seams should be preferred to new ones. Use the highest seam possible. If new seams are needed, propose them at the highest point you can. The fewer seams across the codebase, the better - the ideal number is one.
+2. Sketch out the seams at which you're going to test the feature. Existing seams should be preferred to new ones. Use the highest seam possible. If new seams are needed, propose them at the highest point you can. The fewer seams across the codebase, the better - the ideal number is one. If the spec would change module ownership, dependency direction, request/event flow, data ownership, public contracts, infrastructure, or another hard-to-reverse choice, run `/architecture-council` before publishing the spec.
 
 Check with the user that these seams match their expectations.
 
@@ -40,6 +40,14 @@ A LONG, numbered list of user stories. Each user story should be in the format o
 
 This list of user stories should be extremely extensive and cover all aspects of the feature.
 
+## Architecture Placement
+
+Summarize the owner module, allowed dependencies, request/event routing, public contracts, and any `ARCHITECTURE.md` rules this work must respect. If a rule must change, link the ADR or Architecture Council verdict.
+
+## Affected Runtime Invariants
+
+List the `RUNTIME_CONSTITUTION.md` invariants this work may touch, or say "None identified".
+
 ## Implementation Decisions
 
 A list of implementation decisions that were made. This can include:
@@ -55,6 +63,10 @@ A list of implementation decisions that were made. This can include:
 Do NOT include specific file paths or code snippets. They may end up being outdated very quickly.
 
 Exception: if a prototype produced a snippet that encodes a decision more precisely than prose can (state machine, reducer, schema, type shape), inline it within the relevant decision and note briefly that it came from a prototype. Trim to the decision-rich parts — not a working demo, just the important bits.
+
+## Required Proof
+
+List the proof required by `PROCESS_AND_PROOF_POLICY.md` for this change type: tests, migration checks, benchmark, visual check, reproduction, or other evidence.
 
 ## Testing Decisions
 

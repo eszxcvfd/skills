@@ -15,6 +15,8 @@ A **flow** is a path through the skills. Most paths run along one **main flow**,
 The route most work travels. You have an idea and want it built.
 
 1. **`/grill-with-docs`** — sharpen the idea by interview. Start here when you **have a codebase**: it's stateful, retaining what it learns in `CONTEXT.md` and ADRs. (No codebase? Use `/grill-me` — see Standalone. Both run the same `/grilling` primitive; `grill-with-docs` is the one that leaves a paper trail.)
+
+   **Architecture gate** — if sharpening reveals a hard-to-reverse structural choice (database/schema, tenancy/auth, service split, module boundary, public API, queue/infrastructure, or repeated workaround), run **`/architecture-council`** before `/to-spec` or `/implement`. It records the ADR, guardrails, lock level, and reopen conditions so code does not smuggle in a dead-end architecture.
 2. **Branch — can you settle every question in conversation?** If a question needs a runnable answer (state, business logic, a UI you have to see), detour through a prototype, bridged by **`/handoff`** in both directions (see Crossing sessions):
    - **`/handoff`** out, then open a fresh session against that file,
    - **`/prototype`** to answer the question with throwaway code,
@@ -25,9 +27,21 @@ The route most work travels. You have an idea and want it built.
 
    Either way, **`/implement`** builds each issue by driving **`/tdd`** internally — one red-green slice at a time — then closes out by running **`/code-review`**, a two-axis review (Standards + Spec) of the diff, before committing. Reach for **`/tdd`** on its own when you just want to build a concrete behaviour test-first without a full spec, and **`/code-review`** on its own whenever you want to review a branch or PR against a fixed point.
 
-### Context hygiene
+### Control docs and context hygiene
 
-Keep steps 1–3 in **one unbroken context window** — don't compact or clear until after `/to-tickets` — so the grilling, spec, and tickets all build on the same thinking. Each `/implement` then starts fresh, working from the ticket.
+Every implementation-oriented flow reads the repo control docs in order:
+
+```text
+ARCHITECTURE.md
+  → RUNTIME_CONSTITUTION.md
+  → PROCESS_AND_PROOF_POLICY.md
+  → ACTIVE_EXECUTION_PLAN.md
+  → implementation
+```
+
+`ARCHITECTURE.md` tells the agent where code belongs. `RUNTIME_CONSTITUTION.md` tells it what runtime invariants must not break. `PROCESS_AND_PROOF_POLICY.md` tells it what evidence is required before claiming done. `ACTIVE_EXECUTION_PLAN.md` is the live task memory that `/implement` creates, updates, then archives or deletes at the end.
+
+Keep steps 1–3 in **one unbroken context window** — don't compact or clear until after `/to-tickets` — so the grilling, spec, and tickets all build on the same thinking. Each `/implement` then starts fresh, working from the ticket and its active execution plan.
 
 The limit on this is the **[smart zone](https://www.aihero.dev/ai-coding-dictionary/smart-zone)**: the window (~120k tokens on state-of-the-art models) within which the model still reasons sharply. If a session approaches it before `/to-tickets`, don't push on degraded — `/handoff` and continue in a fresh thread.
 
@@ -50,6 +64,7 @@ A starting situation that generates work, then merges onto the main flow.
 Not feature work — upkeep.
 
 - **`/improve-codebase-architecture`** — run whenever you have a spare moment to keep the codebase good for agents to operate in. It surfaces **deepening opportunities**; picking one _generates an idea_ you can take into the main flow at `/grill-with-docs`. It's the survey that finds the candidates; **`/codebase-design`** (below) is the bench you design the chosen one on.
+- **`/architecture-council`** — run before a hard-to-reverse architecture choice or when a health finding would reopen an ADR: database/schema, tenancy/auth, service split, module boundary, public API, infrastructure, queue/retry strategy, storage abstraction, deployment topology, or repeated workarounds. It decides with proposals, challenge, verification, and an ADR instead of letting implementation drift set the architecture.
 
 ## Vocabulary underneath
 
@@ -76,4 +91,4 @@ Off the main flow entirely.
 
 ## Precondition
 
-**`/setup-matt-pocock-skills`** — run before your first engineering flow to configure the issue tracker, triage labels, and doc layout the other skills assume. Custom issue trackers also work.
+**`/setup-matt-pocock-skills`** — run before your first engineering flow to configure the issue tracker, triage labels, domain doc layout, and root control docs (`ARCHITECTURE.md`, `RUNTIME_CONSTITUTION.md`, `PROCESS_AND_PROOF_POLICY.md`; `/implement` owns task-local `ACTIVE_EXECUTION_PLAN.md`). Custom issue trackers also work.

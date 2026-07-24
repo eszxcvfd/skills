@@ -1,0 +1,25 @@
+name: infrastructure
+scale: 0-5
+criteria:
+  operational_justification:
+    weight: 25
+    question: "Is the operational cost justified by a current, evidenced need?"
+  boring_standard:
+    weight: 20
+    question: "Is this a mainstream managed/default option before bespoke infrastructure?"
+  reversibility:
+    weight: 15
+    question: "Can the team remove or swap it without rewriting business code?"
+  failure_handling:
+    weight: 15
+    question: "Are retries, idempotency, backoff, ordering, poison messages, and observability defined?"
+  blast_radius:
+    weight: 15
+    question: "Does failure stay bounded and debuggable?"
+  local_development:
+    weight: 10
+    question: "Can developers run and test the system locally without production-like ceremony?"
+vetoes:
+  - "Queue/cache/service is introduced before the synchronous or simpler path is shown insufficient"
+  - "Retry semantics lack idempotency and poison-message handling"
+  - "The team cannot monitor or operate the dependency"

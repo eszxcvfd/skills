@@ -14,7 +14,7 @@ npx skills update diagnosing-bugs
 
 `diagnosing-bugs` runs a disciplined diagnosis loop for hard bugs and performance regressions — building a repro, minimising it, ranking hypotheses, instrumenting, then fixing with a regression test.
 
-It refuses to hypothesise before you have a **tight feedback loop** — one runnable command that already goes red on *this* bug. Reading code to build a theory before that command exists is the exact failure this skill prevents. No red-capable loop, no diagnosis.
+It refuses to hypothesise before you have a **tight feedback loop** — one runnable command that already goes red on *this* bug. Reading code to build a theory before that command exists is the exact failure this skill prevents. No red-capable loop, no diagnosis. The eventual fix must also preserve affected `RUNTIME_CONSTITUTION.md` invariants and satisfy `PROCESS_AND_PROOF_POLICY.md`.
 
 ## When to reach for it
 
@@ -34,7 +34,8 @@ It gives you a ladder of ways to build that loop — failing test, curl script, 
 - The loop asserts the symptom you actually reported, not a nearby failure.
 - Hypotheses arrive as a ranked, falsifiable list shown to you before any are tested.
 - Debug instrumentation is tagged (`[DEBUG-...]`) and grepped away before it declares done.
+- The final proof names the regression test, original repro rerun, affected runtime invariants, and any unverified checks.
 
 ## Where it fits
 
-`diagnosing-bugs` is a reach-for-it-anytime standalone — you drop into it the moment something is broken, and drop out once the fix and its regression test are in. Its post-mortem hands off to [improve-codebase-architecture](https://aihero.dev/skills-improve-codebase-architecture) when the real finding is that there's no good seam to lock the bug down — the code, not the bug, is the problem. When you're unsure which skill fits, [ask-matt](https://aihero.dev/skills-ask-matt) routes you.
+`diagnosing-bugs` is a reach-for-it-anytime standalone — you drop into it the moment something is broken, and drop out once the fix, regression test, and proof-policy evidence are in. Its post-mortem hands off to [improve-codebase-architecture](https://aihero.dev/skills-improve-codebase-architecture) when the real finding is that there's no good seam to lock the bug down — the code, not the bug, is the problem; use [architecture-council](https://aihero.dev/skills-architecture-council) when the post-mortem would reopen a hard architecture decision. When you're unsure which skill fits, [ask-matt](https://aihero.dev/skills-ask-matt) routes you.
