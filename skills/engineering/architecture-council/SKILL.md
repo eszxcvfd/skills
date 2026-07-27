@@ -1,22 +1,41 @@
 ---
 name: architecture-council
-description: "Use before hard-to-reverse architecture decisions: database or schema changes, tenancy/auth models, service decomposition, module boundaries, public API contracts, core framework/state choices, infrastructure dependencies, queues/retries/storage/deployment topology, or repeated workarounds that suggest the current architecture is becoming a dead end. Convene independent proposals, challenge assumptions, verify evidence, and record an ADR with guardrails, lock level, migration path, and reopen conditions."
+description: "Use before any architecture decision or architecture change, and whenever the agent cannot identify a safe next step because the current system or architecture is unclear, constrained, or becoming a dead end. This gate must run before production code or architecture changes. Convene independent Pi agents in Herdr to propose, challenge, verify, and judge, then record an ADR with guardrails, lock level, migration path, and reopen conditions."
 ---
 
 # Architecture Council
 
-Before code crosses a lock-in seam, run a **Council**. The job is not to make the requested feature work on the current architecture at any cost; it is to decide whether the architecture remains fit before implementation continues.
+Before making any architecture decision, writing production code that depends on
+one, or changing the architecture, run a **Council**. Also run it when the agent
+cannot identify a safe next step because the current system or architecture is
+unclear, constrained, contradictory, or becoming a dead end. The job is not to
+make the requested feature work on the current architecture at any cost; it is
+to decide whether the architecture remains fit before implementation continues.
 
 Prefer boring, standard, reversible solutions. A novel architecture only wins when the evidence and operational justification beat the boring path.
 
 ## Quick gate
 
-Run this gate whenever planning or implementation touches structure. If no trigger applies and the score is below `6`, do not run the full Council; continue with the normal skill and mention the low score only if it matters.
+Run this gate whenever planning or implementation touches structure, whenever a
+choice would establish or change an architectural rule, and whenever the agent
+does not know what to do next because of the current system or architecture.
+
+The gate may conclude that no architecture decision exists. Only then may the
+normal skill continue without a Council. If an architecture decision exists,
+the score selects a reduced or full Council; it never permits bypassing the
+Council.
 
 ### Trigger signs
 
 Run the Council when the change has any of these signs:
 
+- requires any architecture decision, even when it appears reversible or scores
+  below the normal risk threshold;
+- changes the architecture or writes production code that depends on an
+  unresolved architecture choice;
+- the agent cannot state a safe next step because the current system or
+  architecture is unclear, constrained, contradictory, or no longer supports
+  the requested direction;
 - hard to rollback;
 - affects multiple modules or teams;
 - changes data model, schema, ownership, or migration path;
@@ -40,7 +59,16 @@ Data migration risk: 0-3
 Novelty:             0-2
 ```
 
-A total of `6` or more triggers a full Council. A database choice, tenancy model, auth architecture, service decomposition, public contract, event schema, or deployment topology also triggers a full Council even if the score is lower.
+A total of `6` or more triggers a full Council. A database choice, tenancy
+model, auth architecture, service decomposition, public contract, event schema,
+or deployment topology also triggers a full Council even if the score is lower.
+Not knowing the safe next step because of the current system or architecture
+also triggers a full Council.
+
+An architecture decision below `6` that does not match a full-Council trigger
+still requires a reduced Council with one proposer, one challenger, one
+verifier, and one judge. Low risk changes the Council size, not whether the
+decision receives independent review.
 
 ### Autonomy zones
 
@@ -89,6 +117,84 @@ Before framing the case, read:
 
 If there is no ADR convention yet, default to `docs/adr/` so the rest of these engineering skills can find the decision. If the target repo already uses `docs/architecture/adr/`, follow that local convention.
 
+## Herdr Council contract
+
+The quick gate can run in the current agent anywhere. Any reduced or full
+Council must run inside Herdr and must use `pi` for every Council worker.
+
+Before opening the Council:
+
+```bash
+test "${HERDR_ENV:-}" = "1"
+command -v pi
+herdr integration status
+herdr agent list
+```
+
+If any prerequisite fails, stop after the quick gate and ask the user to run the
+Council from a Herdr session with `pi` available. Do not write production code,
+change architecture, or fall back to internal subagents, serial role-play,
+another multiplexer, or `omp`.
+
+The Lead remains in the current pane and owns framing, artifact ingestion, the
+quality gate, and final user interaction. Create these independent workers:
+
+| Worker | Role | Mode |
+| --- | --- | --- |
+| `council-proposer-a` | Independent proposal A | reduced and full |
+| `council-proposer-b` | Independent proposal B | full only |
+| `council-proposer-c` | Independent proposal C | full only |
+| `council-challenger` | Cross-proposal challenge | reduced and full |
+| `council-verifier` | Evidence and claim verification | reduced and full |
+| `council-judge` | Final synthesis and verdict | reduced and full |
+
+Use this artifact layout under
+`.scratch/architecture-council/<decision-slug>/`:
+
+```text
+case.yaml
+prompts/
+proposals/a.md
+proposals/b.md
+proposals/c.md
+challenge.md
+replies/a.md
+replies/b.md
+replies/c.md
+verification.md
+scores.yaml
+verdict.yaml
+ADR-draft.md
+workers.tsv
+```
+
+Each worker prompt must include the appropriate file from `prompts/`, the case
+file, the evidence it may read, and the single artifact it must write. In a full
+Council, start all three proposer workers before waiting for any proposer so
+their reasoning remains independent. A reduced Council starts only
+`council-proposer-a`. Reuse participating proposer panes only for their one
+challenge reply.
+
+Launch every worker with this Herdr API shape:
+
+```bash
+herdr agent start "$WORKER" \
+  --cwd "$PROJECT_ROOT" \
+  --split right \
+  --no-focus \
+  -- pi
+herdr agent send "$WORKER" "$(cat "$PROMPT_FILE")"
+herdr pane send-keys "$PANE_ID" Enter
+herdr agent wait "$WORKER" --status idle --timeout 3600000
+herdr agent read "$WORKER" --source recent
+```
+
+Record worker and pane identifiers in `workers.tsv`. `idle` only means the Pi
+session stopped producing work; it is not success. Before advancing a round,
+read the transcript and validate that the required artifact exists and
+satisfies its output contract. Close only panes created by this run, and only
+after the Council ends or the user approves cleanup.
+
 ## Council rounds
 
 Use `.scratch/architecture-council/<decision-slug>/` for intermediate artifacts. Do not edit production code while the decision is unresolved.
@@ -101,7 +207,11 @@ Do not propose a solution in Round 0. If the framing has a blocking ambiguity, a
 
 ### Round 1 — Independent proposals
 
-Launch `3` detached proposer agents by default when the harness supports subagents; use `2-4` only when the case genuinely calls for fewer or more. If the harness does not support subagents, write separate proposal briefs serially and do not let later briefs read earlier ones until Round 2.
+For a full Council, launch `council-proposer-a`, `council-proposer-b`, and
+`council-proposer-c` as separate Herdr agents running `pi`. Start all three
+before waiting for any of them. For a reduced Council, launch only
+`council-proposer-a`. Each participating proposer receives the same case brief
+but cannot read other proposal artifacts.
 
 Each proposer uses [prompts/proposer.md](prompts/proposer.md) and must output:
 
@@ -113,17 +223,28 @@ Each proposer uses [prompts/proposer.md](prompts/proposer.md) and must output:
 - lock level introduced or changed;
 - conditions where the option stops being appropriate.
 
-Detached means detached: Round 1 agents do not read each other's answers.
+Independent means independent: Round 1 Pi agents do not read each other's
+answers.
 
 ### Round 2 — Cross-examination
 
-Run the **Challenger** with [prompts/challenger.md](prompts/challenger.md). The Challenger attacks the proposals rather than adding new ones, unless all proposals miss an obvious boring option.
+Launch `council-challenger` as a new Herdr agent running `pi` with all
+validated proposals and
+[prompts/challenger.md](prompts/challenger.md). The Challenger attacks the
+proposals rather than adding new ones, unless all proposals miss an obvious
+boring option.
 
-Every proposer gets one reply to the challenge. Do not allow infinite debate.
+Send the challenge back to each original proposer Pi agent. Every proposer gets
+one reply and writes only its assigned reply artifact. Do not allow infinite
+debate.
 
 ### Round 3 — Verification
 
-Run the **Verifier** with [prompts/verifier.md](prompts/verifier.md). The Verifier checks load-bearing claims against code, tests, dependency evidence, official docs, and small spikes only when a spike answers a disputed claim.
+Launch `council-verifier` as a new Herdr agent running `pi` with the
+proposals, challenge, replies, and
+[prompts/verifier.md](prompts/verifier.md). The Verifier checks load-bearing
+claims against code, tests, dependency evidence, official docs, and small
+spikes only when a spike answers a disputed claim.
 
 Classify every important claim as:
 
@@ -144,7 +265,10 @@ Vote is signal, not authority. A majority can be wrong if the evidence contradic
 
 ### Round 5 — Verdict
 
-Act as **Lead Judge** with [prompts/judge.md](prompts/judge.md). Read the proposals, challenge, replies, verification, and scores before deciding.
+Launch `council-judge` as a separate Herdr agent running `pi`. Give it the
+case, all validated round artifacts, rubric scores, and
+[prompts/judge.md](prompts/judge.md). The Lead must not silently replace the
+Judge; it ingests and presents the Judge's result.
 
 The verdict uses [templates/verdict.yaml](templates/verdict.yaml) and must include:
 
@@ -196,7 +320,9 @@ Agents must read decision locks before planning structural work. They must not s
 
 ## Architecture health check
 
-Run a health-check Council when the user asks for an architecture review or when you detect these smells:
+Run a health-check Council when the user asks for an architecture review, when
+the agent cannot identify a safe next step because of the current system or
+architecture, or when you detect these smells:
 
 - one feature touches too many modules;
 - circular dependencies appear;
@@ -208,18 +334,29 @@ Run a health-check Council when the user asks for an architecture review or when
 - an abstraction has many booleans or configuration switches;
 - a developer must understand the whole system to change one feature.
 
-Start by asking: **is this an implementation problem, or an architecture problem?** Then apply the quick gate. If risk is high, run the full Council; if risk is medium and the affected lock is `guarded`, run a reduced Council with one proposer, one challenger, one verifier, and a verdict.
+Start by asking: **is this an implementation problem, or an architecture
+problem?** Then apply the quick gate. If the next safe step is unknown because
+of the current architecture, stop implementation and run the full Council. For
+other architecture decisions, use the risk score to choose full or reduced
+Council. Resume production code or architecture changes only after the verdict
+is accepted.
 
 ## Done when
 
 The Council is complete only when:
 
+- the required reduced or full Council ran inside Herdr;
+- every Council worker was launched with `pi`, never `omp`;
+- for a full Council, all three proposer panes were started before the Lead
+  waited for results;
 - the quick-gate score and trigger decision are recorded;
 - Round 0 framed the case without bias;
-- Round 1 produced three independent proposals, or explains why fewer were possible;
+- Round 1 produced three independent proposals for a full Council or one
+  proposal for a reduced Council;
 - Round 2 challenged every viable option;
 - Round 3 classified load-bearing claims with evidence status;
 - Round 4 scored options without treating vote as authority;
 - Round 5 produced guardrails, lock level, migration/rollback, and reopen conditions;
 - an ADR, decision-lock update, and any required root control-doc updates are written, or the final answer clearly says user approval is pending;
-- no production code changed before the architecture decision was accepted.
+- no production code or architecture changed before the architecture decision
+  was accepted.

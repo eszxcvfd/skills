@@ -16,7 +16,12 @@ The route most work travels. You have an idea and want it built.
 
 1. **`/grill-with-docs`** — sharpen the idea by interview. Start here when you **have a codebase**: it's stateful, retaining what it learns in `CONTEXT.md` and ADRs. (No codebase? Use `/grill-me` — see Standalone. Both run the same `/grilling` primitive; `grill-with-docs` is the one that leaves a paper trail.)
 
-   **Architecture gate** — if sharpening reveals a hard-to-reverse structural choice (database/schema, tenancy/auth, service split, module boundary, public API, queue/infrastructure, or repeated workaround), run **`/architecture-council`** before `/to-spec` or `/implement`. It records the ADR, guardrails, lock level, and reopen conditions so code does not smuggle in a dead-end architecture.
+   **Mandatory architecture gate** — if sharpening reveals any architecture
+   decision, or the current system/architecture leaves no clear safe next step,
+   run **`/architecture-council`** before `/to-spec`, `/implement`, production
+   code, or architecture changes. Risk selects a reduced or full Council; it
+   never permits bypassing the gate. Council roles run as independent Pi workers
+   in Herdr.
 2. **Branch — can you settle every question in conversation?** If a question needs a runnable answer (state, business logic, a UI you have to see), detour through a prototype, bridged by **`/handoff`** in both directions (see Crossing sessions):
    - **`/handoff`** out, then open a fresh session against that file,
    - **`/prototype`** to answer the question with throwaway code,
@@ -64,7 +69,12 @@ A starting situation that generates work, then merges onto the main flow.
 Not feature work — upkeep.
 
 - **`/improve-codebase-architecture`** — run whenever you have a spare moment to keep the codebase good for agents to operate in. It surfaces **deepening opportunities**; picking one _generates an idea_ you can take into the main flow at `/grill-with-docs`. It's the survey that finds the candidates; **`/codebase-design`** (below) is the bench you design the chosen one on.
-- **`/architecture-council`** — run before a hard-to-reverse architecture choice or when a health finding would reopen an ADR: database/schema, tenancy/auth, service split, module boundary, public API, infrastructure, queue/retry strategy, storage abstraction, deployment topology, or repeated workarounds. It decides with proposals, challenge, verification, and an ADR instead of letting implementation drift set the architecture.
+- **`/architecture-council`** — mandatory before any architecture decision,
+  production code that depends on one, or architecture change. Also run it when
+  the agent cannot identify a safe next step because of the current system or
+  architecture. The quick gate can run anywhere; reduced and full Councils
+  require Herdr and launch every role with `pi`, never internal subagents or
+  `omp`.
 
 ## Vocabulary underneath
 
