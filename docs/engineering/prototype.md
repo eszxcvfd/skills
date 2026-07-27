@@ -1,14 +1,14 @@
 Quickstart:
 
 ```bash
-npx skills add mattpocock/skills --skill=prototype
+npx skills@latest add eszxcvfd/skills --skill=prototype
 ```
 
 ```bash
-npx skills update prototype
+npx skills@latest update prototype
 ```
 
-[Source](https://github.com/mattpocock/skills/tree/main/skills/engineering/prototype)
+[Source](https://github.com/eszxcvfd/skills/tree/main/skills/engineering/prototype)
 
 ## What it does
 

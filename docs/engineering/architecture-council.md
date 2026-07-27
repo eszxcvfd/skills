@@ -1,11 +1,11 @@
 Quickstart:
 
 ```bash
-npx skills add eszxcvfd/skills --skill=architecture-council
+npx skills@latest add eszxcvfd/skills --skill=architecture-council
 ```
 
 ```bash
-npx skills update architecture-council
+npx skills@latest update architecture-council
 ```
 
 [Source](https://github.com/eszxcvfd/skills/tree/main/skills/engineering/architecture-council)

@@ -1,14 +1,14 @@
 Quickstart:
 
 ```bash
-npx skills add mattpocock/skills --skill=codebase-design
+npx skills@latest add eszxcvfd/skills --skill=codebase-design
 ```
 
 ```bash
-npx skills update codebase-design
+npx skills@latest update codebase-design
 ```
 
-[Source](https://github.com/mattpocock/skills/tree/main/skills/engineering/codebase-design)
+[Source](https://github.com/eszxcvfd/skills/tree/main/skills/engineering/codebase-design)
 
 ## What it does
 

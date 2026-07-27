@@ -1,14 +1,14 @@
 Quickstart:
 
 ```bash
-npx skills add mattpocock/skills --skill=tdd
+npx skills@latest add eszxcvfd/skills --skill=tdd
 ```
 
 ```bash
-npx skills update tdd
+npx skills@latest update tdd
 ```
 
-[Source](https://github.com/mattpocock/skills/tree/main/skills/engineering/tdd)
+[Source](https://github.com/eszxcvfd/skills/tree/main/skills/engineering/tdd)
 
 ## What it does
 

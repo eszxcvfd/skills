@@ -229,6 +229,7 @@ Skills I use daily for code work.
 - **[implement](./skills/engineering/implement/SKILL.md)** — Build the work described by a spec or set of tickets, maintaining `ACTIVE_EXECUTION_PLAN.md`, driving `/tdd`, proving per policy, and closing with `/code-review` before committing.
 - **[wayfinder](./skills/engineering/wayfinder/SKILL.md)** — Plan a huge chunk of work, more than one agent session can hold, as a shared map of investigation tickets on the issue tracker — resolve them one at a time until the way to the destination is clear.
 - **[orchestrator-herdr](./skills/engineering/orchestrator-herdr/SKILL.md)** — Herdr mission control: DAG plan, spawn/reuse OMP workers for 60 minutes, alert on worker stop, enforce one-skill prompts, ingest STATUS/artifacts, and quality-gate before next work.
+- **[orchestrator-pi-workflows](./skills/engineering/orchestrator-pi-workflows/SKILL.md)** — Deterministic Pi mission control: route skills into a durable DAG, fan out independent agents, isolate writers, checkpoint decisions, and recover persisted runs.
 
 **Model-invoked**
 

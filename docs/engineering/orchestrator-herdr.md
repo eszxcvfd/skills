@@ -1,11 +1,11 @@
 Quickstart:
 
 ```bash
-npx skills add eszxcvfd/skills --skill=orchestrator-herdr
+npx skills@latest add eszxcvfd/skills --skill=orchestrator-herdr
 ```
 
 ```bash
-npx skills update orchestrator-herdr
+npx skills@latest update orchestrator-herdr
 ```
 
 [Source](https://github.com/eszxcvfd/skills/tree/main/skills/engineering/orchestrator-herdr)
@@ -32,6 +32,8 @@ mission → DAG PLAN (y/n) → Herdr workers → ingest each stop → ORCH decis
 ```
 
 Workers are not autonomous free agents. Each one receives a prompt containing one primary skill, concrete inputs, a dedicated artifact directory, a required `STATUS.md` schema, and a 60-minute timebox. The orchestrator fires one Herdr alert when a worker stops or times out, then decides whether outputs are accepted, retried, reworked, blocked, or turned into a new approved plan.
+
+An already-approved plan may be handed off by another trusted orchestrator. That handoff must include the approval marker, a stable run key, and a complete skill-routed DAG. Herdr skips only the initial approval prompt, reconciles its existing ledger and live workers before dispatch, and still stops for any new scope or human decision.
 
 ## It's working if
 

@@ -1,14 +1,14 @@
 Quickstart:
 
 ```bash
-npx skills add mattpocock/skills --skill=grilling
+npx skills@latest add eszxcvfd/skills --skill=grilling
 ```
 
 ```bash
-npx skills update grilling
+npx skills@latest update grilling
 ```
 
-[Source](https://github.com/mattpocock/skills/tree/main/skills/productivity/grilling)
+[Source](https://github.com/eszxcvfd/skills/tree/main/skills/productivity/grilling)
 
 ## What it does
 

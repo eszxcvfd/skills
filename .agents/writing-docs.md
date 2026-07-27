@@ -19,14 +19,14 @@ Fill the template below. The **fixed frame** (Quickstart block, source link, `##
 Quickstart:
 
 ```bash
-npx skills add mattpocock/skills --skill=<name>
+npx skills@latest add eszxcvfd/skills --skill=<name>
 ```
 
 ```bash
-npx skills update <name>
+npx skills@latest update <name>
 ```
 
-[Source](https://github.com/mattpocock/skills/tree/main/skills/<bucket>/<name>)
+[Source](https://github.com/eszxcvfd/skills/tree/main/skills/<bucket>/<name>)
 
 ## What it does
 

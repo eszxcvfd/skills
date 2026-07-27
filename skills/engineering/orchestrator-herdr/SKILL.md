@@ -46,6 +46,28 @@ Run-owned files live only under `.scratch/orchestrator/<run-id>/` unless a worke
 10. Reuse an idle worker only when the same role, cwd, and context still fit. Otherwise spawn a fresh worker.
 11. Close only panes you created for this run, and close them when finished or no longer reusable.
 
+## Approved Plan Handoff
+
+Another trusted orchestrator may hand off a plan with:
+
+```text
+PLAN_APPROVED: true
+RUN_KEY: <stable id>
+APPROVED_PLAN: <task DAG>
+```
+
+Treat this as explicit approval only when all three fields are present and every task contains a stable ID, one primary skill with a real `SKILL.md` path, the problem it solves, dependencies, inputs, and required proof.
+
+For a valid handoff:
+
+1. Use `.scratch/orchestrator/<RUN_KEY>/` instead of generating a timestamp run ID.
+2. Write the handed-off plan to `ORCH.md`.
+3. Before dispatch, inspect `ORCH.md`, `workers.tsv`, live Herdr agents, and existing artifacts. Reuse matching in-flight work and ingest settled work; never respawn an accepted or currently running task.
+4. Skip the initial `Proceed? (y/n)` because the exact plan is already approved.
+5. Keep the normal approval boundary. Any new task, changed scope, HITL decision, or `NEXT PLAN` still requires the user.
+
+If the handoff is incomplete, malformed, or does not match the real skill inventory, do not execute it. Return the defects to the calling orchestrator.
+
 ## Preflight
 
 1. Confirm Herdr is available:
@@ -55,10 +77,10 @@ herdr integration status
 herdr agent list
 ```
 
-2. Establish `PROJECT_ROOT`, `RUN_ID`, and `RUN_DIR`:
+2. Establish `PROJECT_ROOT`, `RUN_ID`, and `RUN_DIR`. Use a handed-off `RUN_KEY` when present; otherwise generate a new ID:
 
 ```bash
-RUN_ID="$(date +%Y%m%d-%H%M%S)"
+RUN_ID="${RUN_KEY:-$(date +%Y%m%d-%H%M%S)}"
 RUN_DIR=".scratch/orchestrator/$RUN_ID"
 mkdir -p "$RUN_DIR"
 ```
@@ -148,7 +170,7 @@ approval boundary: <what this plan is allowed to do before NEXT PLAN>
 Proceed? (y/n)
 ```
 
-Wait for `y`. If the user changes scope, rewrite the plan.
+Wait for `y`. If the user changes scope, rewrite the plan. Skip this wait only for a valid `PLAN_APPROVED: true` handoff; do not expand or alter its approved task set.
 
 ## 3. Dispatch Workers
 
