@@ -1,9 +1,9 @@
 ---
 name: research
-description: Investigate a question against high-trust primary sources and capture the findings as a Markdown file in the repo. Use when the user wants a topic researched, docs or API facts gathered, or reading legwork delegated to a background agent.
+description: Investigate a question against high-trust primary sources and capture the findings as a Markdown file in the repo. Use when the user wants a topic researched, docs or API facts gathered, or reading legwork delegated to a focused peer research packet.
 ---
 
-Spin up a **background agent** to do the research, so you keep working while it reads.
+In Paseo, root assigns a `peer` research packet. Outside Paseo, run the research in a separate worker only when the harness provides an explicit worker; do not use Pi/Codex internal subagents as hidden children.
 
 Its job:
 

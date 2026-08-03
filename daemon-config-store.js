@@ -1,0 +1,254 @@
+import { loadPersistedConfig, savePersistedConfig, } from "./persisted-config.js";
+import { ProviderOverrideSchema } from "./agent/provider-launch-config.js";
+import { MutableDaemonConfigSchema, MutableDaemonConfigPatchSchema, } from "@getpaseo/protocol/messages";
+function getLogger(logger) {
+    return logger?.child({ module: "daemon-config-store" });
+}
+function isRecord(value) {
+    return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+function deepMerge(current, patch) {
+    const next = { ...current };
+    for (const [key, patchValue] of Object.entries(patch)) {
+        if (patchValue === undefined) {
+            continue;
+        }
+        const currentValue = next[key];
+        if (isRecord(currentValue) && isRecord(patchValue)) {
+            next[key] = deepMerge(currentValue, patchValue);
+            continue;
+        }
+        next[key] = patchValue;
+    }
+    return next;
+}
+function omitProvidersFromConfig(config, providers) {
+    if (providers.length === 0 || !config.providers) {
+        return config;
+    }
+    let changed = false;
+    const nextProviders = { ...config.providers };
+    for (const provider of providers) {
+        if (provider in nextProviders) {
+            delete nextProviders[provider];
+            changed = true;
+        }
+    }
+    return changed ? { ...config, providers: nextProviders } : config;
+}
+function omitMetadataGenerationProvidersFromConfig(config, providers) {
+    if (providers.length === 0 || !config.metadataGeneration?.providers) {
+        return config;
+    }
+    const removedProviderIds = new Set(providers);
+    const nextProviders = config.metadataGeneration.providers.filter((entry) => {
+        return typeof entry.provider !== "string" || !removedProviderIds.has(entry.provider);
+    });
+    if (nextProviders.length === config.metadataGeneration.providers.length) {
+        return config;
+    }
+    return {
+        ...config,
+        metadataGeneration: {
+            ...config.metadataGeneration,
+            providers: nextProviders,
+        },
+    };
+}
+function omitProvidersFromOverrides(overrides, providers) {
+    if (!overrides) {
+        return undefined;
+    }
+    const nextOverrides = { ...overrides };
+    for (const provider of providers) {
+        delete nextOverrides[provider];
+    }
+    return Object.keys(nextOverrides).length > 0 ? nextOverrides : undefined;
+}
+function omitProvidersFromPersistedAgents(agents) {
+    if (!agents) {
+        return undefined;
+    }
+    const { providers: _providers, ...rest } = agents;
+    return Object.keys(rest).length > 0 ? rest : undefined;
+}
+function getValueAtPath(config, path) {
+    return path
+        .split(".")
+        .reduce((value, segment) => (isRecord(value) ? value[segment] : undefined), config);
+}
+function isEqualValue(a, b) {
+    return JSON.stringify(a) === JSON.stringify(b);
+}
+export function applyMutableProviderConfigToOverrides(baseOverrides, mutableProviders) {
+    if (!baseOverrides && (!mutableProviders || Object.keys(mutableProviders).length === 0)) {
+        return undefined;
+    }
+    const nextOverrides = { ...baseOverrides };
+    for (const [providerId, providerConfig] of Object.entries(mutableProviders ?? {})) {
+        nextOverrides[providerId] = {
+            ...nextOverrides[providerId],
+            ...ProviderOverrideSchema.strip().parse(providerConfig),
+        };
+    }
+    return nextOverrides;
+}
+export class DaemonConfigStore {
+    constructor(paseoHome, initial, logger) {
+        this.changeListeners = new Set();
+        this.fieldChangeHandlers = new Map();
+        this.paseoHome = paseoHome;
+        this.logger = getLogger(logger);
+        this.current = MutableDaemonConfigSchema.parse(initial);
+    }
+    get() {
+        return this.current;
+    }
+    patch(partial) {
+        const parsedPatch = MutableDaemonConfigPatchSchema.parse(partial);
+        const { removeProviders = [], ...configPatch } = parsedPatch;
+        const removedProviders = Array.from(new Set(removeProviders));
+        const merged = deepMerge(this.current, configPatch);
+        const next = MutableDaemonConfigSchema.parse(omitMetadataGenerationProvidersFromConfig(omitProvidersFromConfig(merged, removedProviders), removedProviders));
+        const changedFieldPaths = Array.from(this.fieldChangeHandlers.keys()).filter((path) => {
+            return !isEqualValue(getValueAtPath(this.current, path), getValueAtPath(next, path));
+        });
+        const configChanged = !isEqualValue(this.current, next);
+        if (!configChanged && removedProviders.length === 0) {
+            return this.current;
+        }
+        // Persist before updating in-memory state so that if persistence fails,
+        // runtime and disk stay consistent.
+        this.persistConfig(next, removedProviders);
+        if (!configChanged) {
+            return this.current;
+        }
+        this.current = next;
+        for (const path of changedFieldPaths) {
+            const handlers = this.fieldChangeHandlers.get(path);
+            if (!handlers) {
+                continue;
+            }
+            const value = getValueAtPath(next, path);
+            for (const handler of handlers) {
+                handler(value);
+            }
+        }
+        const changeDetails = { removedProviders };
+        for (const listener of this.changeListeners) {
+            listener(next, changeDetails);
+        }
+        return next;
+    }
+    onFieldChange(path, handler) {
+        const handlers = this.fieldChangeHandlers.get(path) ?? new Set();
+        handlers.add(handler);
+        this.fieldChangeHandlers.set(path, handlers);
+        return () => {
+            const currentHandlers = this.fieldChangeHandlers.get(path);
+            if (!currentHandlers) {
+                return;
+            }
+            currentHandlers.delete(handler);
+            if (currentHandlers.size === 0) {
+                this.fieldChangeHandlers.delete(path);
+            }
+        };
+    }
+    onChange(listener) {
+        this.changeListeners.add(listener);
+        return () => {
+            this.changeListeners.delete(listener);
+        };
+    }
+    persistConfig(config, removeProviders) {
+        const persisted = loadPersistedConfig(this.paseoHome, this.logger);
+        const nextPersisted = mergeMutableConfigIntoPersistedConfig({
+            persisted,
+            mutable: config,
+            removeProviders,
+        });
+        savePersistedConfig(this.paseoHome, nextPersisted, this.logger);
+    }
+}
+function mergeMutableConfigIntoPersistedConfig(params) {
+    const { persisted, mutable, removeProviders } = params;
+    const browserToolsEnabled = readBrowserToolsEnabled(mutable);
+    const metadataGenerationProviders = readMetadataGenerationProviders(mutable);
+    const persistedProviderOverrides = omitProvidersFromOverrides(persisted.agents?.providers, removeProviders);
+    const providerOverrides = applyMutableProviderConfigToOverrides(persistedProviderOverrides, mutable.providers);
+    const persistedAgents = omitProvidersFromPersistedAgents(persisted.agents);
+    const persistedMetadataGeneration = {
+        providers: metadataGenerationProviders,
+    };
+    const shouldPersistMetadataGeneration = metadataGenerationProviders.length > 0 || persisted.agents?.metadataGeneration !== undefined;
+    let nextAgents = persistedAgents;
+    if (providerOverrides && Object.keys(providerOverrides).length > 0) {
+        nextAgents = {
+            ...persistedAgents,
+            providers: providerOverrides,
+            ...(shouldPersistMetadataGeneration
+                ? { metadataGeneration: persistedMetadataGeneration }
+                : {}),
+        };
+    }
+    else if (shouldPersistMetadataGeneration) {
+        nextAgents = {
+            ...persistedAgents,
+            metadataGeneration: persistedMetadataGeneration,
+        };
+    }
+    return {
+        ...persisted,
+        daemon: {
+            ...persisted.daemon,
+            mcp: {
+                ...persisted.daemon?.mcp,
+                injectIntoAgents: mutable.mcp.injectIntoAgents,
+            },
+            browserTools: {
+                ...persisted.daemon?.browserTools,
+                enabled: browserToolsEnabled,
+            },
+            autoArchiveAfterMerge: mutable.autoArchiveAfterMerge,
+            enableTerminalAgentHooks: mutable.enableTerminalAgentHooks,
+            appendSystemPrompt: mutable.appendSystemPrompt,
+            ...(mutable.terminalProfiles !== undefined
+                ? { terminalProfiles: mutable.terminalProfiles }
+                : {}),
+        },
+        agents: nextAgents,
+    };
+}
+function readBrowserToolsEnabled(mutable) {
+    const browserTools = mutable.browserTools;
+    if (!isRecord(browserTools)) {
+        return false;
+    }
+    return browserTools["enabled"] === true;
+}
+function readMetadataGenerationProviders(mutable) {
+    const metadataGeneration = mutable.metadataGeneration;
+    if (!isRecord(metadataGeneration)) {
+        return [];
+    }
+    const providers = metadataGeneration["providers"];
+    if (!Array.isArray(providers)) {
+        return [];
+    }
+    return providers.flatMap((entry) => {
+        if (!isRecord(entry) || typeof entry["provider"] !== "string") {
+            return [];
+        }
+        return [
+            {
+                provider: entry["provider"],
+                ...(typeof entry["model"] === "string" ? { model: entry["model"] } : {}),
+                ...(typeof entry["thinkingOptionId"] === "string"
+                    ? { thinkingOptionId: entry["thinkingOptionId"] }
+                    : {}),
+            },
+        ];
+    });
+}
+//# sourceMappingURL=daemon-config-store.js.map

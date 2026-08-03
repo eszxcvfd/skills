@@ -1,6 +1,6 @@
 # skills
 
-Agent skills for real engineering — fork of [mattpocock/skills](https://github.com/mattpocock/skills) plus personal extras (Herdr orchestrator).
+Agent skills for real engineering — fork of [mattpocock/skills](https://github.com/mattpocock/skills) plus a Paseo supervisor/root/peer hierarchy.
 
 **Repo:** https://github.com/eszxcvfd/skills
 
@@ -10,24 +10,41 @@ Use this README to pull the set into **any other project**.
 
 ## Install vào project khác
 
-Chọn **một** cách. Làm trong thư mục project đích (app/repo bạn đang code).
+Làm trong thư mục project đích.
 
-### A. skills.sh (nhanh — copy skill vào project)
+### Claude Code — cách mới, khuyến nghị
+
+```bash
+claude plugin marketplace add eszxcvfd/skills
+claude plugin install mattpocock-skills@eszxcvfd
+```
+
+Cập nhật:
+
+```bash
+claude plugin update mattpocock-skills@eszxcvfd
+```
+
+Nếu muốn bản upstream gốc của Matt:
+
+```bash
+claude plugin marketplace add mattpocock/skills
+claude plugin install mattpocock-skills@mattpocock
+```
+
+### Agent khác — copy skill vào repo
 
 ```bash
 cd /path/to/your-project
 npx skills@latest add eszxcvfd/skills
 ```
 
-- Chọn skill cần dùng và agent (Claude Code, Codex, OpenCode, Cursor, …).
-- **Nên tick** `setup-matt-pocock-skills`.
-- Trong agent, chạy `/setup-matt-pocock-skills` một lần/repo (issue tracker, triage labels, domain docs, control docs).
+- Chọn skill cần dùng và agent: Claude Code, Codex, OpenCode, Cursor, …
+- Nên tick `setup-matt-pocock-skills`.
+- Trong agent, chạy `/setup-matt-pocock-skills` một lần/repo.
+- Cập nhật: chạy lại cùng lệnh `npx skills@latest add eszxcvfd/skills`.
 
-Cập nhật sau này: chạy lại cùng lệnh `npx skills@latest add eszxcvfd/skills`.
-
-### B. Clone + symlink global (một bản, nhiều project)
-
-Giữ một clone; mọi agent đọc skill qua symlink home:
+### Một clone global — nhiều project
 
 ```bash
 git clone https://github.com/eszxcvfd/skills.git ~/src/skills
@@ -35,17 +52,10 @@ cd ~/src/skills
 ./scripts/link-skills.sh
 ```
 
-Script link toàn bộ skill (trừ `deprecated/`) vào:
+Script link toàn bộ skill, trừ `deprecated/`, vào:
 
-- `~/.claude/skills` — Claude Code
-- `~/.agents/skills` — Codex / Agent Skills standard
-
-OpenCode / pi: trỏ skill path tới clone, hoặc copy/symlink thêm:
-
-```bash
-# OpenCode user config example — skills.paths
-# "~/.config/opencode/opencode.json" → "skills": { "paths": ["~/src/skills/skills"] }
-```
+- `~/.claude/skills`
+- `~/.agents/skills`
 
 Cập nhật:
 
@@ -53,43 +63,18 @@ Cập nhật:
 cd ~/src/skills && git pull && ./scripts/link-skills.sh
 ```
 
-### C. Git submodule / subtree (skill nằm trong monorepo)
+OpenCode / Pi: trỏ skill path tới `~/src/skills/skills`, hoặc copy/symlink bucket cần dùng.
 
-```bash
-cd /path/to/your-project
-git submodule add https://github.com/eszxcvfd/skills.git vendor/skills
-# hoặc sparse: chỉ lấy skills/engineering + skills/productivity
-```
+### Flow Paseo
 
-Rồi cấu hình agent trỏ vào `vendor/skills/skills` (hoặc copy promoted buckets vào `.agents/skills` / `.claude/skills` của project).
+Sau khi cài:
 
-### D. Claude Code plugin từ GitHub fork này
+1. `/setup-matt-pocock-skills`
+2. `/ask-matt` nếu không chắc skill nào.
+3. `/supervisor` → `/root` → `/peer` cho flow lớn.
+4. Với flow nhỏ: `/grill-with-docs` → `/to-spec` → `/to-tickets` → `/implement`.
 
-Cài trực tiếp marketplace plugin được ship trong repo GitHub này:
-
-```bash
-claude plugin marketplace add eszxcvfd/skills
-claude plugin install mattpocock-skills@eszxcvfd
-```
-
-Cập nhật sau này:
-
-```bash
-claude plugin update mattpocock-skills@eszxcvfd
-```
-
-Nếu chỉ muốn bản upstream gốc của Matt, dùng `claude plugin marketplace add mattpocock/skills` rồi `claude plugin install mattpocock-skills@mattpocock`.
-
-Riêng `/orchestrator-herdr`: Herdr worker mặc định chạy bằng command `omp`, nên máy/project đích cần có `omp` trong `PATH` trước khi dùng flow multi-agent.
-
----
-
-## Sau khi cài — checklist 1 project
-
-1. `/setup-matt-pocock-skills` trong agent (tracker + labels + docs).
-2. Router: `/ask-matt` khi không chắc skill nào.
-3. Flow thường: `/grill-with-docs` → `/to-spec` → `/to-tickets` → `/implement`.
-4. (Tuỳ chọn) Herdr multi-agent: cài [Herdr](https://herdr.dev), integration `omp` (và agent bạn đang dùng), rồi `/orchestrator-herdr` — **coding agent** điều phối, spawn **OMP** workers theo skill project, mỗi worker chạy tối đa 60 phút và có alert khi dừng.
+Root đọc `WORKSPACE_PROTOCOL.md`; peer không đọc file đó. Root không tạo peer trước khi thật sự có lát việc độc lập.
 
 ---
 
@@ -105,109 +90,10 @@ skills/
   deprecated/    # bỏ
 ```
 
-Promoted = an toàn copy sang project khác (kể cả `orchestrator-herdr`).
+Promoted = an toàn copy sang project khác.
 
 ---
 
-## Why these skills exist
-
-Upstream framing (Matt Pocock) — common agent failure modes and the skills that fix them:
-
-### #1: The Agent Didn't Do What I Want
-
-> "No-one knows exactly what they want"
->
-> David Thomas & Andrew Hunt, [The Pragmatic Programmer](https://www.amazon.co.uk/Pragmatic-Programmer-Anniversary-Journey-Mastery/dp/B0833F1T3V)
-
-**The Problem**. The most common failure mode in software development is misalignment. You think the dev knows what you want. Then you see what they've built - and you realize it didn't understand you at all.
-
-This is just the same in the AI age. There is a communication gap between you and the agent. The fix for this is a **grilling session** - getting the agent to ask you detailed questions about what you're building.
-
-**The Fix** is to use:
-
-- [`/grill-me`](./skills/productivity/grill-me/SKILL.md) - for non-code uses
-- [`/grill-with-docs`](./skills/engineering/grill-with-docs/SKILL.md) - same as [`/grill-me`](./skills/productivity/grill-me/SKILL.md), but adds more goodies (see below)
-
-These are my most popular skills. They help you align with the agent before you get started, and think deeply about the change you're making. Use them _every_ time you want to make a change.
-
-### #2: The Agent Is Way Too Verbose
-
-> With a ubiquitous language, conversations among developers and expressions of the code are all derived from the same domain model.
->
-> Eric Evans, [Domain-Driven-Design](https://www.amazon.co.uk/Domain-Driven-Design-Tackling-Complexity-Software/dp/0321125215)
-
-**The Problem**: At the start of a project, devs and the people they're building the software for (the domain experts) are usually speaking different languages.
-
-I felt the same tension with my agents. Agents are usually dropped into a project and asked to figure out the jargon as they go. So they use 20 words where 1 will do.
-
-**The Fix** for this is a shared language. It's a document that helps agents decode the jargon used in the project.
-
-<details>
-<summary>
-Example
-</summary>
-
-Here's an example [`CONTEXT.md`](https://github.com/mattpocock/course-video-manager/blob/076a5a7a182db0fe1e62971dd7a68bcadf010f1c/CONTEXT.md), from my `course-video-manager` repo. Which one is easier to read?
-
-- **BEFORE**: "There's a problem when a lesson inside a section of a course is made 'real' (i.e. given a spot in the file system)"
-- **AFTER**: "There's a problem with the materialization cascade"
-
-This concision pays off session after session.
-
-</details>
-
-This is built into [`/grill-with-docs`](./skills/engineering/grill-with-docs/SKILL.md). It's a grilling session, but that helps you build a shared language with the AI, and document hard-to-explain decisions in ADR's.
-
-It's hard to explain how powerful this is. It might be the single coolest technique in this repo. Try it, and see.
-
-> [!TIP]
-> A shared language has many other benefits than reducing verbosity:
->
-> - **Variables, functions and files are named consistently**, using the shared language
-> - As a result, the **codebase is easier to navigate** for the agent
-> - The agent also **spends fewer tokens on thinking**, because it has access to a more concise language
-
-### #3: The Code Doesn't Work
-
-> "Always take small, deliberate steps. The rate of feedback is your speed limit. Never take on a task that’s too big."
->
-> David Thomas & Andrew Hunt, [The Pragmatic Programmer](https://www.amazon.co.uk/Pragmatic-Programmer-Anniversary-Journey-Mastery/dp/B0833F1T3V)
-
-**The Problem**: Let's say that you and the agent are aligned on what to build. What happens when the agent _still_ produces crap?
-
-It's time to look at your feedback loops. Without feedback on how the code it produces actually runs, the agent will be flying blind.
-
-**The Fix**: You need the usual tranche of feedback loops: static types, browser access, and automated tests.
-
-For automated tests, a red-green-refactor loop is critical. This is where the agent writes a failing test first, then fixes the test. This helps give the agent a consistent level of feedback that results in far better code.
-
-I've built a **[`/tdd`](./skills/engineering/tdd/SKILL.md) skill** you can slot into any project. It encourages red-green-refactor and gives the agent plenty of guidance on what makes good and bad tests.
-
-For debugging, I've also built a **[`/diagnosing-bugs`](./skills/engineering/diagnosing-bugs/SKILL.md)** skill that wraps best debugging practices into a simple loop.
-
-### #4: We Built A Ball Of Mud
-
-> "Invest in the design of the system _every day_."
->
-> Kent Beck, [Extreme Programming Explained](https://www.amazon.co.uk/Extreme-Programming-Explained-Embrace-Change/dp/0321278658)
-
-> "The best modules are deep. They allow a lot of functionality to be accessed through a simple interface."
->
-> John Ousterhout, [A Philosophy Of Software Design](https://www.amazon.co.uk/Philosophy-Software-Design-2nd/dp/173210221X)
-
-**The Problem**: Most apps built with agents are complex and hard to change. Because agents can radically speed up coding, they also accelerate software entropy. Codebases get more complex at an unprecedented rate.
-
-**The Fix** for this is a radical new approach to AI-powered development: caring about the design of the code.
-
-This is built in to every layer of these skills:
-
-- [`/to-spec`](./skills/engineering/to-spec/SKILL.md) quizzes you about which modules you're touching before creating a spec
-
-And crucially, [`/improve-codebase-architecture`](./skills/engineering/improve-codebase-architecture/SKILL.md) helps you rescue a codebase that has become a ball of mud. I recommend running it on your codebase once every few days.
-
-### Summary
-
-Software engineering fundamentals matter more than ever. These skills are my best effort at condensing these fundamentals into repeatable practices, to help you ship the best apps of your career. Enjoy.
 
 ## Reference
 
@@ -220,6 +106,9 @@ Skills I use daily for code work.
 **User-invoked**
 
 - **[ask-matt](./skills/engineering/ask-matt/SKILL.md)** — Ask which skill or flow fits your situation. A router over the user-invoked skills in this repo.
+- **[supervisor](./skills/engineering/supervisor/SKILL.md)** — Decision proxy above root: handles macro decisions, momentum recovery, quality, and progress truth.
+- **[root](./skills/engineering/root/SKILL.md)** — Active project lead that reads `WORKSPACE_PROTOCOL.md`, preserves momentum, does central work, allocates peers only when needed, and gates output.
+- **[peer](./skills/engineering/peer/SKILL.md)** — Independent worker for any bounded packet from root.
 - **[grill-with-docs](./skills/engineering/grill-with-docs/SKILL.md)** — Grilling session that also builds your project's domain model, sharpening terminology and updating `CONTEXT.md` and ADRs inline.
 - **[triage](./skills/engineering/triage/SKILL.md)** — Move issues through a state machine of triage roles.
 - **[improve-codebase-architecture](./skills/engineering/improve-codebase-architecture/SKILL.md)** — Scan a codebase for deepening opportunities, present them as a visual HTML report, then grill through whichever one you pick.
@@ -227,19 +116,21 @@ Skills I use daily for code work.
 - **[to-spec](./skills/engineering/to-spec/SKILL.md)** — Turn the current conversation into a spec with architecture placement, runtime invariants, and required proof. No interview — just synthesizes what you've already discussed.
 - **[to-tickets](./skills/engineering/to-tickets/SKILL.md)** — Break any plan, spec, or conversation into tracer-bullet tickets with blocking edges, control notes, and required proof — local markdown or native tracker links.
 - **[implement](./skills/engineering/implement/SKILL.md)** — Build the work described by a spec or set of tickets, maintaining `ACTIVE_EXECUTION_PLAN.md`, driving `/tdd`, proving per policy, and closing with `/code-review` before committing.
+- **[repo-refresh](./skills/engineering/repo-refresh/SKILL.md)** — Explicit repository-wide cleanup for stale docs, dead plans, stale proof machinery, generated debris, and obsolete tests.
+- **[ultra-review](./skills/engineering/ultra-review/SKILL.md)** — Maximum-recall peer review pipeline that preserves every candidate in one durable report.
 - **[wayfinder](./skills/engineering/wayfinder/SKILL.md)** — Plan a huge chunk of work, more than one agent session can hold, as a shared map of investigation tickets on the issue tracker — resolve them one at a time until the way to the destination is clear.
-- **[orchestrator-herdr](./skills/engineering/orchestrator-herdr/SKILL.md)** — Herdr mission control: DAG plan, spawn/reuse OMP workers for 60 minutes, alert on worker stop, enforce one-skill prompts, ingest STATUS/artifacts, and quality-gate before next work.
-- **[orchestrator-pi-workflows](./skills/engineering/orchestrator-pi-workflows/SKILL.md)** — Deterministic Pi mission control: route skills into a durable DAG, fan out independent agents, isolate writers, checkpoint decisions, and recover persisted runs.
 
 **Model-invoked**
 
 - **[architecture-council](./skills/engineering/architecture-council/SKILL.md)** — Mandatory pre-code gate for every architecture decision or unclear architectural next step, evaluated by independent Pi agents in Herdr.
+- **[architecture-premise-audit](./skills/engineering/architecture-premise-audit/SKILL.md)** — Broad premise audit for wrong system archetypes before trusting repo vocabulary, proof, or module boundaries.
 - **[prototype](./skills/engineering/prototype/SKILL.md)** — Build a throwaway prototype to answer a design question — a runnable terminal app for state/logic questions, or several radically different UI variations toggleable from one route.
 - **[diagnosing-bugs](./skills/engineering/diagnosing-bugs/SKILL.md)** — Disciplined diagnosis loop for hard bugs and performance regressions: reproduce → minimise → hypothesise → instrument → fix → regression-test.
-- **[research](./skills/engineering/research/SKILL.md)** — Investigate a question against high-trust primary sources and capture the findings as a cited Markdown file in the repo, run as a background agent.
+- **[research](./skills/engineering/research/SKILL.md)** — Investigate a question against high-trust primary sources and capture the findings as a cited Markdown file in the repo, run as a focused research packet.
 - **[tdd](./skills/engineering/tdd/SKILL.md)** — Test-driven development with a red-green-refactor loop. Builds features or fixes bugs one vertical slice at a time.
 - **[domain-modeling](./skills/engineering/domain-modeling/SKILL.md)** — Actively build and sharpen a project's domain model — challenge terms against the glossary, stress-test with edge-case scenarios, and update `CONTEXT.md` and ADRs inline.
 - **[codebase-design](./skills/engineering/codebase-design/SKILL.md)** — Shared discipline and vocabulary for designing deep modules: a lot of behaviour behind a small interface, placed at a clean seam, testable through that interface.
+- **[structural-antipatterns](./skills/engineering/structural-antipatterns/SKILL.md)** — Design-control lens for structural misfit, weak-owner workarounds, proof laundering, overengineering, and avoidable tax.
 - **[code-review](./skills/engineering/code-review/SKILL.md)** — Two-axis review of the diff since a fixed point: **Standards** (including control docs and Fowler smells) and **Spec**, plus a proof gate.
 - **[resolving-merge-conflicts](./skills/engineering/resolving-merge-conflicts/SKILL.md)** — Work through an in-progress git merge or rebase conflict hunk by hunk, resolving by intent traced to each side's primary source, then finish the operation — never `--abort`.
 

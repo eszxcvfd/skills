@@ -12,7 +12,7 @@ npx skills@latest update code-review
 
 ## What it does
 
-`code-review` reviews the diff between `HEAD` and a fixed point you supply — a commit, branch, tag, or merge-base — along two separate axes: **Standards** (does the code follow this repo's documented conventions and control docs?) and **Spec** (does it implement what the originating issue or spec asked for?). It runs each axis as its own parallel sub-agent and reports them side by side, then adds a proof gate from `PROCESS_AND_PROOF_POLICY.md`. It never merges or re-ranks the two sets of findings — keeping them separate is the whole point, because a change can pass one axis and fail the other, and a single blended verdict lets one mask the other.
+`code-review` reviews the diff between `HEAD` and a fixed point you supply — a commit, branch, tag, or merge-base — along two separate axes: **Standards** (does the code follow this repo's documented conventions and control docs?) and **Spec** (does it implement what the originating issue or spec asked for?). It keeps each axis as its own review lane and reports them side by side, then adds a proof gate from `PROCESS_AND_PROOF_POLICY.md`. It never merges or re-ranks the two sets of findings — keeping them separate is the whole point, because a change can pass one axis and fail the other, and a single blended verdict lets one mask the other.
 
 ## When to reach for it
 
@@ -28,11 +28,11 @@ The **Spec** axis needs somewhere to find the originating spec — an issue refe
 
 The defining idea is the **two axes**. **Standards** asks whether the diff conforms to how this repo writes code — its `CODING_STANDARDS.md`, `CONTRIBUTING.md`, `ARCHITECTURE.md`, `RUNTIME_CONSTITUTION.md`, `PROCESS_AND_PROOF_POLICY.md`, active plan, and relevant ADRs — plus a fixed baseline of ~12 Fowler code smells (Mysterious Name, Duplicated Code, Feature Envy, Data Clumps, …). Two rules keep the baseline safe: a documented repo standard always overrides it, and every smell is a judgement call, never a hard violation. **Spec** asks the orthogonal question — does the code do what the issue or spec actually asked, without missing requirements or smuggling in scope creep?
 
-They run as parallel sub-agents so neither pollutes the other's context, and the final report presents them under separate `## Standards` and `## Spec` headings. The added `## Proof Gate` section checks whether the required evidence was actually provided; missing proof prevents a "done" verdict even when the two axes are clean. There is deliberately no single winner across axes.
+They remain separate lanes so neither pollutes the other's context; in Paseo, root can assign them to peer reviewers, and the final report presents them under separate `## Standards` and `## Spec` headings. The added `## Proof Gate` section checks whether the required evidence was actually provided; missing proof prevents a "done" verdict even when the two axes are clean. There is deliberately no single winner across axes.
 
 ## It's working if
 
-- It pins and confirms the fixed point first (`git rev-parse`), failing fast on a bad ref or empty diff rather than inside the sub-agents.
+- It pins and confirms the fixed point first (`git rev-parse`), failing fast on a bad ref or empty diff rather than inside the review lanes.
 - Standards and Spec findings arrive in two distinct blocks, each citing its source — a repo standard/control doc or baseline smell for one, a quoted spec line for the other.
 - The Proof Gate names required evidence as provided, missing, or unverified.
 - When no spec can be found, the Spec axis reports "no spec available" instead of inventing requirements.

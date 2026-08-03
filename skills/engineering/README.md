@@ -7,28 +7,32 @@ Skills I use daily for code work.
 Reachable only when you type them (Claude Code: `disable-model-invocation: true`; Codex: `policy.allow_implicit_invocation: false` in `agents/openai.yaml`).
 
 - **[ask-matt](./ask-matt/SKILL.md)** — Ask which skill or flow fits your situation. A router over the user-invoked skills in this repo.
+- **[supervisor](./supervisor/SKILL.md)** — Decision proxy above root: handles macro decisions, momentum recovery, quality, and progress truth.
+- **[root](./root/SKILL.md)** — Active project lead that reads `WORKSPACE_PROTOCOL.md`, preserves momentum, does central work, allocates peers only when needed, and gates output.
+- **[peer](./peer/SKILL.md)** — Independent worker for any bounded packet from root.
 - **[grill-with-docs](./grill-with-docs/SKILL.md)** — Grilling session that also builds your project's domain model, sharpening terminology and updating `CONTEXT.md` and ADRs inline.
 - **[triage](./triage/SKILL.md)** — Move issues through a state machine of triage roles.
 - **[improve-codebase-architecture](./improve-codebase-architecture/SKILL.md)** — Scan a codebase for deepening opportunities, present them as a visual HTML report, then grill through whichever one you pick.
 - **[setup-matt-pocock-skills](./setup-matt-pocock-skills/SKILL.md)** — Configure this repo for the engineering skills (issue tracker, triage labels, domain docs, and root control docs). Run once per repo.
 - **[to-spec](./to-spec/SKILL.md)** — Turn the current conversation into a spec with architecture placement, runtime invariants, and required proof.
 - **[to-tickets](./to-tickets/SKILL.md)** — Break any plan, spec, or conversation into tracer-bullet tickets with blocking edges, control notes, and required proof.
-- **[implement](./implement/SKILL.md)** — Build the work described by a spec or set of tickets, maintaining `ACTIVE_EXECUTION_PLAN.md`, driving `/tdd`, proving per policy, and closing with `/code-review` before committing.
 - **[wayfinder](./wayfinder/SKILL.md)** — Plan a huge chunk of work — more than one agent session can hold — as a shared map of decision tickets on the issue tracker, resolved one at a time until the way to the destination is clear.
-- **[orchestrator-herdr](./orchestrator-herdr/SKILL.md)** — Herdr mission control: DAG plan, spawn/reuse OMP workers for 60 minutes, alert on worker stop, enforce one-skill prompts, ingest STATUS/artifacts, and quality-gate before next work.
-- **[orchestrator-pi-workflows](./orchestrator-pi-workflows/SKILL.md)** — Deterministic Pi mission control: route skills into a durable DAG, fan out independent agents, isolate writers, checkpoint decisions, and recover persisted runs.
+- **[implement](./implement/SKILL.md)** — Build the work described by a spec or set of tickets, maintaining `ACTIVE_EXECUTION_PLAN.md`, driving `/tdd`, proving per policy, and closing with `/code-review` before committing.
+- **[repo-refresh](./repo-refresh/SKILL.md)** — Explicit repository-wide cleanup: remove stale docs, dead plans, stale proof machinery, scripts, generated debris, and tests that protect no current contract.
+- **[ultra-review](./ultra-review/SKILL.md)** — Maximum-recall peer review pipeline that preserves every candidate in one durable report.
 
 ## Model-invoked
 
 Model- or user-reachable (rich trigger phrasing so the model can reach for them).
 
 - **[architecture-council](./architecture-council/SKILL.md)** — Mandatory pre-code gate for every architecture decision or unclear architectural next step, evaluated by independent Pi agents in Herdr.
+- **[architecture-premise-audit](./architecture-premise-audit/SKILL.md)** — Broad premise audit for wrong system archetypes before trusting repo vocabulary, proof, or module boundaries.
 - **[prototype](./prototype/SKILL.md)** — Build a throwaway prototype to answer a design question: a runnable terminal app for state/logic, or several toggleable UI variations.
-
 - **[diagnosing-bugs](./diagnosing-bugs/SKILL.md)** — Disciplined diagnosis loop for hard bugs and performance regressions: reproduce → minimise → hypothesise → instrument → fix → regression-test.
-- **[research](./research/SKILL.md)** — Investigate a question against high-trust primary sources and capture the findings as a cited Markdown file in the repo, run as a background agent.
+- **[research](./research/SKILL.md)** — Investigate a question against high-trust primary sources and capture the findings as a cited Markdown file in the repo.
 - **[tdd](./tdd/SKILL.md)** — Test-driven development with a red-green-refactor loop. Builds features or fixes bugs one vertical slice at a time.
 - **[domain-modeling](./domain-modeling/SKILL.md)** — Actively build and sharpen a project's domain model — challenge terms, stress-test with scenarios, update `CONTEXT.md` and ADRs inline.
 - **[codebase-design](./codebase-design/SKILL.md)** — Shared discipline and vocabulary for designing deep modules: small interfaces, clean seams, testable through the interface.
+- **[structural-antipatterns](./structural-antipatterns/SKILL.md)** — Design-control lens for structural misfit, weak-owner workarounds, proof laundering, overengineering, and avoidable tax.
 - **[code-review](./code-review/SKILL.md)** — Two-axis review of the diff since a fixed point: **Standards** (including control docs and Fowler smells) and **Spec**, plus a proof gate.
 - **[resolving-merge-conflicts](./resolving-merge-conflicts/SKILL.md)** — Work through an in-progress git merge or rebase conflict hunk by hunk, resolving by intent traced to each side's primary source, then finish the operation — never `--abort`.

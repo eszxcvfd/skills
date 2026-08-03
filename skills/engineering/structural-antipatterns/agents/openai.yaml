@@ -1,0 +1,3 @@
+interface:
+  display_name: "Structural Antipatterns"
+  short_description: "Review system design for structural misfit and avoidable tax"

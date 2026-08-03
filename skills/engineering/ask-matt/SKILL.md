@@ -8,98 +8,59 @@ disable-model-invocation: true
 
 You don't remember every skill, so ask.
 
-A **flow** is a path through the skills. Most paths run along one **main flow**, and two **on-ramps** merge onto it. Everything else is standalone, or a vocabulary layer that runs underneath.
+A **flow** is a path through the skills. The current top-level operating model is the Paseo hierarchy, with the older spec/ticket/build skills still available for small or single-agent work.
 
-## The main flow: idea → ship
+## Paseo hierarchy
 
-The route most work travels. You have an idea and want it built.
-
-1. **`/grill-with-docs`** — sharpen the idea by interview. Start here when you **have a codebase**: it's stateful, retaining what it learns in `CONTEXT.md` and ADRs. (No codebase? Use `/grill-me` — see Standalone. Both run the same `/grilling` primitive; `grill-with-docs` is the one that leaves a paper trail.)
-
-   **Mandatory architecture gate** — if sharpening reveals any architecture
-   decision, or the current system/architecture leaves no clear safe next step,
-   run **`/architecture-council`** before `/to-spec`, `/implement`, production
-   code, or architecture changes. Risk selects a reduced or full Council; it
-   never permits bypassing the gate. Council roles run as independent Pi workers
-   in Herdr.
-2. **Branch — can you settle every question in conversation?** If a question needs a runnable answer (state, business logic, a UI you have to see), detour through a prototype, bridged by **`/handoff`** in both directions (see Crossing sessions):
-   - **`/handoff`** out, then open a fresh session against that file,
-   - **`/prototype`** to answer the question with throwaway code,
-   - **`/handoff`** back what you learned, and reference it from the original idea thread.
-3. **Branch — is this a multi-session build?**
-   - **Yes** → **`/to-spec`** (turn the thread into a spec), then **`/to-tickets`** to split it into tracer-bullet tickets, each declaring its **blocking edges**. On a local tracker that's one file per ticket under `.scratch/<feature>/issues/`, worked blockers-first by hand; on a real tracker the edges become native blocking links, so any ticket whose blockers are done can be grabbed — kick off **`/implement`** per ticket, **clearing context between each one**.
-   - **No** → **`/implement`** right here, in the same context window.
-
-   Either way, **`/implement`** builds each issue by driving **`/tdd`** internally — one red-green slice at a time — then closes out by running **`/code-review`**, a two-axis review (Standards + Spec) of the diff, before committing. Reach for **`/tdd`** on its own when you just want to build a concrete behaviour test-first without a full spec, and **`/code-review`** on its own whenever you want to review a branch or PR against a fixed point.
-
-### Control docs and context hygiene
-
-Every implementation-oriented flow reads the repo control docs in order:
+Use this when work needs management, decisions, multiple workers, or quality gates:
 
 ```text
-ARCHITECTURE.md
-  → RUNTIME_CONSTITUTION.md
-  → PROCESS_AND_PROOF_POLICY.md
-  → ACTIVE_EXECUTION_PLAN.md
-  → implementation
+/supervisor → /root → /peer
 ```
 
-`ARCHITECTURE.md` tells the agent where code belongs. `RUNTIME_CONSTITUTION.md` tells it what runtime invariants must not break. `PROCESS_AND_PROOF_POLICY.md` tells it what evidence is required before claiming done. `ACTIVE_EXECUTION_PLAN.md` is the live task memory that `/implement` creates, updates, then archives or deletes at the end.
+- **`/supervisor`** represents the human on macro decisions: requirements, architecture solution, scope, acceptance, quality, and momentum recovery. It can decide `APPROVED`, `REVISE`, `RECOVER`, or `ESCALATE`; it does not plan peer work.
+- **`/root`** is the active project lead: reads `WORKSPACE_PROTOCOL.md`, preserves the mainline, does central work when delegation would slow things down, allocates peer workers only when needed, gates their output, and reports status upward.
+- **`/peer`** is the worker: executes one bounded packet from root. Peer must not read `WORKSPACE_PROTOCOL.md` and must not spawn Pi/Codex internal subagents.
+- Supervisor calls inspected root agents through Paseo with the `root` provider. Root calls inspected peer agents through Paseo with the `peer` provider. Peer does not call upward or sideways.
 
-Keep steps 1–3 in **one unbroken context window** — don't compact or clear until after `/to-tickets` — so the grilling, spec, and tickets all build on the same thinking. Each `/implement` then starts fresh, working from the ticket and its active execution plan.
+Peers are workers root feeds when needed; they are not child subagents of root, and root should not create them before there is independent work.
 
-The limit on this is the **[smart zone](https://www.aihero.dev/ai-coding-dictionary/smart-zone)**: the window (~120k tokens on state-of-the-art models) within which the model still reasons sharply. If a session approaches it before `/to-tickets`, don't push on degraded — `/handoff` and continue in a fresh thread.
+## Main flow: idea → ship
 
-## On-ramps
+For small or single-session work, the direct route remains:
 
-A starting situation that generates work, then merges onto the main flow.
+1. **`/grill-with-docs`** — sharpen the idea and update `CONTEXT.md`/ADRs.
+2. **`/to-spec`** — turn the conversation into a spec.
+3. **`/to-tickets`** — split the spec into tracer-bullet tickets.
+4. **`/implement`** — build each ticket with `/tdd`, proof policy, and `/code-review`.
 
-- **Bugs and requests piling up** → **`/triage`**. It moves issues through triage roles and produces agent-ready issues, which **`/implement`** later picks up.
+If this grows into multi-worker work, move to `/supervisor → /root → /peer` before implementation; otherwise root or the direct flow should keep the work inline.
 
-  Triage is only for issues **you didn't create** — bug reports, incoming feature requests, anything that arrives raw. Tickets that `/to-tickets` produced are already agent-ready, so **don't triage them**.
+## Design and proof gates
 
-- **Something's broken** → **`/diagnosing-bugs`**. For the hard ones: the bug that resists a first glance, the intermittent flake, the regression that crept in between two known-good states. It refuses to theorise until it has a **tight feedback loop** — one command that already goes red on *this* bug — then fixes with a regression test. Its post-mortem hands off to **`/improve-codebase-architecture`** when the real finding is that there's no good seam to lock the bug down.
+- **`/structural-antipatterns`** — use when a plan or implementation may contain structural misfit, weak-owner workarounds, proof laundering, overengineering, or avoidable tax.
+- **`/architecture-council`** — mandatory before architecture decisions or when no safe architectural next step is clear. It still requires Herdr/Pi for Council workers; do not fall back to internal subagents.
+- **`/architecture-premise-audit`** — use only for an explicitly requested broad premise audit when the whole system archetype may be wrong before repo vocabulary can be trusted.
+- **`/codebase-design`** — deep-module vocabulary: module, interface, seam, adapter, depth, leverage, locality.
+- **`/domain-modeling`** — domain vocabulary and ADR discipline.
 
-- **A huge, foggy effort — a greenfield project or a huge feature build, too big for one session** → **`/wayfinder`**, the most cognitively demanding flow here. When the way from here to the destination isn't visible yet, it charts a **shared map** of **decision tickets** on the issue tracker and resolves them one at a time — producing **decisions, not deliverables** — until the fog is pushed back and the way is clear. Where **`/grill-with-docs`** sharpens an idea you can hold in one session, wayfinder is for the idea you can't — and it's slower and denser, so save it for exactly that, never a well-scoped feature.
+## Review and cleanup
 
-  When the map clears, **it hands off, it doesn't build**: merge onto the main flow at **`/to-spec`**, which collapses the map's linked decisions into a buildable plan, then `/to-tickets` and `/implement` as usual. Looping the map straight into `/implement` skips that collapse and throws the linked detail away — go straight to `/implement` only when the effort turned out genuinely small.
+- **`/code-review`** — ordinary diff review against Standards and Spec.
+- **`/ultra-review`** — maximum-recall peer review when false positives are acceptable and missing a rare bug is worse.
+- **`/repo-refresh`** — explicit repo cleanup: stale docs, dead proof, obsolete tests, scripts, fixtures, generated debris.
 
-## Codebase health
+## On-ramps and standalone skills
 
-Not feature work — upkeep.
-
-- **`/improve-codebase-architecture`** — run whenever you have a spare moment to keep the codebase good for agents to operate in. It surfaces **deepening opportunities**; picking one _generates an idea_ you can take into the main flow at `/grill-with-docs`. It's the survey that finds the candidates; **`/codebase-design`** (below) is the bench you design the chosen one on.
-- **`/architecture-council`** — mandatory before any architecture decision,
-  production code that depends on one, or architecture change. Also run it when
-  the agent cannot identify a safe next step because of the current system or
-  architecture. The quick gate can run anywhere; reduced and full Councils
-  require Herdr and launch every role with `pi`, never internal subagents or
-  `omp`.
-
-## Vocabulary underneath
-
-Two model-invoked references that run *beneath* the other skills — each the single source of truth for its vocabulary. Reach for them directly when the **words**, not the process, are the problem; or let the skills above pull them in.
-
-- **`/domain-modeling`** — sharpen the project's *domain* language: challenge a fuzzy term, resolve an overloaded word ("account" doing three jobs), record a hard-to-reverse decision as an ADR. It's the active discipline `/grill-with-docs` drives to keep `CONTEXT.md` a clean glossary.
-- **`/codebase-design`** — the deep-module vocabulary (module, interface, depth, seam, adapter, leverage, locality) for designing a module's *shape*: a lot of behaviour behind a small interface at a clean seam. `/tdd` and `/improve-codebase-architecture` both speak it.
-
-## Crossing sessions
-
-- **`/handoff`** — when a thread is full or you need to branch off (e.g. into a `/prototype` session), this compacts the conversation into a markdown file. You don't continue in place — you **open a new session and reference that file** to carry the context across. It's the bridge between context windows, in either direction. Use it when you want a **fresh session** but need the **current conversation preserved**.
-- **`/compact`** (built-in) — stay in the **same conversation**, letting the earlier turns be summarized. Use it at **intentional breaks between phases**, when you don't mind losing the verbatim history. Don't compact mid-phase — the agent can lose its way. `/handoff` forks; `/compact` continues.
-- **`/orchestrator-herdr`** — when you are **inside Herdr** (`HERDR_ENV=1`) and want the **coding agent already in this pane** to act as mission control: route project skills into a dependency graph, confirm a PLAN, spawn/reuse OMP workers in sibling panes with a 60-minute timebox, alert once when each worker stops, ingest each worker's STATUS/artifacts/transcript, quality-gate the result, and only then re-plan or finish. Not for single-pane one-shot work — use the main flow skills directly then.
-- **`/orchestrator-pi-workflows`** — when Pi has `pi-extensible-workflows` installed and the mission benefits from a **durable DAG**: deterministic parallel fan-out, named worktree isolation, checkpoints, aggregate budgets, and persisted retry/resume. For a GitHub issue while Pi runs inside Herdr, it can use one agent to build a skill-routed plan from the issue, checkpoint that exact plan, then hand it to a second agent running `/orchestrator-herdr`. Choose direct `/orchestrator-herdr` when the plan already exists or visible pane control is the starting point; use the main flow skills directly for one well-scoped agent task.
-
-## Standalone
-
-Off the main flow entirely.
-
-- **`/grill-me`** — the same relentless interview as `/grill-with-docs`, but for when you have **no codebase**. Stateless: it saves nothing locally, builds no `CONTEXT.md`. Reach for it to sharpen any plan or design that doesn't live in a repo.
-- **`/prototype`** — a small, throwaway program that answers one design question: does this state model feel right, or what should this UI look like. Throwaway from day one — keep the answer, delete the code. It's the detour in step 2 of the main flow, but reach for it any time a design question is hard to settle on paper.
-- **`/research`** — delegate reading legwork to a **background agent**: it investigates a question against **primary sources**, then leaves a cited Markdown file in the repo. Keep working while it reads. The file it produces is something to take *into* the main flow at `/grill-with-docs` — research feeds the thinking, it doesn't replace it.
-- **`/teach`** — learn a concept over multiple sessions, using the current directory as a stateful workspace.
-- **`/writing-great-skills`** — reference for writing and editing skills well.
+- **Bugs** → `/diagnosing-bugs`.
+- **Incoming raw issues** → `/triage`.
+- **Huge foggy effort** → `/wayfinder`, then collapse into `/to-spec` when decisions are clear.
+- **Runnable design question** → `/prototype`.
+- **External reading** → `/research`.
+- **Session bridge** → `/handoff`.
+- **Learning** → `/teach`.
+- **Writing skills** → `/writing-great-skills`.
 
 ## Precondition
 
-**`/setup-matt-pocock-skills`** — run before your first engineering flow to configure the issue tracker, triage labels, domain doc layout, and root control docs (`ARCHITECTURE.md`, `RUNTIME_CONSTITUTION.md`, `PROCESS_AND_PROOF_POLICY.md`; `/implement` owns task-local `ACTIVE_EXECUTION_PLAN.md`). Custom issue trackers also work.
+Run **`/setup-matt-pocock-skills`** once per repo to install issue tracker wiring and root control docs. For Paseo-managed repos, add `WORKSPACE_PROTOCOL.md`; root reads it, peer does not.

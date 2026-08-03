@@ -1,0 +1,6 @@
+interface:
+  display_name: "Peer"
+  short_description: "Independent Paseo worker for any bounded packet from root"
+  default_prompt: "Use $peer to execute a bounded packet from root, never read WORKSPACE_PROTOCOL.md, never spawn internal subagents, and return PEER_STATUS evidence."
+policy:
+  allow_implicit_invocation: false

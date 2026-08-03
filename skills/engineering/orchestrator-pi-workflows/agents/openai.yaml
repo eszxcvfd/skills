@@ -1,6 +1,0 @@
-interface:
-  display_name: "Orchestrator (Pi Workflows)"
-  short_description: "Run durable deterministic multi-agent Pi workflows"
-policy:
-  allow_implicit_invocation: false
-
