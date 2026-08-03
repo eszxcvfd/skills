@@ -1,0 +1,18 @@
+# Paseo hierarchy model config for this project.
+# Edit this file at the repo root after running /setup-matt-pocock-skills.
+# provider = Paseo provider alias. model/thinking come from `paseo provider models <provider> --json`.
+
+[supervisor]
+provider=supervisor
+model=openai-codex/gpt-5.6-luna
+thinking=low
+
+[root]
+provider=root
+model=openai-codex/gpt-5.6-luna
+thinking=high
+
+[peer]
+provider=peer
+model=openai-codex/gpt-5.6-luna
+thinking=medium

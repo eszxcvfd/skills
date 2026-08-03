@@ -17,10 +17,17 @@ choice or architecture change. It also runs whenever the agent cannot identify
 a safe next step because the current system or architecture is unclear,
 constrained, contradictory, or becoming a dead end.
 
-The Council convenes independent Pi agents in Herdr for proposals, challenge,
-verification, and judging before production implementation continues.
+The Council now convenes dedicated Paseo `root` agents for proposals,
+challenge, verification, and judging before production implementation
+continues. It does not use Herdr, internal subagents, peer workers, serial
+role-play, or `omp` as a fallback.
 
-It is about lock-in, not debate theater. The Council prefers boring, standard, reversible architecture, then records the decision as an ADR with guardrails, migration or rollback notes, lock level, and reopen conditions so future agents know what they may not silently break. When the verdict changes the system map, runtime invariants, or required evidence, it syncs `ARCHITECTURE.md`, `RUNTIME_CONSTITUTION.md`, and `PROCESS_AND_PROOF_POLICY.md` too.
+It is about lock-in, not debate theater. The Council prefers boring, standard,
+reversible architecture, then records the decision as an ADR with guardrails,
+migration or rollback notes, lock level, and reopen conditions so future agents
+know what they may not silently break. When the verdict changes the system map,
+runtime invariants, or required evidence, it syncs `ARCHITECTURE.md`,
+`RUNTIME_CONSTITUTION.md`, and `PROCESS_AND_PROOF_POLICY.md` too.
 
 ## When to reach for it
 
@@ -41,10 +48,15 @@ visual UI work remains outside the Council unless it changes structure.
 
 ## Prerequisites
 
-Run reduced and full Councils from inside Herdr (`HERDR_ENV=1`) and make sure
-`pi` is on `PATH`. The quick gate can run anywhere, but the skill stops rather
-than simulating Council roles or modifying production code if Herdr or Pi is
-unavailable.
+Paseo must be running and the `root` provider must be available:
+
+```bash
+paseo daemon status
+paseo provider ls --json
+```
+
+The quick gate can run anywhere, but the skill stops rather than simulating
+Council roles or modifying production code if Paseo/root is unavailable.
 
 The skill writes durable records when a decision is accepted: an ADR in the
 repo's ADR directory, and a decision-lock registry such as
@@ -60,34 +72,45 @@ deployment topology, and uncertainty about the safe next step caused by the
 current architecture.
 
 Every other architecture decision still runs a reduced Council. A low score
-reduces the number of Pi agents; it does not allow the architecture gate to be
-skipped.
+reduces the number of root agents; it does not allow the architecture gate to
+be skipped.
 
-The key split is expression versus structure. Frontend visuals get high autonomy; frontend architecture, backend domain design, and data architecture get progressively less. AI can cook the dashboard, but adding global state or changing an API contract goes through the gate.
+The key split is expression versus structure. Frontend visuals get high
+autonomy; frontend architecture, backend domain design, and data architecture
+get progressively less. AI can cook the dashboard, but adding global state or
+changing an API contract goes through the gate.
 
-## Pi agents in Herdr
+## Paseo root agents
 
-The Lead stays in the current pane. A full Council starts
-`council-proposer-a`, `council-proposer-b`, and
-`council-proposer-c` as separate Herdr workers running `pi`. A reduced Council
-starts only `council-proposer-a`. Both modes then use dedicated
-`council-challenger`, `council-verifier`, and `council-judge` Pi workers.
+The Lead stays in the current agent. A full Council starts `proposer-a`,
+`proposer-b`, and `proposer-c` as separate background Paseo root agents. A
+reduced Council starts only `proposer-a`. Both modes then use fresh `root`
+agents for `challenger`, `verifier`, and `judge`.
 
-In a full Council, all proposer workers start before the Lead waits for any
+In a full Council, all proposer root agents start before the Lead waits for any
 result. Every round writes a durable artifact under
-`.scratch/architecture-council/<decision-slug>/`, and the Lead validates
-both the worker transcript and artifact before advancing.
+`.scratch/architecture-council/<decision-slug>/`, and the Lead validates both
+the root transcript and artifact before advancing.
 
-There is intentionally no fallback to internal subagents, serial role-play, or
-`omp`. Reopen the task inside a Herdr session when a full Council is required.
+There is intentionally no fallback to Herdr, internal subagents, peer workers,
+serial role-play, or `omp`. Restore Paseo/root before running the Council.
 
 ## The artifact is the architecture
 
-The most important output is the ADR plus the control-doc sync. The ADR preserves context, considered alternatives, evidence, trade-offs, guardrails, rejected options, reopen conditions, and migration or rollback strategy. `ARCHITECTURE.md` gets the owner map and routing rule, `RUNTIME_CONSTITUTION.md` gets any new invariant, and `PROCESS_AND_PROOF_POLICY.md` gets any new proof requirement. The decision-lock registry then marks the choice as `soft`, `guarded`, or `locked`, turning architecture from an assumption into an explicit rule future agents must read.
+The most important output is the ADR plus the control-doc sync. The ADR
+preserves context, considered alternatives, evidence, trade-offs, guardrails,
+rejected options, reopen conditions, and migration or rollback strategy.
+`ARCHITECTURE.md` gets the owner map and routing rule,
+`RUNTIME_CONSTITUTION.md` gets any new invariant, and
+`PROCESS_AND_PROOF_POLICY.md` gets any new proof requirement. The
+decision-lock registry then marks the choice as `soft`, `guarded`, or
+`locked`, turning architecture from an assumption into an explicit rule future
+agents must read.
 
 ## It's working if
 
-- The full Council opens separate Herdr panes running `pi`, never `omp`.
+- The full Council opens separate Paseo root agents, never Herdr, peer workers,
+  internal subagents, serial role-play, or `omp`.
 - Production code and architecture remain unchanged until the Council verdict is
   accepted.
 - Being unable to identify a safe next step triggers a full Council instead of

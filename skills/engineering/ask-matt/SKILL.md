@@ -18,10 +18,10 @@ Use this when work needs management, decisions, multiple workers, or quality gat
 /supervisor → /root → /peer
 ```
 
-- **`/supervisor`** represents the human on macro decisions: requirements, architecture solution, scope, acceptance, quality, and momentum recovery. It can decide `APPROVED`, `REVISE`, `RECOVER`, or `ESCALATE`; it does not plan peer work.
+- **`/supervisor`** represents the human on macro decisions: requirements, architecture solution, scope, acceptance, quality, and momentum recovery. It can decide `APPROVED`, `REVISE`, `RECOVER`, or `ESCALATE`; it does not plan peer work. It appends reusable coordination failures and anti-pattern lessons to `SUPERVISOR_NOTEBOOK.md`.
 - **`/root`** is the active project lead: reads `WORKSPACE_PROTOCOL.md`, preserves the mainline, does central work when delegation would slow things down, allocates peer workers only when needed, gates their output, and reports status upward.
 - **`/peer`** is the worker: executes one bounded packet from root. Peer must not read `WORKSPACE_PROTOCOL.md` and must not spawn Pi/Codex internal subagents.
-- Supervisor calls inspected root agents through Paseo with the `root` provider. Root calls inspected peer agents through Paseo with the `peer` provider. Peer does not call upward or sideways.
+- Supervisor calls inspected root agents through Paseo with the `root` provider, optionally overridden by `<repo>/config.model`'s `[root]` model settings. Root calls inspected peer agents through Paseo with the `peer` provider, optionally overridden by `<repo>/config.model`'s `[peer]` model settings. Peer does not call upward or sideways.
 
 Peers are workers root feeds when needed; they are not child subagents of root, and root should not create them before there is independent work.
 
@@ -39,7 +39,7 @@ If this grows into multi-worker work, move to `/supervisor → /root → /peer` 
 ## Design and proof gates
 
 - **`/structural-antipatterns`** — use when a plan or implementation may contain structural misfit, weak-owner workarounds, proof laundering, overengineering, or avoidable tax.
-- **`/architecture-council`** — mandatory before architecture decisions or when no safe architectural next step is clear. It still requires Herdr/Pi for Council workers; do not fall back to internal subagents.
+- **`/architecture-council`** — mandatory before architecture decisions or when no safe architectural next step is clear. It uses Paseo to spawn dedicated `root` agents for Council roles; do not fall back to Herdr, internal subagents, peers, serial role-play, or `omp`.
 - **`/architecture-premise-audit`** — use only for an explicitly requested broad premise audit when the whole system archetype may be wrong before repo vocabulary can be trusted.
 - **`/codebase-design`** — deep-module vocabulary: module, interface, seam, adapter, depth, leverage, locality.
 - **`/domain-modeling`** — domain vocabulary and ADR discipline.
@@ -63,4 +63,4 @@ If this grows into multi-worker work, move to `/supervisor → /root → /peer` 
 
 ## Precondition
 
-Run **`/setup-matt-pocock-skills`** once per repo to install issue tracker wiring and root control docs. For Paseo-managed repos, add `WORKSPACE_PROTOCOL.md`; root reads it, peer does not.
+Run **`/setup-matt-pocock-skills`** once per repo to install issue tracker wiring, root control docs, `WORKSPACE_PROTOCOL.md`, `SUPERVISOR_NOTEBOOK.md`, and `config.model`. Root reads `WORKSPACE_PROTOCOL.md`; peer does not. Supervisor uses `SUPERVISOR_NOTEBOOK.md` for durable coordination lessons, and supervisor/root use `config.model` for per-project downstream model defaults when creating new agents.

@@ -54,7 +54,6 @@ Root must not:
 - report peer claims as complete without proof;
 - keep a stale lead plan alive after supervisor marks momentum lost.
 
-
 ## Momentum recovery
 
 Supervisor may recover momentum by reading git history, session history, root reports, and accepted artifacts. If root loses the path, supervisor can instruct root to recover the mainline, revise the plan, or retire the current root and start a fresh lead context. Root must make the current path explicit before assigning more peer work.

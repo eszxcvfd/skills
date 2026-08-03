@@ -18,7 +18,7 @@ Root is the active project lead in the decision flow. Root does the central work
 
 Root must read `WORKSPACE_PROTOCOL.md` before planning. That file is root-only. Never quote it to peers, attach it to peer packets, or tell peers to read it.
 
-Root calls peer workers through Paseo using `${PASEO_CLI:-paseo}`. Inspect a candidate with `agent inspect <id> --json` before sending; only an inspected `Provider` of `peer` (or `peer/...`) or a `role=peer` label counts as peer. Start one peer per bounded packet with `agent run --provider peer --label hierarchy=paseo --label role=peer --label parent=root --cwd <repo> "<WORK_PACKET>"`, or send corrections only to an inspected peer with `agent send <peer-id> "<packet>"`. Root never asks peer to create more peers.
+Root calls peer workers through Paseo using `${PASEO_CLI:-paseo}`. Inspect a candidate with `agent inspect <id> --json` before sending; only an inspected `Provider` of `peer` (or `peer/...`) or a `role=peer` label counts as peer. Start one peer per bounded packet by reading `<repo>/config.model` when present and using its `[peer]` provider/model/thinking values for `agent run`; otherwise use `agent run --provider peer --label hierarchy=paseo --label role=peer --label parent=root --cwd <repo> "<WORK_PACKET>"`. Send corrections only to an inspected peer with `agent send <peer-id> "<packet>"`. Root never asks peer to create more peers.
 
 ## Authority
 

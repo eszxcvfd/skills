@@ -1,6 +1,6 @@
 ---
 name: architecture-council
-description: "Use before any architecture decision or architecture change, and whenever the agent cannot identify a safe next step because the current system or architecture is unclear, constrained, or becoming a dead end. This gate must run before production code or architecture changes. Convene independent Pi agents in Herdr to propose, challenge, verify, and judge, then record an ADR with guardrails, lock level, migration path, and reopen conditions."
+description: "Use before any architecture decision or architecture change, and whenever the agent cannot identify a safe next step because the current system or architecture is unclear, constrained, or becoming a dead end. This gate must run before production code or architecture changes."
 ---
 
 # Architecture Council
@@ -117,36 +117,37 @@ Before framing the case, read:
 
 If there is no ADR convention yet, default to `docs/adr/` so the rest of these engineering skills can find the decision. If the target repo already uses `docs/architecture/adr/`, follow that local convention.
 
-## Herdr Council contract
+## Paseo Root Council contract
 
 The quick gate can run in the current agent anywhere. Any reduced or full
-Council must run inside Herdr and must use `pi` for every Council worker.
+Council must use Paseo root agents for every Council role. Do not use Herdr,
+Pi/Codex internal subagents, serial role-play, `omp`, or peer workers as a
+fallback.
 
 Before opening the Council:
 
 ```bash
-test "${HERDR_ENV:-}" = "1"
-command -v pi
-herdr integration status
-herdr agent list
+command -v paseo
+paseo daemon status
+paseo provider ls --json
 ```
 
-If any prerequisite fails, stop after the quick gate and ask the user to run the
-Council from a Herdr session with `pi` available. Do not write production code,
-change architecture, or fall back to internal subagents, serial role-play,
-another multiplexer, or `omp`.
+The `root` provider must be available. If Paseo or root is unavailable, stop
+after the quick gate and ask the user to restore Paseo/root. Do not write
+production code, change architecture, or simulate the Council.
 
-The Lead remains in the current pane and owns framing, artifact ingestion, the
-quality gate, and final user interaction. Create these independent workers:
+The Lead remains in the current agent and owns framing, artifact ingestion, the
+quality gate, final user interaction, and non-scratch writes after approval.
+Each Council role is a fresh root agent spawned through Paseo:
 
-| Worker | Role | Mode |
+| Root agent label | Role | Mode |
 | --- | --- | --- |
-| `council-proposer-a` | Independent proposal A | reduced and full |
-| `council-proposer-b` | Independent proposal B | full only |
-| `council-proposer-c` | Independent proposal C | full only |
-| `council-challenger` | Cross-proposal challenge | reduced and full |
-| `council-verifier` | Evidence and claim verification | reduced and full |
-| `council-judge` | Final synthesis and verdict | reduced and full |
+| `proposer-a` | Independent proposal A | reduced and full |
+| `proposer-b` | Independent proposal B | full only |
+| `proposer-c` | Independent proposal C | full only |
+| `challenger` | Cross-proposal challenge | reduced and full |
+| `verifier` | Evidence and claim verification | reduced and full |
+| `judge` | Final synthesis and verdict | reduced and full |
 
 Use this artifact layout under
 `.scratch/architecture-council/<decision-slug>/`:
@@ -165,35 +166,47 @@ verification.md
 scores.yaml
 verdict.yaml
 ADR-draft.md
-workers.tsv
+roots.tsv
 ```
 
-Each worker prompt must include the appropriate file from `prompts/`, the case
-file, the evidence it may read, and the single artifact it must write. In a full
-Council, start all three proposer workers before waiting for any proposer so
-their reasoning remains independent. A reduced Council starts only
-`council-proposer-a`. Reuse participating proposer panes only for their one
-challenge reply.
+Every root prompt must include the case file, the evidence it may read, the
+single artifact it must write, and this boundary:
 
-Launch every worker with this Herdr API shape:
+```text
+COUNCIL_ROOT_BOUNDARY:
+- You are one Paseo root agent for one Architecture Council role.
+- Do not create peers, internal subagents, replacement roots, or side-channel agents.
+- Do not edit production files.
+- Write only the requested scratch artifact and report evidence.
+```
+
+Launch root agents with this shape:
 
 ```bash
-herdr agent start "$WORKER" \
+paseo agent run \
+  --background \
+  --provider root \
+  --title "architecture-council:<decision-slug>:<role>" \
+  --label hierarchy=paseo \
+  --label role=root \
+  --label architecture-council=<decision-slug> \
+  --label council-role=<role> \
   --cwd "$PROJECT_ROOT" \
-  --split right \
-  --no-focus \
-  -- pi
-herdr agent send "$WORKER" "$(cat "$PROMPT_FILE")"
-herdr pane send-keys "$PANE_ID" Enter
-herdr agent wait "$WORKER" --status idle --timeout 3600000
-herdr agent read "$WORKER" --source recent
+  "$(cat "$PROMPT_FILE")"
 ```
 
-Record worker and pane identifiers in `workers.tsv`. `idle` only means the Pi
-session stopped producing work; it is not success. Before advancing a round,
-read the transcript and validate that the required artifact exists and
-satisfies its output contract. Close only panes created by this run, and only
-after the Council ends or the user approves cleanup.
+Record the returned root agent id in `roots.tsv`. Wait and ingest with:
+
+```bash
+paseo agent wait "$ROOT_AGENT_ID" --timeout 3600 --json
+paseo agent logs "$ROOT_AGENT_ID" --json > ".scratch/architecture-council/<decision-slug>/transcripts/<role>.log"
+```
+
+`idle` or `completed` means the root agent stopped; it is not success. Before
+advancing a round, read the transcript and validate that the required artifact
+exists and satisfies its output contract. Archive only Council root agents
+created by this run, and only after the Council ends or the user approves
+cleanup.
 
 ## Council rounds
 
@@ -203,17 +216,16 @@ Use `.scratch/architecture-council/<decision-slug>/` for intermediate artifacts.
 
 Act as **Lead**. Rewrite the decision as a case file using [templates/case.yaml](templates/case.yaml). Include constraints, non-goals, existing locks, the risk score, and the exact question being decided.
 
-Do not propose a solution in Round 0. If the framing has a blocking ambiguity, ask the user before launching proposers. Otherwise state assumptions explicitly and continue.
+Do not propose a solution in Round 0. If the framing has a blocking ambiguity, ask the user before launching root agents. Otherwise state assumptions explicitly and continue.
 
 ### Round 1 — Independent proposals
 
-For a full Council, launch `council-proposer-a`, `council-proposer-b`, and
-`council-proposer-c` as separate Herdr agents running `pi`. Start all three
-before waiting for any of them. For a reduced Council, launch only
-`council-proposer-a`. Each participating proposer receives the same case brief
-but cannot read other proposal artifacts.
+For a full Council, spawn `proposer-a`, `proposer-b`, and `proposer-c` as
+separate Paseo root agents in the background. Start all three before waiting for
+any of them. For a reduced Council, spawn only `proposer-a`. Each participating
+proposer receives the same case brief but cannot read other proposal artifacts.
 
-Each proposer uses [prompts/proposer.md](prompts/proposer.md) and must output:
+Each proposer must output:
 
 - the proposed architecture;
 - why it fits the case;
@@ -223,28 +235,25 @@ Each proposer uses [prompts/proposer.md](prompts/proposer.md) and must output:
 - lock level introduced or changed;
 - conditions where the option stops being appropriate.
 
-Independent means independent: Round 1 Pi agents do not read each other's
+Independent means independent: Round 1 root agents do not read each other's
 answers.
 
 ### Round 2 — Cross-examination
 
-Launch `council-challenger` as a new Herdr agent running `pi` with all
-validated proposals and
-[prompts/challenger.md](prompts/challenger.md). The Challenger attacks the
-proposals rather than adding new ones, unless all proposals miss an obvious
-boring option.
+Spawn a fresh `challenger` root agent with all validated proposals. The
+Challenger attacks the proposals rather than adding new ones, unless all
+proposals miss an obvious boring option.
 
-Send the challenge back to each original proposer Pi agent. Every proposer gets
-one reply and writes only its assigned reply artifact. Do not allow infinite
-debate.
+Send the challenge back to each original proposer root with `paseo agent send`.
+Every proposer gets one reply and writes only its assigned reply artifact. Do
+not allow infinite debate.
 
 ### Round 3 — Verification
 
-Launch `council-verifier` as a new Herdr agent running `pi` with the
-proposals, challenge, replies, and
-[prompts/verifier.md](prompts/verifier.md). The Verifier checks load-bearing
-claims against code, tests, dependency evidence, official docs, and small
-spikes only when a spike answers a disputed claim.
+Spawn a fresh `verifier` root agent with the proposals, challenge, and replies.
+The Verifier checks load-bearing claims against code, tests, dependency
+evidence, official docs, and small spikes only when a spike answers a disputed
+claim.
 
 Classify every important claim as:
 
@@ -257,18 +266,19 @@ Contradicted
 
 The Verifier does not vote by taste. It reports evidence and uncertainty.
 
-### Round 4 — Scoring and vote
+### Round 4 — Scoring
 
-Score each option with the relevant rubric from [rubrics/](rubrics/). Use [rubrics/default.yaml](rubrics/default.yaml) unless the decision is mainly database, module-boundary, or infrastructure.
+Score each option with the relevant rubric from [rubrics/](rubrics/). Use
+[rubrics/default.yaml](rubrics/default.yaml) unless the decision is mainly
+database, module-boundary, or infrastructure.
 
 Vote is signal, not authority. A majority can be wrong if the evidence contradicts it or if the boring option has lower lock-in.
 
 ### Round 5 — Verdict
 
-Launch `council-judge` as a separate Herdr agent running `pi`. Give it the
-case, all validated round artifacts, rubric scores, and
-[prompts/judge.md](prompts/judge.md). The Lead must not silently replace the
-Judge; it ingests and presents the Judge's result.
+Spawn a fresh `judge` root agent. Give it the case, all validated round
+artifacts, rubric scores, and verification. The Lead must not silently replace
+the Judge; it ingests and presents the Judge's result.
 
 The verdict uses [templates/verdict.yaml](templates/verdict.yaml) and must include:
 
@@ -283,7 +293,10 @@ The verdict uses [templates/verdict.yaml](templates/verdict.yaml) and must inclu
 - reopen conditions;
 - updates needed to `ARCHITECTURE.md`, `RUNTIME_CONSTITUTION.md`, and `PROCESS_AND_PROOF_POLICY.md`.
 
-If the Council was auto-triggered inside another task, or if the verdict touches a `locked` item, contradicts an ADR, changes data, or adds infrastructure, present the verdict and ask the user for approval before writing non-scratch files or proceeding to implementation.
+If the Council was auto-triggered inside another task, or if the verdict touches
+a `locked` item, contradicts an ADR, changes data, or adds infrastructure,
+present the verdict and ask the user for approval before writing non-scratch
+files or proceeding to implementation.
 
 ## ADR and decision locks
 
@@ -345,10 +358,9 @@ is accepted.
 
 The Council is complete only when:
 
-- the required reduced or full Council ran inside Herdr;
-- every Council worker was launched with `pi`, never `omp`;
-- for a full Council, all three proposer panes were started before the Lead
-  waited for results;
+- the required reduced or full Council ran through Paseo root agents;
+- every Council role was a root provider agent, never Herdr, internal subagent, peer, serial role-play, or `omp`;
+- for a full Council, all three proposer root agents were started before the Lead waited for results;
 - the quick-gate score and trigger decision are recorded;
 - Round 0 framed the case without bias;
 - Round 1 produced three independent proposals for a full Council or one

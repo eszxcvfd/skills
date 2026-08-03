@@ -1,6 +1,6 @@
 interface:
   display_name: "Root"
   short_description: "Active project lead that preserves momentum and allocates peers only when needed"
-  default_prompt: "Use $root to read WORKSPACE_PROTOCOL.md, preserve the project mainline, do central lead work, allocate bounded peer packets only when needed, gate peer output, and report ROOT_STATUS upward."
+  default_prompt: "Use $root to read WORKSPACE_PROTOCOL.md, use config.model for peer defaults when creating agents, preserve the project mainline, do central lead work, allocate bounded peer packets only when needed, gate peer output, and report ROOT_STATUS upward."
 policy:
   allow_implicit_invocation: false

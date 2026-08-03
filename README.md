@@ -74,7 +74,7 @@ Sau khi cài:
 3. `/supervisor` → `/root` → `/peer` cho flow lớn.
 4. Với flow nhỏ: `/grill-with-docs` → `/to-spec` → `/to-tickets` → `/implement`.
 
-Root đọc `WORKSPACE_PROTOCOL.md`; peer không đọc file đó. Root không tạo peer trước khi thật sự có lát việc độc lập.
+Root đọc `WORKSPACE_PROTOCOL.md`; peer không đọc file đó. `SUPERVISOR_NOTEBOOK.md` là memory của supervisor cho failure/anti-pattern quan sát được. `config.model` giữ provider/model/thinking mặc định cho supervisor/root/peer theo từng project, để đổi model mà không sửa prompt. Root không tạo peer trước khi thật sự có lát việc độc lập.
 
 ---
 
@@ -107,13 +107,12 @@ Skills I use daily for code work.
 
 - **[ask-matt](./skills/engineering/ask-matt/SKILL.md)** — Ask which skill or flow fits your situation. A router over the user-invoked skills in this repo.
 - **[supervisor](./skills/engineering/supervisor/SKILL.md)** — Decision proxy above root: handles macro decisions, momentum recovery, quality, and progress truth.
-- **[root](./skills/engineering/root/SKILL.md)** — Active project lead that reads `WORKSPACE_PROTOCOL.md`, preserves momentum, does central work, allocates peers only when needed, and gates output.
+- **[root](./skills/engineering/root/SKILL.md)** — Active project lead that reads `WORKSPACE_PROTOCOL.md`, uses repo-local `config.model` for peer defaults, preserves momentum, allocates peers only when needed, and gates output.
 - **[peer](./skills/engineering/peer/SKILL.md)** — Independent worker for any bounded packet from root.
 - **[grill-with-docs](./skills/engineering/grill-with-docs/SKILL.md)** — Grilling session that also builds your project's domain model, sharpening terminology and updating `CONTEXT.md` and ADRs inline.
 - **[triage](./skills/engineering/triage/SKILL.md)** — Move issues through a state machine of triage roles.
 - **[improve-codebase-architecture](./skills/engineering/improve-codebase-architecture/SKILL.md)** — Scan a codebase for deepening opportunities, present them as a visual HTML report, then grill through whichever one you pick.
-- **[setup-matt-pocock-skills](./skills/engineering/setup-matt-pocock-skills/SKILL.md)** — Configure this repo for the engineering skills (issue tracker, triage labels, domain docs, and root control docs). Run once per repo before using the other engineering skills.
-- **[to-spec](./skills/engineering/to-spec/SKILL.md)** — Turn the current conversation into a spec with architecture placement, runtime invariants, and required proof. No interview — just synthesizes what you've already discussed.
+- **[setup-matt-pocock-skills](./skills/engineering/setup-matt-pocock-skills/SKILL.md)** — Configure this repo for the engineering skills (issue tracker, triage labels, domain docs, root control docs, `WORKSPACE_PROTOCOL.md`, `SUPERVISOR_NOTEBOOK.md`, and `config.model`). Run once per repo.
 - **[to-tickets](./skills/engineering/to-tickets/SKILL.md)** — Break any plan, spec, or conversation into tracer-bullet tickets with blocking edges, control notes, and required proof — local markdown or native tracker links.
 - **[implement](./skills/engineering/implement/SKILL.md)** — Build the work described by a spec or set of tickets, maintaining `ACTIVE_EXECUTION_PLAN.md`, driving `/tdd`, proving per policy, and closing with `/code-review` before committing.
 - **[repo-refresh](./skills/engineering/repo-refresh/SKILL.md)** — Explicit repository-wide cleanup for stale docs, dead plans, stale proof machinery, generated debris, and obsolete tests.
@@ -122,7 +121,7 @@ Skills I use daily for code work.
 
 **Model-invoked**
 
-- **[architecture-council](./skills/engineering/architecture-council/SKILL.md)** — Mandatory pre-code gate for every architecture decision or unclear architectural next step, evaluated by independent Pi agents in Herdr.
+- **[architecture-council](./skills/engineering/architecture-council/SKILL.md)** — Mandatory pre-code gate for every architecture decision or unclear architectural next step, evaluated by dedicated Paseo root agents.
 - **[architecture-premise-audit](./skills/engineering/architecture-premise-audit/SKILL.md)** — Broad premise audit for wrong system archetypes before trusting repo vocabulary, proof, or module boundaries.
 - **[prototype](./skills/engineering/prototype/SKILL.md)** — Build a throwaway prototype to answer a design question — a runnable terminal app for state/logic questions, or several radically different UI variations toggleable from one route.
 - **[diagnosing-bugs](./skills/engineering/diagnosing-bugs/SKILL.md)** — Disciplined diagnosis loop for hard bugs and performance regressions: reproduce → minimise → hypothesise → instrument → fix → regression-test.

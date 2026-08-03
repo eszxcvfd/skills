@@ -32,7 +32,7 @@ The current management chain is:
 
 Supervisor decides macro issues and recovers momentum for the human. Root is the active lead: it preserves the mainline, does central work, and feeds peer workers only when needed. Peer executes bounded packets without reading `WORKSPACE_PROTOCOL.md` or spawning internal subagents.
 
-Supervisor calls inspected root agents through Paseo with the `root` provider. Root calls inspected peer agents through Paseo with the `peer` provider. Peer reports evidence back to root and does not call upward or sideways.
+Supervisor calls inspected root agents through Paseo with the `root` provider, optionally overridden by `<repo>/config.model`'s `[root]` model settings. Root calls inspected peer agents through Paseo with the `peer` provider, optionally overridden by `<repo>/config.model`'s `[peer]` model settings. Supervisor appends reusable coordination failures and anti-pattern lessons to `SUPERVISOR_NOTEBOOK.md`; peer reports evidence back to root and does not call upward or sideways.
 
 For ordinary small work, `ask-matt` still routes to `grill-with-docs → to-spec → to-tickets → implement → code-review`. For design-shape concerns it points at [structural-antipatterns](https://aihero.dev/skills-structural-antipatterns), [codebase-design](https://aihero.dev/skills-codebase-design), [architecture-premise-audit](https://aihero.dev/skills-architecture-premise-audit), or [architecture-council](https://aihero.dev/skills-architecture-council). For cleanup it points at [repo-refresh](https://aihero.dev/skills-repo-refresh). For maximum-recall peer review it points at [ultra-review](https://aihero.dev/skills-ultra-review).
 

@@ -1,6 +1,6 @@
 interface:
   display_name: "Supervisor"
   short_description: "Macro decision and momentum proxy above root"
-  default_prompt: "Use $supervisor to act as the human's macro decision proxy: resolve requirements/architecture/scope, audit root plan/progress, decide APPROVED/REVISE/RECOVER/ESCALATE, recover lost momentum from history, and report evidence-backed progress without planning peer work."
+  default_prompt: "Use $supervisor to act as the human's macro decision proxy: resolve requirements/architecture/scope, audit root plan/progress, use config.model for root defaults when creating agents, append reusable coordination lessons to SUPERVISOR_NOTEBOOK.md, decide APPROVED/REVISE/RECOVER/ESCALATE, recover lost momentum from history, and report evidence-backed progress without planning peer work."
 policy:
   allow_implicit_invocation: false
