@@ -1,12 +1,15 @@
 Quickstart:
 
 ```bash
-npx skills@latest add eszxcvfd/skills --skill=supervisor
+claude plugin marketplace add --scope project eszxcvfd/skills
+claude plugin install --scope project mattpocock-skills@eszxcvfd
 ```
 
 ```bash
-npx skills@latest update supervisor
+claude plugin update --scope project mattpocock-skills@eszxcvfd
 ```
+
+Non-Claude agents can copy just this skill with `npx skills@latest add eszxcvfd/skills --skill=supervisor`.
 
 [Source](https://github.com/eszxcvfd/skills/tree/main/skills/engineering/supervisor)
 
@@ -14,9 +17,11 @@ npx skills@latest update supervisor
 
 Supervisor is the decision proxy above root in the Paseo hierarchy. It handles macro decisions such as requirements, architecture solution, scope, acceptance, quality, and momentum recovery; it does not plan peer work or implement code.
 
-Supervisor calls root through Paseo with the `root` provider via `${PASEO_CLI:-paseo}`. It inspects any candidate before sending; only a verified `root` provider (or `role=root` label) counts as root. If no verified root exists, it reads `<repo>/config.model` when present and starts root with that file's `[root]` provider/model/thinking values; otherwise it starts root with `agent run --provider root --label hierarchy=paseo --label role=root --cwd <repo> "<packet>"`. It never sends root packets to its own supervisor session and never calls peer directly.
+Supervisor calls root through Paseo with the `root` provider via `${PASEO_CLI:-paseo}`. Every fresh human request to call, summon, start, open, create, or "gọi" root creates a fresh root. It resumes an existing root only when the human explicitly names an existing root/session id or asks to continue/reuse it. Before launch, it reads `<repo>/config.model` when present, verifies the exact `[root]` provider/model/thinking values against the role provider catalog, and refuses guessed or unavailable model IDs. CLI launches use the role provider alias plus model/thinking flags; MCP `paseo_create_agent` provider must be `<role>/<model>` after catalog verification. Existing agents keep their original model/thinking; fresh work uses `config.model`, so stale-model roots are reused only when explicitly named. It never sends root packets to its own supervisor session and never calls peer directly.
 
 Supervisor also owns `SUPERVISOR_NOTEBOOK.md`: a durable memory for coordination failures and anti-patterns observed while monitoring root. It appends lessons for tool-call loops, missing env/config, quota exhaustion, stalled root/peer waits, permission loops, stale sessions, or protocol friction, with observation, counterevidence, diagnosis, cost, existing coverage, correction candidate, and next comparable check.
+
+For coding, TDD, bugfix implementation, test/proof, and code review, supervisor passes root the macro constraint that those slices are peer-default unless the human explicitly asks root to do them inline. Supervisor still does not plan or assign peer packets; root owns the split.
 
 ## When to reach for it
 

@@ -1,20 +1,29 @@
 Quickstart:
 
 ```bash
-npx skills@latest add eszxcvfd/skills --skill=root
+claude plugin marketplace add --scope project eszxcvfd/skills
+claude plugin install --scope project mattpocock-skills@eszxcvfd
 ```
 
 ```bash
-npx skills@latest update root
+claude plugin update --scope project mattpocock-skills@eszxcvfd
 ```
+
+Non-Claude agents can copy just this skill with `npx skills@latest add eszxcvfd/skills --skill=root`.
 
 [Source](https://github.com/eszxcvfd/skills/tree/main/skills/engineering/root)
 
 ## What it does
 
-Root is the active project lead in the Paseo hierarchy. It reads `WORKSPACE_PROTOCOL.md`, preserves the mainline, does central work when delegation would slow things down, allocates peer packets only when needed, and gates output before reporting upward.
+Root is the active project lead in the Paseo hierarchy. It reads `WORKSPACE_PROTOCOL.md`, preserves the mainline, does central work when delegation would slow things down, starts fresh peer sessions only when independent bounded execution is useful, and gates terminal output before reporting upward.
 
-Root calls peer workers through Paseo with the `peer` provider via `${PASEO_CLI:-paseo}`. It inspects any candidate before sending; only a verified `peer` provider (or `role=peer` label) counts as peer. It starts one peer per bounded packet using `<repo>/config.model`'s `[peer]` provider/model/thinking values when present; otherwise it uses `agent run --provider peer --label hierarchy=paseo --label role=peer --label parent=root --cwd <repo> "<WORK_PACKET>"`. It sends corrections only to an inspected peer with `agent send <peer-id> "<packet>"`.
+Root calls peer through Paseo with the `peer` provider via `${PASEO_CLI:-paseo}`. It reads `<repo>/config.model` when present, verifies the exact `[peer]` provider/model/thinking values against the role provider catalog, and refuses guessed or unavailable model IDs. CLI launches use the role provider alias plus model/thinking flags; MCP `paseo_create_agent` provider must be `<role>/<model>` after catalog verification, must never be called with a bare model id, and stores the model in provider rather than `settings.model`. Existing agents keep their original model/thinking; fresh work uses `config.model`, so stale-model peers are reused only when explicitly named. Normal work starts one fresh peer per bounded packet. Peer packets must not ask peer to read `WORKSPACE_PROTOCOL.md` or `config.model`; root sends only sanitized packet-specific constraints. Peer completion is native: root tracks the returned peer id and retrieves the final `PEER_STATUS` through wait/log/inspect, not a `ROOT_AGENT_ID` callback.
+
+## Peer-default work
+
+Root keeps design/lead ownership: requirements shaping, scope, architecture solution, domain model, plans, tickets, structural-antipattern review, acceptance decisions, momentum recovery, and final integration judgment.
+
+Peer-default work covers coding and code edits, TDD/red-green implementation, bugfix implementation after root defines the repro and invariant, tests, proof commands, code review, and bounded code cleanup. Root can still do this work inline when the human explicitly asks, when delegation costs more than the task, when no safe peer packet exists, or when verified provider/model failure makes peer unavailable. Root must state that reason and must not promote proof rows unless it actually ran the proof.
 
 ## When to reach for it
 
@@ -24,4 +33,4 @@ Use it when a project needs a lead agent to keep momentum, own the mainline, do 
 
 ## Where it fits
 
-It sits below [supervisor](https://aihero.dev/skills-supervisor) and coordinates [peer](https://aihero.dev/skills-peer) workers. It uses [structural-antipatterns](https://aihero.dev/skills-structural-antipatterns) as the design-control lens.
+It sits below [supervisor](https://aihero.dev/skills-supervisor) and coordinates [peer](https://aihero.dev/skills-peer). It uses [structural-antipatterns](https://aihero.dev/skills-structural-antipatterns) as the design-control lens.

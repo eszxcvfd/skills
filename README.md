@@ -8,28 +8,32 @@ Use this README to pull the set into **any other project**.
 
 ---
 
-## Install vào project khác
+## Tải xuống / cài vào project khác
 
 Làm trong thư mục project đích.
 
-### Claude Code — cách mới, khuyến nghị
+### Claude Code — khuyến nghị
+
+Claude Code dùng plugin marketplace của repo này; đây là cách cài chính.
 
 ```bash
-claude plugin marketplace add eszxcvfd/skills
-claude plugin install mattpocock-skills@eszxcvfd
+claude plugin marketplace add --scope project eszxcvfd/skills
+claude plugin install --scope project mattpocock-skills@eszxcvfd
 ```
 
-Cập nhật:
+`--scope project` giữ plugin trong project hiện tại. Muốn cài global cho mọi project Claude Code thì bỏ `--scope project`.
+
+Tải lại bản mới trong project:
 
 ```bash
-claude plugin update mattpocock-skills@eszxcvfd
+claude plugin update --scope project mattpocock-skills@eszxcvfd
 ```
 
-Nếu muốn bản upstream gốc của Matt:
+Nếu muốn bản upstream gốc của Matt trong project hiện tại:
 
 ```bash
-claude plugin marketplace add mattpocock/skills
-claude plugin install mattpocock-skills@mattpocock
+claude plugin marketplace add --scope project mattpocock/skills
+claude plugin install --scope project mattpocock-skills@mattpocock
 ```
 
 ### Agent khác — copy skill vào repo
@@ -42,7 +46,8 @@ npx skills@latest add eszxcvfd/skills
 - Chọn skill cần dùng và agent: Claude Code, Codex, OpenCode, Cursor, …
 - Nên tick `setup-matt-pocock-skills`.
 - Trong agent, chạy `/setup-matt-pocock-skills` một lần/repo.
-- Cập nhật: chạy lại cùng lệnh `npx skills@latest add eszxcvfd/skills`.
+- Tải lại một skill đã cài: `npx skills@latest update <skill-name>`.
+- Đổi bộ skill hoặc thêm skill mới: chạy lại `npx skills@latest add eszxcvfd/skills`.
 
 ### Một clone global — nhiều project
 
@@ -65,6 +70,26 @@ cd ~/src/skills && git pull && ./scripts/link-skills.sh
 
 OpenCode / Pi: trỏ skill path tới `~/src/skills/skills`, hoặc copy/symlink bucket cần dùng.
 
+### Paseo workflow bootstrap
+
+Repo này có `paseo.json` với script `bootstrap` để chuẩn bị clone local và validate plugin:
+
+```bash
+paseo script start bootstrap --cwd /path/to/skills
+```
+
+Nếu đang ở repo đã mở trong Paseo:
+
+```bash
+paseo script start bootstrap
+```
+
+Workflow chạy `npm ci` rồi `claude plugin validate . --strict`. Nếu `paseo script ls --cwd /path/to/skills` báo `WORKSPACE_NOT_FOUND`, mở repo trong Paseo trước hoặc chạy trực tiếp:
+
+```bash
+npm ci && claude plugin validate . --strict
+```
+
 ### Flow Paseo
 
 Sau khi cài:
@@ -74,7 +99,7 @@ Sau khi cài:
 3. `/supervisor` → `/root` → `/peer` cho flow lớn.
 4. Với flow nhỏ: `/grill-with-docs` → `/to-spec` → `/to-tickets` → `/implement`.
 
-Root đọc `WORKSPACE_PROTOCOL.md`; peer không đọc file đó. `SUPERVISOR_NOTEBOOK.md` là memory của supervisor cho failure/anti-pattern quan sát được. `config.model` giữ provider/model/thinking mặc định cho supervisor/root/peer theo từng project, để đổi model mà không sửa prompt. Root không tạo peer trước khi thật sự có lát việc độc lập.
+Root đọc `WORKSPACE_PROTOCOL.md`; peer không đọc file đó. `SUPERVISOR_NOTEBOOK.md` là memory của supervisor cho failure/anti-pattern quan sát được. `config.model` giữ provider/model/thinking mặc định cho supervisor/root/peer theo từng project, để đổi model mà không sửa prompt. Root giữ design/lead; coding/TDD/bugfix/test/proof/code-review mặc định đẩy xuống peer khi vượt quá một bước inline nhỏ, trừ khi bạn yêu cầu root tự làm.
 
 ---
 
@@ -107,8 +132,8 @@ Skills I use daily for code work.
 
 - **[ask-matt](./skills/engineering/ask-matt/SKILL.md)** — Ask which skill or flow fits your situation. A router over the user-invoked skills in this repo.
 - **[supervisor](./skills/engineering/supervisor/SKILL.md)** — Decision proxy above root: handles macro decisions, momentum recovery, quality, and progress truth.
-- **[root](./skills/engineering/root/SKILL.md)** — Active project lead that reads `WORKSPACE_PROTOCOL.md`, uses repo-local `config.model` for peer defaults, preserves momentum, allocates peers only when needed, and gates output.
-- **[peer](./skills/engineering/peer/SKILL.md)** — Independent worker for any bounded packet from root.
+- **[root](./skills/engineering/root/SKILL.md)** — Active project lead that reads `WORKSPACE_PROTOCOL.md`, uses repo-local `config.model` for peer defaults, preserves momentum, keeps design/lead work, routes coding/test/review slices to peer, and gates output.
+- **[peer](./skills/engineering/peer/SKILL.md)** — Independent worker for any bounded packet from root; reports final status back to root.
 - **[grill-with-docs](./skills/engineering/grill-with-docs/SKILL.md)** — Grilling session that also builds your project's domain model, sharpening terminology and updating `CONTEXT.md` and ADRs inline.
 - **[triage](./skills/engineering/triage/SKILL.md)** — Move issues through a state machine of triage roles.
 - **[improve-codebase-architecture](./skills/engineering/improve-codebase-architecture/SKILL.md)** — Scan a codebase for deepening opportunities, present them as a visual HTML report, then grill through whichever one you pick.

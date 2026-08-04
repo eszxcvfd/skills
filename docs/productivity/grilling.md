@@ -1,12 +1,15 @@
 Quickstart:
 
 ```bash
-npx skills@latest add eszxcvfd/skills --skill=grilling
+claude plugin marketplace add --scope project eszxcvfd/skills
+claude plugin install --scope project mattpocock-skills@eszxcvfd
 ```
 
 ```bash
-npx skills@latest update grilling
+claude plugin update --scope project mattpocock-skills@eszxcvfd
 ```
+
+Non-Claude agents can copy just this skill with `npx skills@latest add eszxcvfd/skills --skill=grilling`.
 
 [Source](https://github.com/eszxcvfd/skills/tree/main/skills/productivity/grilling)
 

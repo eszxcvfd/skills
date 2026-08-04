@@ -8,8 +8,8 @@ Reachable only when you type them (Claude Code: `disable-model-invocation: true`
 
 - **[ask-matt](./ask-matt/SKILL.md)** — Ask which skill or flow fits your situation. A router over the user-invoked skills in this repo.
 - **[supervisor](./supervisor/SKILL.md)** — Decision proxy above root: handles macro decisions, momentum recovery, quality, and progress truth.
-- **[root](./root/SKILL.md)** — Active project lead that reads `WORKSPACE_PROTOCOL.md`, uses repo-local `config.model` for peer defaults, preserves momentum, allocates peers only when needed, and gates output.
-- **[peer](./peer/SKILL.md)** — Independent worker for any bounded packet from root.
+- **[root](./root/SKILL.md)** — Active project lead that reads `WORKSPACE_PROTOCOL.md`, uses repo-local `config.model` for peer defaults, preserves momentum, keeps design/lead work, routes coding/test/review slices to peer, and gates output.
+- **[peer](./peer/SKILL.md)** — Independent worker for any bounded packet from root; reports final status back to root.
 - **[grill-with-docs](./grill-with-docs/SKILL.md)** — Grilling session that also builds your project's domain model, sharpening terminology and updating `CONTEXT.md` and ADRs inline.
 - **[triage](./triage/SKILL.md)** — Move issues through a state machine of triage roles.
 - **[improve-codebase-architecture](./improve-codebase-architecture/SKILL.md)** — Scan a codebase for deepening opportunities, present them as a visual HTML report, then grill through whichever one you pick.

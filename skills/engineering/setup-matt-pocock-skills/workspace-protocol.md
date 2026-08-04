@@ -5,21 +5,35 @@ Root-only law for this repository. Peer agents must not read this file. Root may
 ## Paseo hierarchy
 
 ```text
-human → supervisor → root ⇄ peer workers
+human → supervisor → root → peer
 ```
 
 - **Supervisor** represents the human for macro decisions: architecture solution, requirements, quality bar, progress truth, acceptance, and momentum recovery. Supervisor does not plan peer work.
-- **Root** is the active lead for one project. Root preserves the mainline, does the central work when that is cheaper than delegation, allocates peer workers only when needed, gates their output, and reports status upward.
-- **Peer** is an independent worker. Peer is not a child subagent of root. Root gives peer scoped work packets such as frontend, backend, infrastructure, review, or proof work, not hidden policy.
+- **Root** is the active lead for one project. Root preserves the mainline, does the central work when that is cheaper than delegation, starts peer only when independent bounded execution is useful, gates peer output, and reports status upward.
+- **Peer** is an independent bounded agent. Peer is not a child subagent of root. Root gives peer scoped work packets such as frontend, backend, infrastructure, review, or proof work, not hidden policy.
 
 ## Agent call routing
 
 - `config.model` at the repo root is the per-project source of truth for supervisor/root/peer provider, model, and thinking defaults.
 - Supervisor calls root through Paseo, using the `[root]` entry from `config.model` when present; otherwise use the `root` provider default. Supervisor must not call peer directly.
-- Root calls peer workers through Paseo, using the `[peer]` entry from `config.model` when present; otherwise use the `peer` provider default. Root may create one peer per bounded packet when independent work is useful.
-- Peer returns evidence to root and must not call supervisor, root replacements, or other peers.
+- Root calls peer through Paseo, using the `[peer]` entry from `config.model` when present; otherwise use the `peer` provider default. Root may create one peer per bounded packet when independent work is useful.
+- Before launching root or peer from `config.model`, compare the exact provider/model/thinking values against the role provider catalog. Do not guess model prefixes or launch an unavailable model; report catalog mismatches before retrying.
+- CLI launches use the role provider alias plus model/thinking flags after catalog verification. MCP `paseo_create_agent` provider must be `<role>/<model>` after catalog verification; do not pass the raw model provider alone.
+- Never call `paseo_create_agent` with a bare model id; the first MCP create attempt must use `<role>/<model>` after catalog verification.
+- MCP create_agent model lives in provider; settings must not contain model.
+- Existing agents keep their original model/thinking; fresh work uses `config.model`. Treat old sessions with stale model settings as reusable only when the human explicitly names them.
+- Peer packets must not ask peer to read `WORKSPACE_PROTOCOL.md` or `config.model`; root reads those files and sends only sanitized packet-specific constraints.
+- Peer returns evidence to root as the terminal run result and must not call supervisor, root replacements, or other peers.
 - Use labels to preserve the hierarchy: `hierarchy=paseo`, `role=supervisor|root|peer`, and `parent=root` for peers.
-- Prefer `paseo agent send <id> "<packet>"` for an existing active downstream agent; prefer `paseo agent run --provider <role> --model <model> --thinking <thinking> --label hierarchy=paseo --label role=<role> --cwd <repo> "<packet>"` when starting root, and add `--label parent=root` when starting peer.
+- Fresh downstream work starts a fresh agent with `paseo agent run --provider <role> --label hierarchy=paseo --label role=<role> --cwd <repo> "<packet>"`; add `--label parent=root` when starting peer. Use `agent send` only when the human or root task explicitly names an existing downstream agent/session to continue.
+
+## Work ownership default
+
+Root keeps design/lead ownership: requirements shaping, scope, architecture solution, domain model, plans, tickets, structural-antipattern review, acceptance decisions, momentum recovery, and final integration judgment.
+
+Coding, TDD, bugfix implementation, test/proof, and code review are peer-default. Root should split mixed work so root keeps the design/acceptance decision and peer receives the implementation, test, proof, or review packet. Root may do peer-default work inline only when the human explicitly asks root to do it, the task is smaller than delegation overhead, no safe peer packet can be created, or verified provider/model failure makes peer unavailable; root must state the reason.
+
+Peer completion is not a chat callback. Root must not include `ROOT_AGENT_ID` in peer packets and must not ask peer to call `paseo agent send` for status. Root tracks the returned peer id, waits for completion, and retrieves the final `PEER_STATUS` through native wait/log/inspect.
 
 ## Supervisor notebook
 
@@ -29,7 +43,7 @@ This notebook is not a project decision log, task tracker, transcript, or peer p
 
 ## Internal subagents are disabled
 
-Root, supervisor, and peer must not use Pi or Codex internal subagent facilities as the default execution model. Use Paseo peer workers instead.
+Root, supervisor, and peer must not use Pi or Codex internal subagent facilities as the default execution model. Use Paseo peer instead.
 
 Allowed parallelism is explicit peer allocation by root. Do not create peers before the project needs them. If a tool or skill says to spawn a generic subagent, root must translate that into one or more peer packets or run the work inline. Peer must never create more peers; peer asks root for a split.
 

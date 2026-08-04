@@ -12,18 +12,20 @@ A **flow** is a path through the skills. The current top-level operating model i
 
 ## Paseo hierarchy
 
-Use this when work needs management, decisions, multiple workers, or quality gates:
+Use this when work needs management, decisions, multiple peers, or quality gates:
 
 ```text
 /supervisor → /root → /peer
 ```
 
 - **`/supervisor`** represents the human on macro decisions: requirements, architecture solution, scope, acceptance, quality, and momentum recovery. It can decide `APPROVED`, `REVISE`, `RECOVER`, or `ESCALATE`; it does not plan peer work. It appends reusable coordination failures and anti-pattern lessons to `SUPERVISOR_NOTEBOOK.md`.
-- **`/root`** is the active project lead: reads `WORKSPACE_PROTOCOL.md`, preserves the mainline, does central work when delegation would slow things down, allocates peer workers only when needed, gates their output, and reports status upward.
-- **`/peer`** is the worker: executes one bounded packet from root. Peer must not read `WORKSPACE_PROTOCOL.md` and must not spawn Pi/Codex internal subagents.
-- Supervisor calls inspected root agents through Paseo with the `root` provider, optionally overridden by `<repo>/config.model`'s `[root]` model settings. Root calls inspected peer agents through Paseo with the `peer` provider, optionally overridden by `<repo>/config.model`'s `[peer]` model settings. Peer does not call upward or sideways.
+- **`/root`** is the active project lead: reads `WORKSPACE_PROTOCOL.md`, preserves the mainline, keeps design/lead decisions, starts fresh peer sessions for implementation-heavy bounded work, gates their terminal output, and reports status upward.
+- **`/peer`** executes one bounded packet from root. Peer must not read `WORKSPACE_PROTOCOL.md`, must not spawn Pi/Codex internal subagents, and returns its final `PEER_STATUS` block as the terminal run result.
+- Supervisor creates fresh root agents through Paseo for fresh requests, optionally overridden by `<repo>/config.model`'s `[root]` model settings after exact catalog preflight. Root creates fresh peer agents through Paseo for bounded work, optionally overridden by `<repo>/config.model`'s `[peer]` model settings after exact catalog preflight. Root keeps design/lead; peer is default for coding, TDD, bugfix implementation, test/proof, and code review. Root retrieves peer completion through native wait/log/inspect rather than a callback message.
+- CLI launches use role providers plus model/thinking flags; MCP `paseo_create_agent` provider must be `<role>/<model>` after catalog verification. Existing agents keep their original model/thinking; fresh work uses `config.model`, so stale sessions are reused only when explicitly named.
+- Peer packets must not ask peer to read `WORKSPACE_PROTOCOL.md` or `config.model`; root reads those files and sends only sanitized packet-specific constraints.
 
-Peers are workers root feeds when needed; they are not child subagents of root, and root should not create them before there is independent work.
+Peers are independent bounded agents root feeds when needed; they are not child subagents of root, and root should not create them before there is independent work.
 
 ## Main flow: idea → ship
 
@@ -34,7 +36,7 @@ For small or single-session work, the direct route remains:
 3. **`/to-tickets`** — split the spec into tracer-bullet tickets.
 4. **`/implement`** — build each ticket with `/tdd`, proof policy, and `/code-review`.
 
-If this grows into multi-worker work, move to `/supervisor → /root → /peer` before implementation; otherwise root or the direct flow should keep the work inline.
+If this grows into multi-peer work, move to `/supervisor → /root → /peer` before implementation; otherwise root or the direct flow should keep the work inline.
 
 ## Design and proof gates
 

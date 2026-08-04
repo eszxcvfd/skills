@@ -1,12 +1,15 @@
 Quickstart:
 
 ```bash
-npx skills@latest add eszxcvfd/skills --skill=resolving-merge-conflicts
+claude plugin marketplace add --scope project eszxcvfd/skills
+claude plugin install --scope project mattpocock-skills@eszxcvfd
 ```
 
 ```bash
-npx skills@latest update resolving-merge-conflicts
+claude plugin update --scope project mattpocock-skills@eszxcvfd
 ```
+
+Non-Claude agents can copy just this skill with `npx skills@latest add eszxcvfd/skills --skill=resolving-merge-conflicts`.
 
 [Source](https://github.com/eszxcvfd/skills/tree/main/skills/engineering/resolving-merge-conflicts)
 
