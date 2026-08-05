@@ -15,8 +15,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable
 
-EXPECTED_MODEL = "openai-codex/gpt-5.6-luna"
-EXPECTED_THINKING = "medium"
+REQUIRED_CONFIG_KEYS = ("provider", "model", "thinking")
+
 
 LEGACY_PHRASES = (
     "ROOT_AGENT_ID:",
@@ -34,12 +34,13 @@ LEGACY_PHRASES = (
 REQUIRED_PHRASES = (
     "MCP `paseo_create_agent` provider must be `<role>/<model>`",
     "Existing agents keep their original model/thinking; fresh work uses `config.model`",
+    'CLI launches must pass both `--model "$MODEL"` and `--thinking "$THINKING"`',
     "terminal run result",
     "native wait/log/inspect",
     "role provider catalog",
     "Peer packets must not ask peer to read `WORKSPACE_PROTOCOL.md` or `config.model`",
     "Never call `paseo_create_agent` with a bare model id",
-    "MCP create_agent model lives in provider; settings must not contain model",
+    "MCP create_agent model lives in provider; settings must not contain model; thinking lives in settings.thinkingOptionId",
 )
 
 CONTRACT_FILES = (
@@ -61,6 +62,21 @@ CONTRACT_FILES = (
     ".codex/agents/peer.toml",
     ".codex/agents/supervisor.toml",
 )
+
+AGENT_CONTRACT_FILES = (
+    ".agents/skills/root/agents/openai.yaml",
+    ".agents/skills/supervisor/agents/openai.yaml",
+    "skills/engineering/root/agents/openai.yaml",
+    "skills/engineering/supervisor/agents/openai.yaml",
+)
+
+AGENT_REQUIRED_PHRASES = (
+    '--model "$MODEL"',
+    '--thinking "$THINKING"',
+    "settings.thinkingOptionId",
+    "MCP create_agent model lives in provider and settings must not contain model; thinking lives in settings.thinkingOptionId",
+)
+
 
 
 @dataclass(frozen=True)
@@ -87,15 +103,12 @@ def check_config(root: Path, failures: list[str]) -> None:
         if not parser.has_section(role):
             failures.append(f"config.model: missing [{role}] section")
             continue
+        for key in REQUIRED_CONFIG_KEYS:
+            if not parser.get(role, key, fallback="").strip():
+                failures.append(f"config.model: [{role}].{key} is required")
         provider = parser.get(role, "provider", fallback="")
-        model = parser.get(role, "model", fallback="")
-        thinking = parser.get(role, "thinking", fallback="")
         if provider != role:
             failures.append(f"config.model: [{role}].provider = {provider!r}, expected {role!r}")
-        if model != EXPECTED_MODEL:
-            failures.append(f"config.model: [{role}].model = {model!r}, expected {EXPECTED_MODEL!r}")
-        if thinking != EXPECTED_THINKING:
-            failures.append(f"config.model: [{role}].thinking = {thinking!r}, expected {EXPECTED_THINKING!r}")
 
 
 def check_contract_text(root: Path, failures: list[str]) -> None:
@@ -112,6 +125,15 @@ def check_contract_text(root: Path, failures: list[str]) -> None:
     for phrase in REQUIRED_PHRASES:
         if phrase not in combined:
             failures.append(f"contract: missing required phrase {phrase!r}")
+
+
+    for path in existing_files(root, AGENT_CONTRACT_FILES):
+        text = path.read_text(encoding="utf-8")
+        searchable = text.replace('\\"', '"')
+        rel = path.relative_to(root)
+        for phrase in AGENT_REQUIRED_PHRASES:
+            if phrase not in searchable:
+                failures.append(f"{rel}: missing agent launch phrase {phrase!r}")
 
 
 def check_project(root: Path | str) -> CheckResult:

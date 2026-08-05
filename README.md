@@ -12,31 +12,7 @@ Use this README to pull the set into **any other project**.
 
 Làm trong thư mục project đích.
 
-### Claude Code — khuyến nghị
-
-Claude Code dùng plugin marketplace của repo này; đây là cách cài chính.
-
-```bash
-claude plugin marketplace add --scope project eszxcvfd/skills
-claude plugin install --scope project mattpocock-skills@eszxcvfd
-```
-
-`--scope project` giữ plugin trong project hiện tại. Muốn cài global cho mọi project Claude Code thì bỏ `--scope project`.
-
-Tải lại bản mới trong project:
-
-```bash
-claude plugin update --scope project mattpocock-skills@eszxcvfd
-```
-
-Nếu muốn bản upstream gốc của Matt trong project hiện tại:
-
-```bash
-claude plugin marketplace add --scope project mattpocock/skills
-claude plugin install --scope project mattpocock-skills@mattpocock
-```
-
-### Agent khác — copy skill vào repo
+### Cài bằng `skills`
 
 ```bash
 cd /path/to/your-project

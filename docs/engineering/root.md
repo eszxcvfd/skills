@@ -1,15 +1,8 @@
-Quickstart:
-
 ```bash
-claude plugin marketplace add --scope project eszxcvfd/skills
-claude plugin install --scope project mattpocock-skills@eszxcvfd
+npx skills@latest add eszxcvfd/skills
 ```
 
-```bash
-claude plugin update --scope project mattpocock-skills@eszxcvfd
-```
-
-Non-Claude agents can copy just this skill with `npx skills@latest add eszxcvfd/skills --skill=root`.
+Select `root` when prompted, along with the agent you want to install it for.
 
 [Source](https://github.com/eszxcvfd/skills/tree/main/skills/engineering/root)
 
@@ -17,7 +10,7 @@ Non-Claude agents can copy just this skill with `npx skills@latest add eszxcvfd/
 
 Root is the active project lead in the Paseo hierarchy. It reads `WORKSPACE_PROTOCOL.md`, preserves the mainline, does central work when delegation would slow things down, starts fresh peer sessions only when independent bounded execution is useful, and gates terminal output before reporting upward.
 
-Root calls peer through Paseo with the `peer` provider via `${PASEO_CLI:-paseo}`. It reads `<repo>/config.model` when present, verifies the exact `[peer]` provider/model/thinking values against the role provider catalog, and refuses guessed or unavailable model IDs. CLI launches use the role provider alias plus model/thinking flags; MCP `paseo_create_agent` provider must be `<role>/<model>` after catalog verification, must never be called with a bare model id, and stores the model in provider rather than `settings.model`. Existing agents keep their original model/thinking; fresh work uses `config.model`, so stale-model peers are reused only when explicitly named. Normal work starts one fresh peer per bounded packet. Peer packets must not ask peer to read `WORKSPACE_PROTOCOL.md` or `config.model`; root sends only sanitized packet-specific constraints. Peer completion is native: root tracks the returned peer id and retrieves the final `PEER_STATUS` through wait/log/inspect, not a `ROOT_AGENT_ID` callback.
+Root calls peer through Paseo with the `peer` provider via `${PASEO_CLI:-paseo}`. It reads `<repo>/config.model` when present, verifies the exact `[peer]` provider/model/thinking values against the role provider catalog, and refuses guessed or unavailable model IDs. CLI launches must pass both `--model "$MODEL"` and `--thinking "$THINKING"` from `[peer]`; MCP `paseo_create_agent` provider must be `<role>/<model>` and `settings.thinkingOptionId` must equal `[peer].thinking`. Existing agents keep their original model/thinking; fresh work uses `config.model`, so stale-model peers are reused only when explicitly named. Normal work starts one fresh peer per bounded packet. Peer packets must not ask peer to read `WORKSPACE_PROTOCOL.md` or `config.model`.
 
 ## Peer-default work
 

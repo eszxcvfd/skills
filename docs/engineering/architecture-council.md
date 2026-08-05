@@ -1,15 +1,8 @@
-Quickstart:
-
 ```bash
-claude plugin marketplace add --scope project eszxcvfd/skills
-claude plugin install --scope project mattpocock-skills@eszxcvfd
+npx skills@latest add eszxcvfd/skills
 ```
 
-```bash
-claude plugin update --scope project mattpocock-skills@eszxcvfd
-```
-
-Non-Claude agents can copy just this skill with `npx skills@latest add eszxcvfd/skills --skill=architecture-council`.
+Select `architecture-council` when prompted, along with the agent you want to install it for.
 
 [Source](https://github.com/eszxcvfd/skills/tree/main/skills/engineering/architecture-council)
 
@@ -89,7 +82,9 @@ The Lead stays in the current agent. A reduced Council runs `proposer-a`,
 `challenger`, `verifier`, and `judge` as independent peer/delegated role agents.
 A full Council starts `proposer-a`, `proposer-b`, and `proposer-c` as separate
 background Paseo root agents before waiting for any result, then runs fresh root
-agents for `challenger`, `verifier`, and `judge`.
+agents for `challenger`, `verifier`, and `judge`. Full Council root launches use
+`[root]` provider/model/thinking from `config.model`, passing both `--model` and
+`--thinking` after catalog verification.
 
 Every role writes a durable artifact under
 `.scratch/architecture-council/<decision-slug>/`, and the Lead validates both

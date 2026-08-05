@@ -64,9 +64,11 @@ roles:
   `proposer-b`, `proposer-c`, `challenger`, `verifier`, and `judge`.
 
 If the required peer/root provider is unavailable, stop after the quick gate and
-ask the user to restore it or explicitly choose a different risk mode. Never
-replace the Council with Herdr, serial role-play, `omp`, or uncontrolled
-side-channel agents.
+ask the user to restore it or explicitly choose a different risk mode. Full
+Council root launches read `[root]` provider/model/thinking from
+`<repo>/config.model`, verify them against the root provider catalog, and pass
+both `--model "$MODEL"` and `--thinking "$THINKING"`. Never replace the Council
+with Herdr, serial role-play, `omp`, or uncontrolled side-channel agents.
 
 Every Council agent receives one prompt from `prompts/`, one output path under
 `.scratch/architecture-council/<decision-slug>/`, and this boundary:
@@ -83,6 +85,7 @@ Full Council root launch contract keeps this shape:
 
 ```bash
 paseo agent run --background --provider root \
+  --model "$MODEL" --thinking "$THINKING" \
   --title "architecture-council:<decision-slug>:<role>" \
   --label council-role=<role> --cwd "$PROJECT_ROOT" "$(cat "$PROMPT_FILE")"
 paseo agent wait "$ROOT_AGENT_ID" --timeout 3600 --json

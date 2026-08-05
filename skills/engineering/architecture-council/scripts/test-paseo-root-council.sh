@@ -36,6 +36,8 @@ require_in "$skill_file" 'Full Council.*Paseo.*root|--provider root' 'full/high-
 require_in "$skill_file" 'paseo agent run' 'Paseo root launch command is missing for full Council'
 require_in "$skill_file" '--provider root' 'full Council roles must run as root provider agents'
 require_in "$skill_file" '--background' 'full Council proposers must be launchable before waiting'
+require_in "$skill_file" '--model "\$MODEL"' 'full Council root launch must pass configured model'
+require_in "$skill_file" '--thinking "\$THINKING"' 'full Council root launch must pass configured thinking'
 require_in "$skill_file" 'council-role=<role>' 'Council role label is missing'
 require_in "$skill_file" 'COUNCIL_AGENT_BOUNDARY' 'Council agent boundary prompt is missing'
 require_in "$skill_file" 'proposer-a' 'proposer topology is missing'

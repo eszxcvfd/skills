@@ -18,14 +18,14 @@ human → supervisor → root → peer
 - Supervisor calls root through Paseo, using the `[root]` entry from `config.model` when present; otherwise use the `root` provider default. Supervisor must not call peer directly.
 - Root calls peer through Paseo, using the `[peer]` entry from `config.model` when present; otherwise use the `peer` provider default. Root may create one peer per bounded packet when independent work is useful.
 - Before launching root or peer from `config.model`, compare the exact provider/model/thinking values against the role provider catalog. Do not guess model prefixes or launch an unavailable model; report catalog mismatches before retrying.
-- CLI launches use the role provider alias plus model/thinking flags after catalog verification. MCP `paseo_create_agent` provider must be `<role>/<model>` after catalog verification; do not pass the raw model provider alone.
-- Never call `paseo_create_agent` with a bare model id; the first MCP create attempt must use `<role>/<model>` after catalog verification.
-- MCP create_agent model lives in provider; settings must not contain model.
+- CLI launches must pass both `--model "$MODEL"` and `--thinking "$THINKING"` from the selected `[root]` or `[peer]` entry. Fresh downstream work starts with `paseo agent run --provider <role> --model "$MODEL" --thinking "$THINKING" --label hierarchy=paseo --label role=<role> --cwd <repo> "<packet>"`; add `--label parent=root` when starting peer. Do not pass `--mode` for role providers unless the catalog lists modes.
+- For MCP `paseo_create_agent`, provider must be `<role>/<model>` after catalog verification. Never call `paseo_create_agent` with a bare model id.
+- MCP create_agent model lives in provider; settings must not contain model; thinking lives in settings.thinkingOptionId.
 - Existing agents keep their original model/thinking; fresh work uses `config.model`. Treat old sessions with stale model settings as reusable only when the human explicitly names them.
 - Peer packets must not ask peer to read `WORKSPACE_PROTOCOL.md` or `config.model`; root reads those files and sends only sanitized packet-specific constraints.
 - Peer returns evidence to root as the terminal run result and must not call supervisor, root replacements, or other peers.
 - Use labels to preserve the hierarchy: `hierarchy=paseo`, `role=supervisor|root|peer`, and `parent=root` for peers.
-- Fresh downstream work starts a fresh agent with `paseo agent run --provider <role> --label hierarchy=paseo --label role=<role> --cwd <repo> "<packet>"`; add `--label parent=root` when starting peer. Use `agent send` only when the human or root task explicitly names an existing downstream agent/session to continue.
+- Use `agent send` only when the human or root task explicitly names an existing downstream agent/session to continue.
 
 ## Work ownership default
 

@@ -1,15 +1,8 @@
-Quickstart:
-
 ```bash
-claude plugin marketplace add --scope project eszxcvfd/skills
-claude plugin install --scope project mattpocock-skills@eszxcvfd
+npx skills@latest add eszxcvfd/skills
 ```
 
-```bash
-claude plugin update --scope project mattpocock-skills@eszxcvfd
-```
-
-Non-Claude agents can copy just this skill with `npx skills@latest add eszxcvfd/skills --skill=ask-matt`.
+Select `ask-matt` when prompted, along with the agent you want to install it for.
 
 [Source](https://github.com/eszxcvfd/skills/tree/main/skills/engineering/ask-matt)
 
@@ -35,8 +28,8 @@ The current management chain is:
 
 Supervisor decides macro issues and recovers momentum for the human. Root is the active lead: it preserves the mainline, does central work, and starts peer only when bounded independent execution is useful. Peer executes bounded packets without reading `WORKSPACE_PROTOCOL.md` or `config.model` or spawning internal subagents.
 
-Supervisor creates fresh root agents through Paseo for fresh requests, optionally overridden by `<repo>/config.model`'s `[root]` model settings after exact catalog preflight. Root creates fresh peer agents through Paseo for bounded work, optionally overridden by `<repo>/config.model`'s `[peer]` model settings after exact catalog preflight. Supervisor appends reusable coordination failures and anti-pattern lessons to `SUPERVISOR_NOTEBOOK.md`; root retrieves peer completion through native wait/log/inspect, and peer does not call upward or sideways.
-CLI launches use role providers plus model/thinking flags; MCP `paseo_create_agent` provider must be `<role>/<model>` after catalog verification, must never be called with a bare model id, and stores the model in provider rather than `settings.model`. Existing agents keep their original model/thinking; fresh work uses `config.model`, so stale sessions are reused only when explicitly named.
+Supervisor creates fresh root agents through Paseo for fresh requests, optionally overridden by `<repo>/config.model`'s `[root]` provider/model/thinking settings after exact catalog preflight. Root creates fresh peer agents through Paseo for bounded work, optionally overridden by `<repo>/config.model`'s `[peer]` provider/model/thinking settings after exact catalog preflight. Supervisor appends reusable coordination failures and anti-pattern lessons to `SUPERVISOR_NOTEBOOK.md`; root retrieves peer completion through native wait/log/inspect, and peer does not call upward or sideways.
+CLI launches must pass both `--model "$MODEL"` and `--thinking "$THINKING"` from `config.model`; MCP `paseo_create_agent` provider must be `<role>/<model>` and `settings.thinkingOptionId` must equal the configured thinking value. Existing agents keep their original model/thinking; fresh work uses `config.model`, so stale sessions are reused only when explicitly named.
 
 For ordinary small work, `ask-matt` still routes to `grill-with-docs → to-spec → to-tickets → implement → code-review`. For design-shape concerns it points at [structural-antipatterns](https://aihero.dev/skills-structural-antipatterns), [codebase-design](https://aihero.dev/skills-codebase-design), [architecture-premise-audit](https://aihero.dev/skills-architecture-premise-audit), or [architecture-council](https://aihero.dev/skills-architecture-council). For cleanup it points at [repo-refresh](https://aihero.dev/skills-repo-refresh). For maximum-recall peer review it points at [ultra-review](https://aihero.dev/skills-ultra-review).
 
