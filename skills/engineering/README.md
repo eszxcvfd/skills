@@ -25,7 +25,7 @@ Reachable only when you type them (Claude Code: `disable-model-invocation: true`
 
 Model- or user-reachable (rich trigger phrasing so the model can reach for them).
 
-- **[architecture-council](./architecture-council/SKILL.md)** — Mandatory pre-code gate for every architecture decision or unclear architectural next step, evaluated by dedicated Paseo root agents.
+- **[architecture-council](./architecture-council/SKILL.md)** — Mandatory pre-code gate for every architecture decision or unclear architectural next step, using cheaper peer roles for reduced gates and Paseo root agents for full/high-risk gates.
 - **[architecture-premise-audit](./architecture-premise-audit/SKILL.md)** — Broad premise audit for wrong system archetypes before trusting repo vocabulary, proof, or module boundaries.
 - **[prototype](./prototype/SKILL.md)** — Build a throwaway prototype to answer a design question: a runnable terminal app for state/logic, or several toggleable UI variations.
 - **[diagnosing-bugs](./diagnosing-bugs/SKILL.md)** — Disciplined diagnosis loop for hard bugs and performance regressions: reproduce → minimise → hypothesise → instrument → fix → regression-test.

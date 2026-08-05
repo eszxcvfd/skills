@@ -146,7 +146,7 @@ Skills I use daily for code work.
 
 **Model-invoked**
 
-- **[architecture-council](./skills/engineering/architecture-council/SKILL.md)** — Mandatory pre-code gate for every architecture decision or unclear architectural next step, evaluated by dedicated Paseo root agents.
+- **[architecture-council](./skills/engineering/architecture-council/SKILL.md)** — Mandatory pre-code gate for every architecture decision or unclear architectural next step, using cheaper peer roles for reduced gates and Paseo root agents for full/high-risk gates.
 - **[architecture-premise-audit](./skills/engineering/architecture-premise-audit/SKILL.md)** — Broad premise audit for wrong system archetypes before trusting repo vocabulary, proof, or module boundaries.
 - **[prototype](./skills/engineering/prototype/SKILL.md)** — Build a throwaway prototype to answer a design question — a runnable terminal app for state/logic questions, or several radically different UI variations toggleable from one route.
 - **[diagnosing-bugs](./skills/engineering/diagnosing-bugs/SKILL.md)** — Disciplined diagnosis loop for hard bugs and performance regressions: reproduce → minimise → hypothesise → instrument → fix → regression-test.

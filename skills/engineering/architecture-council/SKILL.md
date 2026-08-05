@@ -5,51 +5,28 @@ description: "Use before any architecture decision or architecture change, and w
 
 # Architecture Council
 
-Before making any architecture decision, writing production code that depends on
-one, or changing the architecture, run a **Council**. Also run it when the agent
-cannot identify a safe next step because the current system or architecture is
-unclear, constrained, contradictory, or becoming a dead end. The job is not to
-make the requested feature work on the current architecture at any cost; it is
-to decide whether the architecture remains fit before implementation continues.
+Mandatory pre-code architecture gate. Use it before any architecture decision,
+before production code that depends on one, before changing architecture, and
+when the current system leaves no clear safe next step.
 
-Prefer boring, standard, reversible solutions. A novel architecture only wins when the evidence and operational justification beat the boring path.
+Prefer boring, standard, reversible solutions. Novel architecture only wins when
+evidence and operational need beat the boring path.
 
 ## Quick gate
 
-Run this gate whenever planning or implementation touches structure, whenever a
-choice would establish or change an architectural rule, and whenever the agent
-does not know what to do next because of the current system or architecture.
+Run the quick gate inline. It may decide **no architecture decision exists**;
+only then may the normal skill continue. If any architecture decision exists,
+run a reduced or full Council. Risk selects Council size, not bypass.
 
-The gate may conclude that no architecture decision exists. Only then may the
-normal skill continue without a Council. If an architecture decision exists,
-the score selects a reduced or full Council; it never permits bypassing the
-Council.
+Trigger on: data/schema/ownership/migration, tenancy, auth, service or module
+boundaries, dependency direction, public/durable contracts, event schemas,
+infrastructure, queues, caches, storage, deployment topology, retry semantics,
+framework/state-management choices, hard rollback, multi-module blast radius,
+low confidence, two viable options, repeated workarounds, circular dependencies,
+or one routine change touching more than five modules. Pure visual UI work is
+outside the Council unless it creates structure or contracts.
 
-### Trigger signs
-
-Run the Council when the change has any of these signs:
-
-- requires any architecture decision, even when it appears reversible or scores
-  below the normal risk threshold;
-- changes the architecture or writes production code that depends on an
-  unresolved architecture choice;
-- the agent cannot state a safe next step because the current system or
-  architecture is unclear, constrained, contradictory, or no longer supports
-  the requested direction;
-- hard to rollback;
-- affects multiple modules or teams;
-- changes data model, schema, ownership, or migration path;
-- introduces infrastructure dependency, queue, cache, storage layer, deployment topology, or retry semantics;
-- changes a public API or durable contract;
-- creates a long-lived abstraction, framework choice, or state-management model;
-- has at least two reasonable options;
-- confidence is low;
-- the agent is about to create the second or third workaround around the same friction;
-- the change exceeds the project's architecture budget: one routine change touches more than five modules, crosses a locked ADR, creates circular dependencies, or forces integration tests for tiny changes.
-
-### Risk score
-
-Score the decision before you decide the process:
+Score before choosing mode:
 
 ```text
 Irreversibility:     0-3
@@ -59,316 +36,100 @@ Data migration risk: 0-3
 Novelty:             0-2
 ```
 
-A total of `6` or more triggers a full Council. A database choice, tenancy
-model, auth architecture, service decomposition, public contract, event schema,
-or deployment topology also triggers a full Council even if the score is lower.
-Not knowing the safe next step because of the current system or architecture
-also triggers a full Council.
-
-An architecture decision below `6` that does not match a full-Council trigger
-still requires a reduced Council with one proposer, one challenger, one
-verifier, and one judge. Low risk changes the Council size, not whether the
-decision receives independent review.
-
-### Autonomy zones
-
-Keep UI cooking out of the Council unless it changes structure:
-
-```yaml
-autonomy_zones:
-  frontend_visual:
-    autonomy: high
-    council_required: false
-    examples:
-      - layout
-      - component styling
-      - Tailwind classes
-      - animation
-      - dashboard polish
-
-  frontend_architecture:
-    autonomy: medium
-    council_required_when:
-      - introduce_global_state
-      - introduce_new_rendering_model
-      - change_api_contract
-      - create_design_system_contract
-      - move_business_logic_to_frontend
-
-  backend_domain:
-    autonomy: low
-
-  data_architecture:
-    autonomy: very_low
-```
+Full Council: score >= 6, database, tenancy, auth architecture, service
+decomposition, public contract, event schema, deployment topology, locked ADR,
+or no safe next step because architecture is unclear/contradictory/dead-ended.
+Everything else with an architecture decision uses a reduced Council.
 
 ## Inputs
 
-Before framing the case, read:
+Read only what frames the decision: current conversation and goal; `CONTEXT.md`
+if present; `ARCHITECTURE.md`, `RUNTIME_CONSTITUTION.md`, and
+`PROCESS_AND_PROOF_POLICY.md`; existing ADRs and decision locks; relevant code,
+dependency paths, tests, and docs. Follow the repo's ADR location; default to
+`docs/adr/` only when no convention exists.
 
-- the user goal and current conversation;
-- `CONTEXT.md`, if it exists, for domain vocabulary;
-- `ARCHITECTURE.md` for owner map, routing, public contracts, and allowed dependencies;
-- `RUNTIME_CONSTITUTION.md` for runtime invariants the decision may create, strengthen, or violate;
-- `PROCESS_AND_PROOF_POLICY.md` for evidence required to accept and later implement the decision;
-- existing ADRs, preferring the repo's established location (`docs/adr/`, `docs/architecture/adr/`, or `src/<context>/docs/adr/`);
-- the architecture decision registry, if present (`docs/architecture/decision-locks.yaml` or equivalent);
-- the current code paths, dependency graph, tests, and docs relevant to the decision.
+## Delegation contract
 
-If there is no ADR convention yet, default to `docs/adr/` so the rest of these engineering skills can find the decision. If the target repo already uses `docs/architecture/adr/`, follow that local convention.
+The Lead stays in the current agent. The Lead owns framing, agent launch,
+artifact ingestion, quality gates, final user interaction, and non-scratch writes
+after approval.
 
-## Paseo Root Council contract
+Choose the cheapest approved delegation mode that preserves independent Council
+roles:
 
-The quick gate can run in the current agent anywhere. Any reduced or full
-Council must use Paseo root agents for every Council role. Do not use Herdr,
-Pi/Codex internal subagents, serial role-play, `omp`, or peer workers as a
-fallback.
+- **Reduced Council:** use independent peer/delegated workers for `proposer-a`,
+  `challenger`, `verifier`, and `judge`.
+- **Full Council:** use separate Paseo `root` agents for `proposer-a`,
+  `proposer-b`, `proposer-c`, `challenger`, `verifier`, and `judge`.
 
-Before opening the Council:
+If the required peer/root provider is unavailable, stop after the quick gate and
+ask the user to restore it or explicitly choose a different risk mode. Never
+replace the Council with Herdr, serial role-play, `omp`, or uncontrolled
+side-channel agents.
 
-```bash
-command -v paseo
-paseo daemon status
-paseo provider ls --json
-```
-
-The `root` provider must be available. If Paseo or root is unavailable, stop
-after the quick gate and ask the user to restore Paseo/root. Do not write
-production code, change architecture, or simulate the Council.
-
-The Lead remains in the current agent and owns framing, artifact ingestion, the
-quality gate, final user interaction, and non-scratch writes after approval.
-Each Council role is a fresh root agent spawned through Paseo:
-
-| Root agent label | Role | Mode |
-| --- | --- | --- |
-| `proposer-a` | Independent proposal A | reduced and full |
-| `proposer-b` | Independent proposal B | full only |
-| `proposer-c` | Independent proposal C | full only |
-| `challenger` | Cross-proposal challenge | reduced and full |
-| `verifier` | Evidence and claim verification | reduced and full |
-| `judge` | Final synthesis and verdict | reduced and full |
-
-Use this artifact layout under
-`.scratch/architecture-council/<decision-slug>/`:
+Every Council agent receives one prompt from `prompts/`, one output path under
+`.scratch/architecture-council/<decision-slug>/`, and this boundary:
 
 ```text
-case.yaml
-prompts/
-proposals/a.md
-proposals/b.md
-proposals/c.md
-challenge.md
-replies/a.md
-replies/b.md
-replies/c.md
-verification.md
-scores.yaml
-verdict.yaml
-ADR-draft.md
-roots.tsv
-```
-
-Every root prompt must include the case file, the evidence it may read, the
-single artifact it must write, and this boundary:
-
-```text
-COUNCIL_ROOT_BOUNDARY:
-- You are one Paseo root agent for one Architecture Council role.
+COUNCIL_AGENT_BOUNDARY:
+- You are one Architecture Council role agent.
 - Do not create peers, internal subagents, replacement roots, or side-channel agents.
 - Do not edit production files.
 - Write only the requested scratch artifact and report evidence.
 ```
 
-Launch root agents with this shape:
+Full Council root launch contract keeps this shape:
 
 ```bash
-paseo agent run \
-  --background \
-  --provider root \
+paseo agent run --background --provider root \
   --title "architecture-council:<decision-slug>:<role>" \
-  --label hierarchy=paseo \
-  --label role=root \
-  --label architecture-council=<decision-slug> \
-  --label council-role=<role> \
-  --cwd "$PROJECT_ROOT" \
-  "$(cat "$PROMPT_FILE")"
-```
-
-Record the returned root agent id in `roots.tsv`. Wait and ingest with:
-
-```bash
+  --label council-role=<role> --cwd "$PROJECT_ROOT" "$(cat "$PROMPT_FILE")"
 paseo agent wait "$ROOT_AGENT_ID" --timeout 3600 --json
 paseo agent logs "$ROOT_AGENT_ID" --json > ".scratch/architecture-council/<decision-slug>/transcripts/<role>.log"
 ```
 
-`idle` or `completed` means the root agent stopped; it is not success. Before
-advancing a round, read the transcript and validate that the required artifact
-exists and satisfies its output contract. Archive only Council root agents
-created by this run, and only after the Council ends or the user approves
-cleanup.
+A stopped, `idle`, or `completed` agent is not success. Validate transcript plus
+required artifact before advancing.
 
-## Council rounds
+## Rounds
 
-Use `.scratch/architecture-council/<decision-slug>/` for intermediate artifacts. Do not edit production code while the decision is unresolved.
+1. **Case:** Lead writes `case.yaml` from `templates/case.yaml` using
+   `prompts/lead.md`. No solution bias. Ask the user only for blocking ambiguity.
+2. **Proposals:** reduced starts `proposer-a`; full starts `proposer-a/b/c` in
+   background before waiting for any result. Proposers cannot read each other's
+   answers.
+3. **Challenge:** fresh `challenger` uses `prompts/challenger.md`; each proposer
+   gets one reply only.
+4. **Verification:** fresh `verifier` uses `prompts/verifier.md` and marks
+   load-bearing claims `Verified`, `Likely`, `Unverified`, or `Contradicted`.
+5. **Scoring:** use `rubrics/default.yaml` unless database, module-boundary, or
+   infrastructure fits better. Vote is signal, not authority.
+6. **Verdict:** fresh `judge` uses `prompts/judge.md` and
+   `templates/verdict.yaml`. Lead ingests; Lead must not silently replace Judge.
 
-### Round 0 — Case framing
+## Records and locks
 
-Act as **Lead**. Rewrite the decision as a case file using [templates/case.yaml](templates/case.yaml). Include constraints, non-goals, existing locks, the risk score, and the exact question being decided.
+Accepted or deliberately rejected decisions need an ADR from `templates/adr.md`
+and a decision-lock registry such as `docs/architecture/decision-locks.yaml`
+from `templates/decision-locks.yaml` unless the repo has an equivalent.
 
-Do not propose a solution in Round 0. If the framing has a blocking ambiguity, ask the user before launching root agents. Otherwise state assumptions explicitly and continue.
+Sync root control docs when the verdict changes them:
+`ARCHITECTURE.md`, `RUNTIME_CONSTITUTION.md`, and
+`PROCESS_AND_PROOF_POLICY.md`. If the verdict is pending user approval, write
+proposed updates only under `.scratch/architecture-council/<decision-slug>/`.
 
-### Round 1 — Independent proposals
-
-For a full Council, spawn `proposer-a`, `proposer-b`, and `proposer-c` as
-separate Paseo root agents in the background. Start all three before waiting for
-any of them. For a reduced Council, spawn only `proposer-a`. Each participating
-proposer receives the same case brief but cannot read other proposal artifacts.
-
-Each proposer must output:
-
-- the proposed architecture;
-- why it fits the case;
-- trade-offs;
-- failure modes;
-- migration and rollback cost;
-- lock level introduced or changed;
-- conditions where the option stops being appropriate.
-
-Independent means independent: Round 1 root agents do not read each other's
-answers.
-
-### Round 2 — Cross-examination
-
-Spawn a fresh `challenger` root agent with all validated proposals. The
-Challenger attacks the proposals rather than adding new ones, unless all
-proposals miss an obvious boring option.
-
-Send the challenge back to each original proposer root with `paseo agent send`.
-Every proposer gets one reply and writes only its assigned reply artifact. Do
-not allow infinite debate.
-
-### Round 3 — Verification
-
-Spawn a fresh `verifier` root agent with the proposals, challenge, and replies.
-The Verifier checks load-bearing claims against code, tests, dependency
-evidence, official docs, and small spikes only when a spike answers a disputed
-claim.
-
-Classify every important claim as:
-
-```text
-Verified
-Likely
-Unverified
-Contradicted
-```
-
-The Verifier does not vote by taste. It reports evidence and uncertainty.
-
-### Round 4 — Scoring
-
-Score each option with the relevant rubric from [rubrics/](rubrics/). Use
-[rubrics/default.yaml](rubrics/default.yaml) unless the decision is mainly
-database, module-boundary, or infrastructure.
-
-Vote is signal, not authority. A majority can be wrong if the evidence contradicts it or if the boring option has lower lock-in.
-
-### Round 5 — Verdict
-
-Spawn a fresh `judge` root agent. Give it the case, all validated round
-artifacts, rubric scores, and verification. The Lead must not silently replace
-the Judge; it ingests and presents the Judge's result.
-
-The verdict uses [templates/verdict.yaml](templates/verdict.yaml) and must include:
-
-- decision and status;
-- confidence;
-- why this wins now;
-- rejected options and why;
-- verified evidence and remaining uncertainty;
-- guardrails;
-- migration or rollback strategy;
-- lock level: `soft`, `guarded`, or `locked`;
-- reopen conditions;
-- updates needed to `ARCHITECTURE.md`, `RUNTIME_CONSTITUTION.md`, and `PROCESS_AND_PROOF_POLICY.md`.
-
-If the Council was auto-triggered inside another task, or if the verdict touches
-a `locked` item, contradicts an ADR, changes data, or adds infrastructure,
-present the verdict and ask the user for approval before writing non-scratch
-files or proceeding to implementation.
-
-## ADR and decision locks
-
-An accepted or deliberately rejected architecture decision needs a durable record. Use [templates/adr.md](templates/adr.md). Number the ADR after the existing local convention.
-
-The ADR must preserve reasoning, not just the conclusion:
-
-1. context;
-2. considered alternatives;
-3. evidence;
-4. trade-offs;
-5. guardrails;
-6. rejected options;
-7. reopen conditions;
-8. migration or rollback strategy.
-
-Update or create `docs/architecture/decision-locks.yaml` using [templates/decision-locks.yaml](templates/decision-locks.yaml) unless the repo already has an equivalent registry.
-
-Then sync the root control docs when the verdict changes them:
-
-- `ARCHITECTURE.md` — module ownership, routing, allowed dependencies, public contracts, implementation-internal areas, code placement rules.
-- `RUNTIME_CONSTITUTION.md` — new or changed runtime invariants and the proof each invariant expects when touched.
-- `PROCESS_AND_PROOF_POLICY.md` — new proof requirements introduced by the architecture decision.
-
-If the verdict is pending user approval, write proposed updates only under `.scratch/architecture-council/<decision-slug>/` and do not edit the root control docs yet.
-
-Lock levels:
-
-- `soft` — easy to change: naming, folder structure, visual UI conventions. Agent may change and note why.
-- `guarded` — broad but reversible: module boundaries, API pattern, caching, queue usage, state management. Changing it requires a reduced Council.
-- `locked` — expensive migration: database, tenancy, service decomposition, public contract, auth architecture, event schema, deployment topology. Changing it requires a full Council and migration plan.
-
-Agents must read decision locks before planning structural work. They must not silently violate a `guarded` or `locked` decision.
-
-## Architecture health check
-
-Run a health-check Council when the user asks for an architecture review, when
-the agent cannot identify a safe next step because of the current system or
-architecture, or when you detect these smells:
-
-- one feature touches too many modules;
-- circular dependencies appear;
-- adapter count keeps increasing;
-- many interfaces have one implementation;
-- modules access each other's database tables or repositories;
-- business logic sits in controllers, jobs, or workers;
-- exceptions have become the rule;
-- an abstraction has many booleans or configuration switches;
-- a developer must understand the whole system to change one feature.
-
-Start by asking: **is this an implementation problem, or an architecture
-problem?** Then apply the quick gate. If the next safe step is unknown because
-of the current architecture, stop implementation and run the full Council. For
-other architecture decisions, use the risk score to choose full or reduced
-Council. Resume production code or architecture changes only after the verdict
-is accepted.
+Lock levels: `soft` = easy to change and note why; `guarded` = broad but
+reversible and needs a reduced Council to change; `locked` = expensive migration
+and needs a full Council plus migration plan. Agents must not silently violate a
+`guarded` or `locked` decision.
 
 ## Done when
 
-The Council is complete only when:
-
-- the required reduced or full Council ran through Paseo root agents;
-- every Council role was a root provider agent, never Herdr, internal subagent, peer, serial role-play, or `omp`;
-- for a full Council, all three proposer root agents were started before the Lead waited for results;
-- the quick-gate score and trigger decision are recorded;
-- Round 0 framed the case without bias;
-- Round 1 produced three independent proposals for a full Council or one
-  proposal for a reduced Council;
-- Round 2 challenged every viable option;
-- Round 3 classified load-bearing claims with evidence status;
-- Round 4 scored options without treating vote as authority;
-- Round 5 produced guardrails, lock level, migration/rollback, and reopen conditions;
-- an ADR, decision-lock update, and any required root control-doc updates are written, or the final answer clearly says user approval is pending;
-- no production code or architecture changed before the architecture decision
-  was accepted.
+- the quick-gate score, trigger, and selected reduced or full Council mode are recorded;
+- every Council role ran as an independent artifact-producing agent in the selected mode;
+- full Council used Paseo root agents and started all three proposers before waiting;
+- case, proposals, challenge, verification, scoring, and judge verdict exist under scratch;
+- important claims are evidence-classified, not voted on by taste;
+- ADR, decision lock, and required control-doc updates are written, or the final answer says approval is pending;
+- no production code or architecture changed before the decision was accepted.

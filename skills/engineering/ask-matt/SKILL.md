@@ -41,7 +41,7 @@ If this grows into multi-peer work, move to `/supervisor → /root → /peer` be
 ## Design and proof gates
 
 - **`/structural-antipatterns`** — use when a plan or implementation may contain structural misfit, weak-owner workarounds, proof laundering, overengineering, or avoidable tax.
-- **`/architecture-council`** — mandatory before architecture decisions or when no safe architectural next step is clear. It uses Paseo to spawn dedicated `root` agents for Council roles; do not fall back to Herdr, internal subagents, peers, serial role-play, or `omp`.
+- **`/architecture-council`** — mandatory before architecture decisions or when no safe architectural next step is clear. It runs independent Council roles through the approved delegation mode: cheaper peer/delegated workers for reduced gates, Paseo root agents for full/high-risk gates. Do not replace the Council with serial role-play, Herdr, `omp`, or uncontrolled side-channel agents.
 - **`/architecture-premise-audit`** — use only for an explicitly requested broad premise audit when the whole system archetype may be wrong before repo vocabulary can be trusted.
 - **`/codebase-design`** — deep-module vocabulary: module, interface, seam, adapter, depth, leverage, locality.
 - **`/domain-modeling`** — domain vocabulary and ADR discipline.

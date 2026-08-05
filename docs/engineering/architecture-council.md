@@ -20,28 +20,25 @@ choice or architecture change. It also runs whenever the agent cannot identify
 a safe next step because the current system or architecture is unclear,
 constrained, contradictory, or becoming a dead end.
 
-The Council now convenes dedicated Paseo `root` agents for proposals,
-challenge, verification, and judging before production implementation
-continues. It does not use Herdr, internal subagents, peer workers, serial
-role-play, or `omp` as a fallback.
+The defining constraint is risk-based delegation. Reduced gates use cheaper
+independent peer/delegated Council roles; full or high-risk gates use separate
+Paseo `root` agents for maximum isolation. The Council does not use Herdr,
+serial role-play, `omp`, or uncontrolled side-channel agents as a fallback.
 
 It is about lock-in, not debate theater. The Council prefers boring, standard,
 reversible architecture, then records the decision as an ADR with guardrails,
 migration or rollback notes, lock level, and reopen conditions so future agents
-know what they may not silently break. When the verdict changes the system map,
-runtime invariants, or required evidence, it syncs `ARCHITECTURE.md`,
-`RUNTIME_CONSTITUTION.md`, and `PROCESS_AND_PROOF_POLICY.md` too.
+know what they may not silently break.
 
 ## When to reach for it
 
 Type `/architecture-council`, or the agent reaches for it automatically when a
 task fits.
 
-It must run before every architecture decision, before production code that
+Reach for it before every architecture decision, before production code that
 depends on an unresolved architecture choice, and before changing the
-architecture. It must also run when the agent does not know what to do next
-because the present system or architecture no longer provides a clear, safe
-path.
+architecture. It also runs when the agent does not know what to do next because
+the present system or architecture no longer provides a clear, safe path.
 
 Examples include database or schema changes, tenancy or auth models, service
 decomposition, module boundaries, public API contracts, framework or
@@ -51,7 +48,9 @@ visual UI work remains outside the Council unless it changes structure.
 
 ## Prerequisites
 
-Paseo must be running and the `root` provider must be available:
+The selected delegation mode must be available. Reduced gates need the approved
+peer/delegated worker mode. Full and high-risk gates need Paseo and the `root`
+provider:
 
 ```bash
 paseo daemon status
@@ -59,7 +58,8 @@ paseo provider ls --json
 ```
 
 The quick gate can run anywhere, but the skill stops rather than simulating
-Council roles or modifying production code if Paseo/root is unavailable.
+Council roles or modifying production code if the required provider is
+unavailable.
 
 The skill writes durable records when a decision is accepted: an ADR in the
 repo's ADR directory, and a decision-lock registry such as
@@ -71,32 +71,30 @@ The skill starts with a risk score: irreversibility, blast radius, operational
 impact, data migration risk, and novelty. A score of six or more runs the full
 Council. Some decisions always require the full Council: database, tenancy,
 auth architecture, service decomposition, public contract, event schema,
-deployment topology, and uncertainty about the safe next step caused by the
-current architecture.
+deployment topology, locked ADR changes, and uncertainty about the safe next
+step caused by the current architecture.
 
 Every other architecture decision still runs a reduced Council. A low score
-reduces the number of root agents; it does not allow the architecture gate to
-be skipped.
+reduces the delegation cost; it does not allow the architecture gate to be
+skipped.
 
 The key split is expression versus structure. Frontend visuals get high
 autonomy; frontend architecture, backend domain design, and data architecture
 get progressively less. AI can cook the dashboard, but adding global state or
 changing an API contract goes through the gate.
 
-## Paseo root agents
+## Independent Council agents
 
-The Lead stays in the current agent. A full Council starts `proposer-a`,
-`proposer-b`, and `proposer-c` as separate background Paseo root agents. A
-reduced Council starts only `proposer-a`. Both modes then use fresh `root`
+The Lead stays in the current agent. A reduced Council runs `proposer-a`,
+`challenger`, `verifier`, and `judge` as independent peer/delegated role agents.
+A full Council starts `proposer-a`, `proposer-b`, and `proposer-c` as separate
+background Paseo root agents before waiting for any result, then runs fresh root
 agents for `challenger`, `verifier`, and `judge`.
 
-In a full Council, all proposer root agents start before the Lead waits for any
-result. Every round writes a durable artifact under
+Every role writes a durable artifact under
 `.scratch/architecture-council/<decision-slug>/`, and the Lead validates both
-the root transcript and artifact before advancing.
-
-There is intentionally no fallback to Herdr, internal subagents, peer workers,
-serial role-play, or `omp`. Restore Paseo/root before running the Council.
+the transcript and the artifact before advancing. No role may edit production
+files, spawn side-channel agents, or replace the Council with serial self-review.
 
 ## The artifact is the architecture
 
@@ -112,13 +110,12 @@ agents must read.
 
 ## It's working if
 
-- The full Council opens separate Paseo root agents, never Herdr, peer workers,
-  internal subagents, serial role-play, or `omp`.
+- Reduced gates use independent peer/delegated Council roles; full/high-risk
+  gates use separate Paseo root agents.
 - Production code and architecture remain unchanged until the Council verdict is
   accepted.
 - Being unable to identify a safe next step triggers a full Council instead of
   speculative implementation.
-- Implementation pauses before a lock-in seam rather than after code has already committed to it.
 - At least two independent options were considered before everyone saw the same answer.
 - Claims are marked `Verified`, `Likely`, `Unverified`, or `Contradicted` instead of voted on by taste.
 - The final ADR says not only what won, but what is forbidden and when to reopen it.
