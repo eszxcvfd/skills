@@ -93,7 +93,7 @@ Before round 2 or later, read every earlier report with the same review name. Gi
 Create exactly one report with:
 
 ```powershell
-python skills/engineering/ultra-review/scripts/create_ultra_review_report.py --workspace <repo-root> --review-name <review-name> --scope "<scope>" --review-brief-sha256 <sha256> --peer reviewer-count 10 --directive-count <count>
+python skills/misc/ultra-review/scripts/create_ultra_review_report.py --workspace <repo-root> --review-name <review-name> --scope "<scope>" --review-brief-sha256 <sha256> --peer reviewer-count 10 --directive-count <count>
 ```
 
 Use the script's `report_path`; never improvise or overwrite it. Replace every `TODO`. If peer reviewers submitted no candidates, state `No candidates reported.` After writing, print the report path and full content.

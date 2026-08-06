@@ -1,68 +1,73 @@
 ---
 name: ask-matt
-description: Ask which skill or flow fits your situation. A router over the skills in this repo.
+description: Ask which active engineering skill or preserved specialized workflow fits the situation. A router over the skills in this repo.
 disable-model-invocation: true
 ---
 
 # Ask Matt
 
-You don't remember every skill, so ask.
-
-A **flow** is a path through the skills. The current top-level operating model is the Paseo hierarchy, with the older spec/ticket/build skills still available for small or single-agent work.
+Use this router when the next engineering move is unclear. The promoted
+engineering surface has thirteen skills. Paseo role instructions remain preserved
+under `skills/misc/`, while the matching Codex profiles contain those
+instructions inline.
 
 ## Paseo hierarchy
 
-Use this when work needs management, decisions, multiple peers, or quality gates:
+Use this for macro decisions, multiple agents, recovery, or quality gates:
 
 ```text
-/supervisor → /root → /peer
+codex-supervisor → codex-root → codex-peer
 ```
 
-- **`/supervisor`** represents the human on macro decisions: requirements, architecture solution, scope, acceptance, quality, and momentum recovery. It can decide `APPROVED`, `REVISE`, `RECOVER`, or `ESCALATE`; it does not plan peer work. It appends reusable coordination failures and anti-pattern lessons to `SUPERVISOR_NOTEBOOK.md`.
-- **`/root`** is the active project lead: reads `WORKSPACE_PROTOCOL.md`, preserves the mainline, keeps design/lead decisions, starts fresh peer sessions for implementation-heavy bounded work, gates their terminal output, and reports status upward.
-- **`/peer`** executes one bounded packet from root. Peer must not read `WORKSPACE_PROTOCOL.md`, must not spawn Pi/Codex internal subagents, and returns its final `PEER_STATUS` block as the terminal run result.
-- Supervisor creates fresh root agents through Paseo for fresh requests, optionally overridden by `<repo>/config.model`'s `[root]` provider/model/thinking settings after exact catalog preflight. Root creates fresh peer agents through Paseo for bounded work, optionally overridden by `<repo>/config.model`'s `[peer]` provider/model/thinking settings after exact catalog preflight. Root keeps design/lead; peer is default for coding, TDD, bugfix implementation, test/proof, and code review. Root retrieves peer completion through native wait/log/inspect rather than a callback message.
-- CLI launches must pass both `--model "$MODEL"` and `--thinking "$THINKING"` from `config.model`; MCP `paseo_create_agent` provider must be `<role>/<model>` and `settings.thinkingOptionId` must equal the configured thinking value. Existing agents keep their original model/thinking; fresh work uses `config.model`, so stale sessions are reused only when explicitly named.
-- Peer packets must not ask peer to read `WORKSPACE_PROTOCOL.md` or `config.model`; root reads those files and sends only sanitized packet-specific constraints.
+- **`codex-supervisor`** represents the human on requirements, architecture,
+  scope, acceptance, quality, and momentum recovery.
+- **`codex-root`** is the active project lead. It reads `WORKSPACE_PROTOCOL.md`,
+  preserves the mainline, keeps design/lead decisions, and allocates bounded
+  peer work.
+- **`codex-peer`** executes one sanitized packet from root and returns evidence.
+  It must not read root-only protocol or create internal agents.
 
-Peers are independent bounded agents root feeds when needed; they are not child subagents of root, and root should not create them before there is independent work.
+The role contract is embedded in each Codex profile. Fresh downstream launches
+must read exact role provider, model, and thinking values from
+`config.model`, verify them against the provider catalog, and pass
+`--model "$MODEL" --thinking "$THINKING" --mode full-access`. MCP creation uses
+`<configured-provider>/<model>` and `settings.thinkingOptionId`; do not put the
+model in settings or pass a bare model id.
 
-## Main flow: idea → ship
+## Active routing
 
-For small or single-session work, the direct route remains:
+- First use in a repository → `/setup-matt-pocock-skills`.
+- Macro decision, recovery, or multi-agent work → `codex-supervisor`.
+- Large, foggy effort spanning multiple sessions → `/wayfinder`.
+- Fuzzy plan that needs a recorded interview and decision docs → `/grill-with-docs`.
+- Architecture decision or unclear safe next step → `/architecture-council`.
+- Aligned conversation that needs a durable spec → `/to-spec`.
+- Finished spec that needs implementation slices → `/to-tickets`.
+- Settled spec or ticket ready to build → `/implement`.
+- Design or state-model question that needs a throwaway artifact → `/prototype`.
+- Test-first feature or fix → `/tdd`.
+- Broken, failing, slow, or regressed behavior → `/diagnosing-bugs`.
+- Primary-source investigation → `/research`.
+- Diff, branch, or PR review → `/code-review`.
 
-1. **`/grill-with-docs`** — sharpen the idea and update `CONTEXT.md`/ADRs.
-2. **`/to-spec`** — turn the conversation into a spec.
-3. **`/to-tickets`** — split the spec into tracer-bullet tickets.
-4. **`/implement`** — build each ticket with `/tdd`, proof policy, and `/code-review`.
+The normal small-work chain is:
 
-If this grows into multi-peer work, move to `/supervisor → /root → /peer` before implementation; otherwise root or the direct flow should keep the work inline.
+```text
+/grill-with-docs → /to-spec → /to-tickets → /implement → /code-review
+```
 
-## Design and proof gates
+## Preserved specialized workflows
 
-- **`/structural-antipatterns`** — use when a plan or implementation may contain structural misfit, weak-owner workarounds, proof laundering, overengineering, or avoidable tax.
-- **`/architecture-council`** — mandatory before architecture decisions or when no safe architectural next step is clear. It runs independent Council roles through the approved delegation mode: cheaper peer/delegated workers for reduced gates, Paseo root agents for full/high-risk gates. Do not replace the Council with serial role-play, Herdr, `omp`, or uncontrolled side-channel agents.
-- **`/architecture-premise-audit`** — use only for an explicitly requested broad premise audit when the whole system archetype may be wrong before repo vocabulary can be trusted.
-- **`/codebase-design`** — deep-module vocabulary: module, interface, seam, adapter, depth, leverage, locality.
-- **`/domain-modeling`** — domain vocabulary and ADR discipline.
+From a repository clone, use the matching skill under `skills/misc/` when the
+specialized workflow is more appropriate:
 
-## Review and cleanup
+- terminology and domain vocabulary → `domain-modeling`;
+- architecture depth and premise checks → `architecture-premise-audit`,
+  `codebase-design`, `structural-antipatterns`,
+  `improve-codebase-architecture`;
+- incoming issue workflow → `triage`;
+- cleanup, conflict repair, or maximum-recall review → `repo-refresh`,
+  `resolving-merge-conflicts`, `ultra-review`.
 
-- **`/code-review`** — ordinary diff review against Standards and Spec.
-- **`/ultra-review`** — maximum-recall peer review when false positives are acceptable and missing a rare bug is worse.
-- **`/repo-refresh`** — explicit repo cleanup: stale docs, dead proof, obsolete tests, scripts, fixtures, generated debris.
-
-## On-ramps and standalone skills
-
-- **Bugs** → `/diagnosing-bugs`.
-- **Incoming raw issues** → `/triage`.
-- **Huge foggy effort** → `/wayfinder`, then collapse into `/to-spec` when decisions are clear.
-- **Runnable design question** → `/prototype`.
-- **External reading** → `/research`.
-- **Session bridge** → `/handoff`.
-- **Learning** → `/teach`.
-- **Writing skills** → `/writing-great-skills`.
-
-## Precondition
-
-Run **`/setup-matt-pocock-skills`** once per repo to install issue tracker wiring, root control docs, `WORKSPACE_PROTOCOL.md`, `SUPERVISOR_NOTEBOOK.md`, and `config.model`. Root reads `WORKSPACE_PROTOCOL.md`; peer does not. Supervisor uses `SUPERVISOR_NOTEBOOK.md` for durable coordination lessons, and supervisor/root use `config.model` for per-project downstream model defaults when creating new agents.
+These utilities and role sources are intentionally not listed in the promoted
+plugin manifest, but their source remains available in the clone.

@@ -1,6 +1,0 @@
-interface:
-  display_name: "Root"
-  short_description: "Active project lead that keeps design decisions and routes coding/test work to peers"
-  default_prompt: "Use $root to read WORKSPACE_PROTOCOL.md, preflight config.model [peer] provider/model/thinking values against the exact role catalog before creating peer, CLI launches must pass both --model \"$MODEL\" and --thinking \"$THINKING\" from config.model, never pass --mode for role providers unless catalog lists modes, use MCP paseo_create_agent provider as <role>/<model> after catalog verification, set settings.thinkingOptionId to the configured thinking value, never call paseo_create_agent with a bare model id, remember MCP create_agent model lives in provider and settings must not contain model; thinking lives in settings.thinkingOptionId, preserve the project mainline, keep design/lead decisions, route coding/TDD/bugfix/test/proof/code-review slices to bounded fresh peer packets by default, never ask peer to read WORKSPACE_PROTOCOL.md or config.model and send only sanitized packet-specific constraints, retrieve peer PEER_STATUS through native wait/log/inspect instead of ROOT_AGENT_ID callbacks, gate peer output, and report evidence upward."
-policy:
-  allow_implicit_invocation: false

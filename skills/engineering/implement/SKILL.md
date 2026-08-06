@@ -8,7 +8,9 @@ disable-model-invocation: true
 
 Implement the work described by the user in the spec or tickets. This is execution, not architecture drift: read the control docs first, write the active plan, prove each claim, then commit.
 
-Use `/tdd` where possible, at pre-agreed seams.
+Apply the red-green-refactor loop at pre-agreed seams. Use the promoted `/tdd`
+skill when the task is explicitly test-first; implementation keeps the same
+discipline inline for every proof-sized slice.
 
 ## Process
 
@@ -44,7 +46,7 @@ Update the plan whenever scope, findings, risks, files, or verification commands
 
 ### 3. Build in proof-sized slices
 
-Use `/tdd` at the pre-agreed seams. For each slice:
+Apply the red-green-refactor loop at the pre-agreed seams. For each slice:
 
 1. Mark the current step in `ACTIVE_EXECUTION_PLAN.md`.
 2. Write or identify the proof first when the policy requires it.

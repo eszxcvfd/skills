@@ -1,0 +1,302 @@
+#!/usr/bin/env python3
+"""Generate isolated Codex runtime homes for Paseo roles."""
+
+from __future__ import annotations
+
+import argparse
+import configparser
+import json
+import os
+import re
+import sys
+import tempfile
+import tomllib
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Iterable
+
+
+ROLES = ("supervisor", "root", "peer")
+SHARED_LINKS = ("auth.json", "skills", "plugins")
+OVERRIDE_KEYS = {"model", "model_reasoning_effort", "developer_instructions"}
+ASSIGNMENT_RE = re.compile(r"^(model|model_reasoning_effort|developer_instructions)\s*=")
+TRIPLE_QUOTES = ('"""', "'''")
+
+
+class SyncError(Exception):
+    """A user-correctable runtime synchronization error."""
+
+
+@dataclass(frozen=True)
+class RoleSpec:
+    role: str
+    provider: str
+    model: str
+    reasoning: str
+    instructions: str
+    profile_path: Path
+
+
+def _parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Generate isolated Codex homes for supervisor, root, and peer."
+    )
+    parser.add_argument(
+        "--repo-root",
+        type=Path,
+        default=Path(__file__).resolve().parents[1],
+        help="Repository containing config.model and .codex/agents (default: script repository)",
+    )
+    parser.add_argument(
+        "--codex-home",
+        type=Path,
+        default=Path.home() / ".codex",
+        help="Shared Codex home used as the baseline (default: ~/.codex)",
+    )
+    parser.add_argument(
+        "--runtime-root",
+        type=Path,
+        default=Path.home() / ".codex-runtime",
+        help="Directory containing role-specific CODEX_HOME directories (default: ~/.codex-runtime)",
+    )
+    return parser.parse_args()
+
+
+def _read_toml(path: Path) -> dict[str, object]:
+    try:
+        return tomllib.loads(path.read_text(encoding="utf-8"))
+    except (OSError, tomllib.TOMLDecodeError) as exc:
+        raise SyncError(f"invalid TOML at {path}: {exc}") from exc
+
+
+def _read_config_model(path: Path) -> configparser.ConfigParser:
+    parser = configparser.ConfigParser(interpolation=None)
+    try:
+        with path.open("r", encoding="utf-8") as handle:
+            parser.read_file(handle)
+    except (OSError, configparser.Error) as exc:
+        raise SyncError(f"invalid config.model at {path}: {exc}") from exc
+    return parser
+
+
+def _require_existing(path: Path, label: str, *, directory: bool = False) -> Path:
+    exists = path.is_dir() if directory else path.is_file()
+    if not exists:
+        kind = "directory" if directory else "file"
+        raise SyncError(f"missing {label} {kind}: {path}")
+    return path.resolve(strict=True)
+
+
+def _load_role_specs(repo_root: Path) -> tuple[RoleSpec, ...]:
+    config_path = _require_existing(repo_root / "config.model", "role config")
+    parser = _read_config_model(config_path)
+    specs: list[RoleSpec] = []
+    for role in ROLES:
+        if not parser.has_section(role):
+            raise SyncError(f"config.model is missing [{role}] in {config_path}")
+        section = parser[role]
+        expected_provider = f"codex-{role}"
+        provider = section.get("provider", "").strip()
+        if provider != expected_provider:
+            raise SyncError(
+                f"[{role}].provider must be {expected_provider!r}, got {provider!r} in {config_path}"
+            )
+        model = section.get("model", "").strip()
+        reasoning = section.get("thinking", "").strip()
+        if not model:
+            raise SyncError(f"[{role}].model is empty in {config_path}")
+        if not reasoning:
+            raise SyncError(f"[{role}].thinking is empty in {config_path}")
+
+        profile_path = _require_existing(
+            repo_root / ".codex" / "agents" / f"{role}.toml", f"{role} profile"
+        )
+        profile = _read_toml(profile_path)
+        profile_name = profile.get("name")
+        if profile_name != role:
+            raise SyncError(
+                f"profile {profile_path} must have name={role!r}, got {profile_name!r}"
+            )
+        profile_reasoning = profile.get("model_reasoning_effort")
+        if not isinstance(profile_reasoning, str) or not profile_reasoning.strip():
+            raise SyncError(f"profile {profile_path} has no model_reasoning_effort")
+        if profile_reasoning.strip() != reasoning:
+            raise SyncError(
+                f"profile {profile_path} reasoning {profile_reasoning!r} "
+                f"does not match [{role}].thinking {reasoning!r}"
+            )
+        instructions = profile.get("developer_instructions")
+        if not isinstance(instructions, str) or not instructions.strip():
+            raise SyncError(f"profile {profile_path} has no developer_instructions")
+        if any(delimiter in instructions for delimiter in TRIPLE_QUOTES):
+            raise SyncError(
+                f"profile {profile_path} developer_instructions contains a triple-quote delimiter"
+            )
+        specs.append(
+            RoleSpec(
+                role=role,
+                provider=provider,
+                model=model,
+                reasoning=reasoning,
+                instructions=instructions,
+                profile_path=profile_path,
+            )
+        )
+    return tuple(specs)
+
+
+def _preflight_runtime_paths(runtime_root: Path) -> None:
+    if runtime_root.exists() and not runtime_root.is_dir():
+        raise SyncError(f"runtime root is not a directory: {runtime_root}")
+    for role in ROLES:
+        role_root = runtime_root / role
+        if role_root.exists() and not role_root.is_dir():
+            raise SyncError(f"runtime path is not a directory: {role_root}")
+        for name in SHARED_LINKS:
+            link = role_root / name
+            if link.exists() and not link.is_symlink():
+                raise SyncError(f"refusing to replace non-symlink runtime path: {link}")
+            if link.is_symlink() and not link.exists():
+                continue
+        config_path = role_root / "config.toml"
+        if config_path.is_symlink():
+            raise SyncError(f"refusing to replace symlinked runtime config: {config_path}")
+        if config_path.exists() and not config_path.is_file():
+            raise SyncError(f"refusing to replace non-file runtime config: {config_path}")
+
+
+def _preflight(repo_root: Path, codex_home: Path, runtime_root: Path) -> tuple[RoleSpec, ...]:
+    repo_root = repo_root.expanduser().resolve()
+    codex_home = codex_home.expanduser().resolve()
+    runtime_root = runtime_root.expanduser().resolve()
+    _require_existing(codex_home / "config.toml", "shared Codex baseline")
+    _require_existing(codex_home / "auth.json", "shared auth", directory=False)
+    _require_existing(codex_home / "skills", "shared skills", directory=True)
+    _require_existing(codex_home / "plugins", "shared plugins", directory=True)
+    specs = _load_role_specs(repo_root)
+    _preflight_runtime_paths(runtime_root)
+    return specs
+
+
+def _top_level_without_overrides(text: str) -> list[str]:
+    lines = text.splitlines(keepends=True)
+    output: list[str] = []
+    in_table = False
+    skipping_multiline: str | None = None
+    for line in lines:
+        stripped = line.lstrip()
+        if skipping_multiline is not None:
+            if skipping_multiline in line:
+                skipping_multiline = None
+            continue
+        if stripped.startswith("[") and (stripped.startswith("[") or stripped.startswith("[[")):
+            in_table = True
+        match = ASSIGNMENT_RE.match(stripped) if not in_table else None
+        if match:
+            key = match.group(1)
+            if key == "developer_instructions":
+                for delimiter in TRIPLE_QUOTES:
+                    if delimiter in line and line.count(delimiter) % 2 == 1:
+                        skipping_multiline = delimiter
+                        break
+            continue
+        output.append(line)
+    return output
+
+
+def _render_config(baseline_text: str, spec: RoleSpec) -> str:
+    overlay = [
+        f"model = {json.dumps(spec.model)}\n",
+        f"model_reasoning_effort = {json.dumps(spec.reasoning)}\n",
+        "developer_instructions = \"\"\"\n",
+        spec.instructions.rstrip("\n") + "\n",
+        "\"\"\"\n",
+        "\n",
+    ]
+    body = _top_level_without_overrides(baseline_text)
+    rendered = "".join(overlay + body)
+    try:
+        parsed = tomllib.loads(rendered)
+    except tomllib.TOMLDecodeError as exc:
+        raise SyncError(f"generated config for {spec.role} is invalid TOML: {exc}") from exc
+    if parsed.get("model") != spec.model:
+        raise SyncError(f"generated config for {spec.role} has the wrong model")
+    if parsed.get("model_reasoning_effort") != spec.reasoning:
+        raise SyncError(f"generated config for {spec.role} has the wrong reasoning level")
+    if parsed.get("developer_instructions") != spec.instructions:
+        raise SyncError(f"generated config for {spec.role} has the wrong developer instructions")
+    return rendered
+
+
+def _atomic_write(path: Path, content: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary_path: Path | None = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="w", encoding="utf-8", dir=path.parent, prefix=f".{path.name}.", delete=False
+        ) as handle:
+            temporary_path = Path(handle.name)
+            handle.write(content)
+            handle.flush()
+            os.fsync(handle.fileno())
+        temporary_path.chmod(0o600)
+        os.replace(temporary_path, path)
+    except OSError as exc:
+        if temporary_path is not None:
+            temporary_path.unlink(missing_ok=True)
+        raise SyncError(f"could not atomically write {path}: {exc}") from exc
+
+
+def _refresh_link(link: Path, target: Path) -> None:
+    if link.is_symlink():
+        link.unlink()
+    elif link.exists():
+        raise SyncError(f"refusing to replace non-symlink runtime path: {link}")
+    try:
+        link.symlink_to(target, target_is_directory=target.is_dir())
+    except OSError as exc:
+        raise SyncError(f"could not link {link} to {target}: {exc}") from exc
+
+
+def sync_runtimes(repo_root: Path, codex_home: Path, runtime_root: Path) -> tuple[Path, ...]:
+    repo_root = repo_root.expanduser().resolve()
+    codex_home = codex_home.expanduser().resolve()
+    runtime_root = runtime_root.expanduser().resolve()
+    specs = _preflight(repo_root, codex_home, runtime_root)
+    baseline_path = codex_home / "config.toml"
+    try:
+        baseline_text = baseline_path.read_text(encoding="utf-8")
+    except OSError as exc:
+        raise SyncError(f"could not read shared Codex baseline {baseline_path}: {exc}") from exc
+    try:
+        tomllib.loads(baseline_text)
+    except tomllib.TOMLDecodeError as exc:
+        raise SyncError(f"invalid shared Codex baseline {baseline_path}: {exc}") from exc
+    rendered = {spec.role: _render_config(baseline_text, spec) for spec in specs}
+
+    outputs: list[Path] = []
+    for spec in specs:
+        role_root = runtime_root / spec.role
+        role_root.mkdir(parents=True, exist_ok=True)
+        config_path = role_root / "config.toml"
+        _atomic_write(config_path, rendered[spec.role])
+        for name in SHARED_LINKS:
+            _refresh_link(role_root / name, (codex_home / name).resolve(strict=True))
+        outputs.append(config_path)
+    return tuple(outputs)
+
+
+def main() -> int:
+    args = _parse_args()
+    try:
+        outputs = sync_runtimes(args.repo_root, args.codex_home, args.runtime_root)
+    except SyncError as exc:
+        print(f"codex-room-sync: {exc}", file=sys.stderr)
+        return 1
+    for output in outputs:
+        print(f"synced {output.parent.name}: {output}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

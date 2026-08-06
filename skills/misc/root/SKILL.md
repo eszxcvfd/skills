@@ -9,7 +9,7 @@ disable-model-invocation: true
 Root is the implementation leader in the Paseo hierarchy:
 
 ```text
-supervisor → root → peer
+codex-supervisor → codex-root → codex-peer
 ```
 
 Root is the active project lead in the decision flow. Root does the central work when that is cheaper than delegation, starts fresh peers for bounded execution when useful, and quality-gates their terminal output.
@@ -18,10 +18,10 @@ Root is the active project lead in the decision flow. Root does the central work
 
 Root must read `WORKSPACE_PROTOCOL.md` before planning. That file is root-only. Never quote it to peers, attach it to peer packets, or tell peers to read it.
 
-Root calls peer through Paseo using `${PASEO_CLI:-paseo}`. Before launch, read `<repo>/config.model` when present and verify the exact `[peer]` provider/model/thinking values against the role provider catalog. Do not guess model prefixes or launch an unavailable model; report the exact catalog mismatch and safe alternatives instead. CLI launches must pass both `--model "$MODEL"` and `--thinking "$THINKING"` from `[peer]`: `${PASEO_CLI:-paseo} agent run --provider peer --model "$MODEL" --thinking "$THINKING" --label hierarchy=paseo --label role=peer --label parent=root --cwd <repo> "<WORK_PACKET>"`. Do not pass `--mode` for role providers unless the provider catalog lists modes. For MCP `paseo_create_agent`, provider must be `<role>/<model>` after catalog verification, `settings.thinkingOptionId` must equal `[peer].thinking`, and `settings.model` must not exist. Existing agents keep their original model/thinking; fresh work uses `config.model`, so treat stale-model sessions as reusable only when the human explicitly names them.
+`codex-root` calls `codex-peer` through Paseo using `${PASEO_CLI:-paseo}` for repository implementation, tests, review, or proof. Before launch, read `<repo>/config.model` when present and verify the exact `[peer]` provider/model/thinking values against the role provider catalog; the provider must be `codex-peer`. Do not guess model prefixes or launch an unavailable model; report the exact catalog mismatch and safe alternatives instead. Read `PEER_PROVIDER` from `[peer].provider`, then launch with `${PASEO_CLI:-paseo} agent run --provider "$PEER_PROVIDER" --model "$MODEL" --thinking "$THINKING" --mode full-access --label hierarchy=paseo --label role=peer --label parent=root --cwd <repo> "<WORK_PACKET>"`. The role catalog must expose `full-access`; use it for every fresh peer. For MCP `paseo_create_agent`, provider must be `<configured-provider>/<model>` after catalog verification, `settings.thinkingOptionId` must equal `[peer].thinking`, and `settings.model` must not exist. Existing agents keep their original model/thinking; fresh work uses `config.model`, so treat stale-model sessions as reusable only when the human explicitly names them.
 Peer packets must not ask peer to read `WORKSPACE_PROTOCOL.md` or `config.model`; root reads those files and sends only sanitized packet-specific constraints.
 
-Normal work starts one fresh peer per bounded packet. Resume or send to an existing peer only when the human or root task explicitly names that peer id. Inspect with `agent inspect <id> --json` first; only an inspected `Provider` of `peer` (or `peer/...`) or a `role=peer` label counts as peer. Root never asks peer to create more peers.
+Normal work starts one fresh peer per bounded packet. Resume or send to an existing peer only when the human or root task explicitly names that peer id. Inspect with `agent inspect <id> --json` first; only an inspected provider equal to the exact `[peer].provider` value (or that provider followed by `/`) or a `role=peer` label counts as peer. Root never asks peer to create more peers.
 
 Peer completion is not a chat callback. Root tracks the returned peer id, waits for completion, and retrieves the final `PEER_STATUS` through native wait/log/inspect. Do not put `ROOT_AGENT_ID` in packets, and do not ask peer to call `paseo agent send` for status, completion, or routine corrections. If a packet is wrong, start a fresh peer with a corrected packet.
 
@@ -101,7 +101,10 @@ If side effects are complete, do not replay the task. If incomplete, archive sup
 - Overlap independent checking deliberately; do not assign the same files to multiple peers unless root names the file conflict policy.
 - Peer output is evidence, not truth. Root must inspect artifacts before reporting up.
 - No shims, placeholders, compatibility copies, or "later cleanup" plans when one coherent cutover is possible.
-- If root cannot assign a safe packet because system design is suspect, run `/structural-antipatterns` before dispatch.
+- If root cannot assign a safe packet because system design is suspect, use the
+  structural-misfit lens in `/architecture-council` before dispatch. The former
+  standalone `structural-antipatterns` skill remains preserved under
+  `skills/misc/`.
 
 ## Progress Report To Supervisor
 

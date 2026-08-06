@@ -1,0 +1,46 @@
+#!/bin/sh
+set -eu
+
+usage() {
+    printf '%s\n' "usage: codex-room {supervisor|root|peer} [codex args...]" >&2
+}
+
+if [ "$#" -lt 1 ]; then
+    usage
+    exit 64
+fi
+
+role=$1
+case "$role" in
+    supervisor|root|peer)
+        ;;
+    *)
+        usage
+        exit 64
+        ;;
+esac
+
+home=${HOME:-}
+if [ -z "$home" ]; then
+    printf '%s\n' "codex-room: HOME is required" >&2
+    exit 64
+fi
+
+runtime_root=${CODEX_RUNTIME_ROOT:-"$home/.codex-runtime"}
+runtime_home=$runtime_root/$role
+config_path=$runtime_home/config.toml
+if [ ! -f "$config_path" ] || [ -L "$config_path" ]; then
+    printf '%s\n' "codex-room: missing synced runtime config: $config_path" >&2
+    printf '%s\n' "run codex-room-sync before launching this role" >&2
+    exit 78
+fi
+
+codex_bin=$(command -v codex || true)
+if [ -z "$codex_bin" ]; then
+    printf '%s\n' "codex-room: codex executable not found on PATH" >&2
+    exit 127
+fi
+
+export CODEX_HOME=$runtime_home
+shift
+exec "$codex_bin" "$@"

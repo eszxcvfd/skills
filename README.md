@@ -72,8 +72,8 @@ Sau khi cài:
 
 1. `/setup-matt-pocock-skills`
 2. `/ask-matt` nếu không chắc skill nào.
-3. `/supervisor` → `/root` → `/peer` cho flow lớn.
-4. Với flow nhỏ: `/grill-with-docs` → `/to-spec` → `/to-tickets` → `/implement`.
+3. `codex-supervisor` → `codex-root` → `codex-peer` cho flow lớn; ba profile chứa role instructions inline.
+4. Với flow nhỏ: `/grill-with-docs` → `/implement` → `/code-review`; effort lớn hoặc còn mù đường bắt đầu bằng `/wayfinder`.
 
 Root đọc `WORKSPACE_PROTOCOL.md`; peer không đọc file đó. `SUPERVISOR_NOTEBOOK.md` là memory của supervisor cho failure/anti-pattern quan sát được. `config.model` giữ provider/model/thinking mặc định cho supervisor/root/peer theo từng project, để đổi model mà không sửa prompt. Root giữ design/lead; coding/TDD/bugfix/test/proof/code-review mặc định đẩy xuống peer khi vượt quá một bước inline nhỏ, trừ khi bạn yêu cầu root tự làm.
 
@@ -102,37 +102,34 @@ These split on one axis — who can invoke them. **User-invoked** skills are rea
 
 ### Engineering
 
-Skills I use daily for code work.
+Skills I use daily for code work. The promoted surface currently has thirteen
+skills, within the requested 10–15 range; specialized utilities remain in
+`skills/misc/`.
 
 **User-invoked**
 
-- **[ask-matt](./skills/engineering/ask-matt/SKILL.md)** — Ask which skill or flow fits your situation. A router over the user-invoked skills in this repo.
-- **[supervisor](./skills/engineering/supervisor/SKILL.md)** — Decision proxy above root: handles macro decisions, momentum recovery, quality, and progress truth.
-- **[root](./skills/engineering/root/SKILL.md)** — Active project lead that reads `WORKSPACE_PROTOCOL.md`, uses repo-local `config.model` for peer defaults, preserves momentum, keeps design/lead work, routes coding/test/review slices to peer, and gates output.
-- **[peer](./skills/engineering/peer/SKILL.md)** — Independent worker for any bounded packet from root; reports final status back to root.
-- **[grill-with-docs](./skills/engineering/grill-with-docs/SKILL.md)** — Grilling session that also builds your project's domain model, sharpening terminology and updating `CONTEXT.md` and ADRs inline.
-- **[triage](./skills/engineering/triage/SKILL.md)** — Move issues through a state machine of triage roles.
-- **[improve-codebase-architecture](./skills/engineering/improve-codebase-architecture/SKILL.md)** — Scan a codebase for deepening opportunities, present them as a visual HTML report, then grill through whichever one you pick.
+- **[ask-matt](./skills/engineering/ask-matt/SKILL.md)** — Ask which active engineering skill or preserved specialized workflow fits the situation.
 - **[setup-matt-pocock-skills](./skills/engineering/setup-matt-pocock-skills/SKILL.md)** — Configure this repo for the engineering skills (issue tracker, triage labels, domain docs, root control docs, `WORKSPACE_PROTOCOL.md`, `SUPERVISOR_NOTEBOOK.md`, and `config.model`). Run once per repo.
-- **[to-tickets](./skills/engineering/to-tickets/SKILL.md)** — Break any plan, spec, or conversation into tracer-bullet tickets with blocking edges, control notes, and required proof — local markdown or native tracker links.
-- **[implement](./skills/engineering/implement/SKILL.md)** — Build the work described by a spec or set of tickets, maintaining `ACTIVE_EXECUTION_PLAN.md`, driving `/tdd`, proving per policy, and closing with `/code-review` before committing.
-- **[repo-refresh](./skills/engineering/repo-refresh/SKILL.md)** — Explicit repository-wide cleanup for stale docs, dead plans, stale proof machinery, generated debris, and obsolete tests.
-- **[ultra-review](./skills/engineering/ultra-review/SKILL.md)** — Maximum-recall peer review pipeline that preserves every candidate in one durable report.
-- **[wayfinder](./skills/engineering/wayfinder/SKILL.md)** — Plan a huge chunk of work, more than one agent session can hold, as a shared map of investigation tickets on the issue tracker — resolve them one at a time until the way to the destination is clear.
+- **[wayfinder](./skills/engineering/wayfinder/SKILL.md)** — Map a very large, foggy effort as decision tickets until the route is clear.
+- **[grill-with-docs](./skills/engineering/grill-with-docs/SKILL.md)** — Sharpen a plan through a one-question-at-a-time interview while recording terms and decisions.
+- **[to-spec](./skills/engineering/to-spec/SKILL.md)** — Turn an aligned conversation into a spec with architecture placement, invariants, and proof.
+- **[to-tickets](./skills/engineering/to-tickets/SKILL.md)** — Split a spec or plan into tracer-bullet tickets with blocking edges and required proof.
+- **[implement](./skills/engineering/implement/SKILL.md)** — Build the work described by a spec or set of tickets, maintaining `ACTIVE_EXECUTION_PLAN.md`, applying TDD inline, proving per policy, and closing with `/code-review` before committing.
 
 **Model-invoked**
 
-- **[architecture-council](./skills/engineering/architecture-council/SKILL.md)** — Mandatory pre-code gate for every architecture decision or unclear architectural next step, using cheaper peer roles for reduced gates and Paseo root agents for full/high-risk gates.
-- **[architecture-premise-audit](./skills/engineering/architecture-premise-audit/SKILL.md)** — Broad premise audit for wrong system archetypes before trusting repo vocabulary, proof, or module boundaries.
-- **[prototype](./skills/engineering/prototype/SKILL.md)** — Build a throwaway prototype to answer a design question — a runnable terminal app for state/logic questions, or several radically different UI variations toggleable from one route.
+- **[architecture-council](./skills/engineering/architecture-council/SKILL.md)** — Mandatory pre-code gate for every architecture decision or unclear architectural next step.
 - **[diagnosing-bugs](./skills/engineering/diagnosing-bugs/SKILL.md)** — Disciplined diagnosis loop for hard bugs and performance regressions: reproduce → minimise → hypothesise → instrument → fix → regression-test.
-- **[research](./skills/engineering/research/SKILL.md)** — Investigate a question against high-trust primary sources and capture the findings as a cited Markdown file in the repo, run as a focused research packet.
-- **[tdd](./skills/engineering/tdd/SKILL.md)** — Test-driven development with a red-green-refactor loop. Builds features or fixes bugs one vertical slice at a time.
-- **[domain-modeling](./skills/engineering/domain-modeling/SKILL.md)** — Actively build and sharpen a project's domain model — challenge terms against the glossary, stress-test with edge-case scenarios, and update `CONTEXT.md` and ADRs inline.
-- **[codebase-design](./skills/engineering/codebase-design/SKILL.md)** — Shared discipline and vocabulary for designing deep modules: a lot of behaviour behind a small interface, placed at a clean seam, testable through that interface.
-- **[structural-antipatterns](./skills/engineering/structural-antipatterns/SKILL.md)** — Design-control lens for structural misfit, weak-owner workarounds, proof laundering, overengineering, and avoidable tax.
-- **[code-review](./skills/engineering/code-review/SKILL.md)** — Two-axis review of the diff since a fixed point: **Standards** (including control docs and Fowler smells) and **Spec**, plus a proof gate.
-- **[resolving-merge-conflicts](./skills/engineering/resolving-merge-conflicts/SKILL.md)** — Work through an in-progress git merge or rebase conflict hunk by hunk, resolving by intent traced to each side's primary source, then finish the operation — never `--abort`.
+- **[research](./skills/engineering/research/SKILL.md)** — Investigate questions against high-trust primary sources and leave cited findings.
+- **[tdd](./skills/engineering/tdd/SKILL.md)** — Drive implementation with a red-green-refactor loop and seam-level proof.
+- **[prototype](./skills/engineering/prototype/SKILL.md)** — Build a throwaway artifact to answer a design or state-model question.
+- **[code-review](./skills/engineering/code-review/SKILL.md)** — Review a fixed-point diff along Standards and Spec axes, including the proof gate.
+
+The three Paseo role sources are intentionally not promoted as user skills:
+`skills/misc/supervisor`, `skills/misc/root`, and `skills/misc/peer` remain
+repository references. The matching Codex profiles contain their role
+instructions inline. Other specialized utilities remain available from a
+repository clone but are not shipped in the promoted plugin.
 
 ### Productivity
 

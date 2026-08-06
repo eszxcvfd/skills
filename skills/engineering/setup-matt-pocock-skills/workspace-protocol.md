@@ -14,12 +14,12 @@ human → supervisor → root → peer
 
 ## Agent call routing
 
-- `config.model` at the repo root is the per-project source of truth for supervisor/root/peer provider, model, and thinking defaults.
-- Supervisor calls root through Paseo, using the `[root]` entry from `config.model` when present; otherwise use the `root` provider default. Supervisor must not call peer directly.
-- Root calls peer through Paseo, using the `[peer]` entry from `config.model` when present; otherwise use the `peer` provider default. Root may create one peer per bounded packet when independent work is useful.
+- `config.model` at the repo root is the per-project source of truth for supervisor/root/peer provider, model, and thinking defaults. Role providers may be custom aliases such as `codex-supervisor`, `codex-root`, and `codex-peer`.
+- Supervisor calls root through Paseo using the exact provider from `[root].provider`; otherwise it reports the missing role provider instead of guessing. Supervisor must not call peer directly.
+- Root calls peer through Paseo using the exact provider from `[peer].provider`; otherwise it reports the missing role provider instead of guessing. Root may create one peer per bounded packet when independent work is useful.
 - Before launching root or peer from `config.model`, compare the exact provider/model/thinking values against the role provider catalog. Do not guess model prefixes or launch an unavailable model; report catalog mismatches before retrying.
-- CLI launches must pass both `--model "$MODEL"` and `--thinking "$THINKING"` from the selected `[root]` or `[peer]` entry. Fresh downstream work starts with `paseo agent run --provider <role> --model "$MODEL" --thinking "$THINKING" --label hierarchy=paseo --label role=<role> --cwd <repo> "<packet>"`; add `--label parent=root` when starting peer. Do not pass `--mode` for role providers unless the catalog lists modes.
-- For MCP `paseo_create_agent`, provider must be `<role>/<model>` after catalog verification. Never call `paseo_create_agent` with a bare model id.
+- CLI launches must pass both `--model "$MODEL"` and `--thinking "$THINKING"` from the selected role entry. Fresh downstream work starts with `paseo agent run --provider "$ROLE_PROVIDER" --model "$MODEL" --thinking "$THINKING" --label hierarchy=paseo --label role=<role> --cwd <repo> "<packet>"`; add `--label parent=root` when starting peer. Do not pass `--mode` for role providers unless the catalog lists modes.
+- For MCP `paseo_create_agent`, provider must be `<configured-provider>/<model>` after catalog verification. Never call `paseo_create_agent` with a bare model id.
 - MCP create_agent model lives in provider; settings must not contain model; thinking lives in settings.thinkingOptionId.
 - Existing agents keep their original model/thinking; fresh work uses `config.model`. Treat old sessions with stale model settings as reusable only when the human explicitly names them.
 - Peer packets must not ask peer to read `WORKSPACE_PROTOCOL.md` or `config.model`; root reads those files and sends only sanitized packet-specific constraints.
@@ -74,7 +74,7 @@ Supervisor may recover momentum by reading git history, session history, root re
 
 ## Design control
 
-Before accepting a plan or peer implementation that changes system shape, root must run the structural-antipatterns lens:
+Before accepting a plan or peer implementation that changes system shape, root must run the structural-misfit lens in `architecture-council`:
 
 - Does the module have the information needed to produce its claimed output?
 - Is a wrapper compensating for a dependency that should own the semantics?

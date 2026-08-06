@@ -32,7 +32,7 @@ LEGACY_PHRASES = (
 )
 
 REQUIRED_PHRASES = (
-    "MCP `paseo_create_agent` provider must be `<role>/<model>`",
+    "MCP `paseo_create_agent` provider must be `<configured-provider>/<model>`",
     "Existing agents keep their original model/thinking; fresh work uses `config.model`",
     'CLI launches must pass both `--model "$MODEL"` and `--thinking "$THINKING"`',
     "terminal run result",
@@ -49,14 +49,14 @@ CONTRACT_FILES = (
     ".agents/skills/peer/SKILL.md",
     ".agents/skills/supervisor/SKILL.md",
     ".agents/skills/ask-matt/SKILL.md",
-    "skills/engineering/root/SKILL.md",
-    "skills/engineering/peer/SKILL.md",
-    "skills/engineering/supervisor/SKILL.md",
+    "skills/misc/root/SKILL.md",
+    "skills/misc/peer/SKILL.md",
+    "skills/misc/supervisor/SKILL.md",
     "skills/engineering/ask-matt/SKILL.md",
     "skills/engineering/setup-matt-pocock-skills/workspace-protocol.md",
-    "docs/engineering/root.md",
-    "docs/engineering/peer.md",
-    "docs/engineering/supervisor.md",
+    "docs/archive/roles/root.md",
+    "docs/archive/roles/peer.md",
+    "docs/archive/roles/supervisor.md",
     "docs/engineering/ask-matt.md",
     ".codex/agents/root.toml",
     ".codex/agents/peer.toml",
@@ -66,13 +66,14 @@ CONTRACT_FILES = (
 AGENT_CONTRACT_FILES = (
     ".agents/skills/root/agents/openai.yaml",
     ".agents/skills/supervisor/agents/openai.yaml",
-    "skills/engineering/root/agents/openai.yaml",
-    "skills/engineering/supervisor/agents/openai.yaml",
+    "skills/misc/root/agents/openai.yaml",
+    "skills/misc/supervisor/agents/openai.yaml",
 )
 
 AGENT_REQUIRED_PHRASES = (
     '--model "$MODEL"',
     '--thinking "$THINKING"',
+    "--mode full-access",
     "settings.thinkingOptionId",
     "MCP create_agent model lives in provider and settings must not contain model; thinking lives in settings.thinkingOptionId",
 )
@@ -107,8 +108,11 @@ def check_config(root: Path, failures: list[str]) -> None:
             if not parser.get(role, key, fallback="").strip():
                 failures.append(f"config.model: [{role}].{key} is required")
         provider = parser.get(role, "provider", fallback="")
-        if provider != role:
-            failures.append(f"config.model: [{role}].provider = {provider!r}, expected {role!r}")
+        expected_provider = f"codex-{role}"
+        if provider != expected_provider:
+            failures.append(
+                f"config.model: [{role}].provider = {provider!r}, expected {expected_provider!r}"
+            )
 
 
 def check_contract_text(root: Path, failures: list[str]) -> None:

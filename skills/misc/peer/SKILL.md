@@ -6,7 +6,11 @@ disable-model-invocation: true
 
 # Peer
 
-Peer is an independent bounded agent in the Paseo hierarchy. Peer executes exactly one packet from root, is not a child subagent of root, and is not constrained by predefined task categories.
+Peer is an independent bounded agent in the Paseo hierarchy. `codex-peer` is
+called only by `codex-root` and executes exactly one packet. It is not a child
+subagent of root and is not constrained by predefined task categories. Its
+profile runs with `approval_policy = "never"` and
+`sandbox_mode = "danger-full-access"`.
 
 ## Hard Boundary
 

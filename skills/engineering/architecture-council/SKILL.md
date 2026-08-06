@@ -65,10 +65,11 @@ roles:
 
 If the required peer/root provider is unavailable, stop after the quick gate and
 ask the user to restore it or explicitly choose a different risk mode. Full
-Council root launches read `[root]` provider/model/thinking from
-`<repo>/config.model`, verify them against the root provider catalog, and pass
-both `--model "$MODEL"` and `--thinking "$THINKING"`. Never replace the Council
-with Herdr, serial role-play, `omp`, or uncontrolled side-channel agents.
+Full Council root launches read the exact `[root].provider`, model, and thinking
+from `<repo>/config.model`, verify the provider/model/thinking tuple against the
+root provider catalog, and pass both `--model "$MODEL"` and `--thinking "$THINKING"`.
+The launch uses that configured provider alias, not a literal provider name.
+Never replace the Council with Herdr, serial role-play, `omp`, or uncontrolled side-channel agents.
 
 Every Council agent receives one prompt from `prompts/`, one output path under
 `.scratch/architecture-council/<decision-slug>/`, and this boundary:
@@ -83,11 +84,11 @@ COUNCIL_AGENT_BOUNDARY:
 
 Full Council root launch contract keeps this shape:
 
-```bash
-paseo agent run --background --provider root \
+ROOT_PROVIDER="<configured [root].provider>"
+paseo agent run --background --provider "$ROOT_PROVIDER" \
   --model "$MODEL" --thinking "$THINKING" \
   --title "architecture-council:<decision-slug>:<role>" \
-  --label council-role=<role> --cwd "$PROJECT_ROOT" "$(cat "$PROMPT_FILE")"
+  --label council-role=<role> --label role=root --cwd "$PROJECT_ROOT" "$(cat "$PROMPT_FILE")"
 paseo agent wait "$ROOT_AGENT_ID" --timeout 3600 --json
 paseo agent logs "$ROOT_AGENT_ID" --json > ".scratch/architecture-council/<decision-slug>/transcripts/<role>.log"
 ```

@@ -3,16 +3,16 @@
 # provider = Paseo provider alias. model/thinking come from `paseo provider models <provider> --json`.
 
 [supervisor]
-provider=supervisor
-model=openai-codex/gpt-5.6-luna
-thinking=low
+provider=codex-supervisor
+model=gpt-5.6-luna
+thinking=medium
 
 [root]
-provider=root
-model=openai-codex/gpt-5.6-luna
-thinking=high
+provider=codex-root
+model=gpt-5.6-luna
+thinking=max
 
 [peer]
-provider=peer
-model=openai-codex/gpt-5.6-luna
-thinking=medium
+provider=codex-peer
+model=gpt-5.6-luna
+thinking=high
