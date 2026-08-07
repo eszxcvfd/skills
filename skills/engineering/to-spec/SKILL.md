@@ -1,6 +1,6 @@
 ---
 name: to-spec
-description: Turn the current conversation into a spec with architecture placement, runtime invariants, and required proof, then publish it to the project issue tracker — no interview, just synthesis.
+description: Turn the current conversation into a spec with routed architecture context and required proof, then publish it to the project issue tracker — no interview, just synthesis.
 disable-model-invocation: true
 ---
 
@@ -10,7 +10,11 @@ The issue tracker and triage label vocabulary should have been provided to you �
 
 ## Process
 
-1. Explore the repo to understand the current state of the codebase, if you haven't already. Use the project's domain glossary vocabulary throughout the spec. Read `ARCHITECTURE.md`, `RUNTIME_CONSTITUTION.md`, `PROCESS_AND_PROOF_POLICY.md`, and relevant ADRs in the area you're touching.
+1. Start with Work Routing. Read only the smallest current set needed:
+   `ARCHITECTURE.md`, `docs/README.md`, and `docs/process/DEVELOPMENT.md`,
+   plus `PLANS.md` or the relevant runtime/protocol/resource document when
+   the task needs it. Use the project's domain glossary vocabulary throughout
+   the spec and read only the relevant `CONTEXT.md` or ADRs.
 
 2. Sketch out the seams at which you're going to test the feature. Existing seams should be preferred to new ones. Use the highest seam possible. If new seams are needed, propose them at the highest point you can. The fewer seams across the codebase, the better - the ideal number is one. If the spec would change module ownership, dependency direction, request/event flow, data ownership, public contracts, infrastructure, or another hard-to-reverse choice, run `/architecture-council` before publishing the spec.
 
@@ -46,7 +50,9 @@ Summarize the owner module, allowed dependencies, request/event routing, public 
 
 ## Affected Runtime Invariants
 
-List the `RUNTIME_CONSTITUTION.md` invariants this work may touch, or say "None identified".
+List the invariants in `docs/architecture/RUNTIME.md` that this work may touch,
+or say "None identified". Mention `NETCODE.md` or `CONTENT.md` when those
+owners are relevant.
 
 ## Implementation Decisions
 
@@ -66,7 +72,9 @@ Exception: if a prototype produced a snippet that encodes a decision more precis
 
 ## Required Proof
 
-List the proof required by `PROCESS_AND_PROOF_POLICY.md` for this change type: tests, migration checks, benchmark, visual check, reproduction, or other evidence.
+List the proof required by `docs/process/DEVELOPMENT.md` for this change type:
+tests, migration checks, benchmark, visual check, reproduction, or other
+evidence.
 
 ## Testing Decisions
 

@@ -7,7 +7,14 @@ description: Test-driven development. Use when the user wants to build features 
 
 TDD is the red → green loop. This skill is the reference that makes that loop produce tests worth keeping: what a good test is, where tests go, the anti-patterns, and the rules of the loop. Every section applies on every cycle — consult them before and during the loop, not after.
 
-When exploring the codebase, read `CONTEXT.md` (if it exists) so test names and interface vocabulary match the project's domain language. Also read `ARCHITECTURE.md`, `RUNTIME_CONSTITUTION.md`, `PROCESS_AND_PROOF_POLICY.md`, and relevant ADRs in the area you're touching. Tests must target the owning module's public seam, protect affected runtime invariants, and satisfy the repo's proof policy.
+When exploring the codebase, start with Work Routing and open only the smallest
+current document set needed: `ARCHITECTURE.md` for placement,
+`docs/process/DEVELOPMENT.md` for the test lane and proof, and
+`docs/architecture/RUNTIME.md` when runtime invariants are involved. Read the
+relevant `CONTEXT.md` and ADRs only when the routed task needs their vocabulary
+or decisions. Tests must target the owning module's public seam, protect
+affected runtime invariants, and satisfy the proof owner selected by Work
+Routing.
 
 ## What a good test is
 
@@ -31,6 +38,6 @@ Ask: "What's the public interface, which runtime invariants are affected, and wh
 
 ## Rules of the loop
 
-- **Red before green.** Write the failing test first, then only enough code to pass it. If `PROCESS_AND_PROOF_POLICY.md` requires a reproduction, benchmark, integration test, migration test, or concurrency harness, that proof is the red signal. Don't anticipate future tests or add speculative features.
+- **Red before green.** Write the failing test first, then only enough code to pass it. If `docs/process/DEVELOPMENT.md` requires a reproduction, benchmark, integration test, migration test, or concurrency harness, that proof is the red signal. Don't anticipate future tests or add speculative features.
 - **One slice at a time.** One seam, one test, one minimal implementation per cycle.
 - **Refactoring is not part of the loop.** It belongs to the review stage (see the `code-review` skill), not the red → green implementation cycle.

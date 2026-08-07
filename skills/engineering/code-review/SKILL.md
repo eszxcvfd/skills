@@ -1,11 +1,11 @@
 ---
 name: code-review
-description: Review the changes since a fixed point (commit, branch, tag, or merge-base) along Standards and Spec axes, including architecture/runtime/proof control docs and a proof gate. Use when the user wants to review a branch, PR, work-in-progress changes, or asks to "review since X".
+description: Review the changes since a fixed point (commit, branch, tag, or merge-base) along Standards and Spec axes, using Work Routing and a proof gate. Use when the user wants to review a branch, PR, work-in-progress changes, or asks to "review since X".
 ---
 
 Two-axis review of the diff between `HEAD` and a fixed point the user supplies:
 
-- **Standards** — does the code conform to this repo's documented coding standards and control docs?
+- **Standards** — does the code conform to this repo's documented coding standards and routed owner docs?
 - **Spec** — does the code faithfully implement the originating issue / PRD / spec?
 
 Both axes run as separate review lanes. Under Paseo, root should assign them to independent peer reviewer packets; otherwise run them inline without Pi/Codex internal subagents.
@@ -31,16 +31,21 @@ Look for the originating spec, in this order:
 3. A PRD/spec file under `docs/`, `specs/`, or `.scratch/` matching the branch name or feature.
 4. If nothing is found, ask the user where the spec is. If they say there isn't one, the **Spec** lane will skip and report "no spec available".
 
-### 3. Identify the standards and control sources
+### 3. Identify the routed standards and owner sources
 
-Anything in the repo that documents how code should be written or constrained, such as `CODING_STANDARDS.md`, `CONTRIBUTING.md`, `ARCHITECTURE.md`, `RUNTIME_CONSTITUTION.md`, `PROCESS_AND_PROOF_POLICY.md`, relevant ADRs, and `ACTIVE_EXECUTION_PLAN.md` if present.
+Start with Work Routing and open only the owner documents relevant to the
+diff. The usual set is `docs/README.md`, `ARCHITECTURE.md`, and
+`docs/process/DEVELOPMENT.md`; add `PLANS.md`,
+`docs/architecture/RUNTIME.md`, `NETCODE.md`, or `CONTENT.md` only when the
+diff touches those concerns. Include the relevant `CODING_STANDARDS.md`,
+`CONTRIBUTING.md`, context glossary, ADRs, and issue/spec when they exist.
 
-Treat the control docs as binding review inputs:
+Treat each selected owner document as binding for its scope:
 
 - `ARCHITECTURE.md` answers whether code went in the right module and respected allowed dependencies.
-- `RUNTIME_CONSTITUTION.md` answers whether runtime invariants were preserved.
-- `PROCESS_AND_PROOF_POLICY.md` answers what evidence is required before done can be claimed.
-- `ACTIVE_EXECUTION_PLAN.md` answers whether the diff stayed within the active scope and ran the planned checks.
+- `docs/architecture/RUNTIME.md` answers whether runtime invariants were preserved.
+- `docs/process/DEVELOPMENT.md` answers which lane and proof are required.
+- `PLANS.md` answers whether a durable plan or coordination record is required.
 
 On top of whatever the repo documents, the Standards axis always carries the **smell baseline** below — a fixed set of Fowler code smells (_Refactoring_, ch.3) that applies even when a repo documents nothing. Two rules bind it:
 
@@ -69,8 +74,8 @@ Do not use Pi/Codex internal subagents. In a Paseo run, root assigns two `peer` 
 **Standards lane packet** — include:
 
 - The full diff command and commit list.
-- The list of standards/control-source files you found in step 3, **plus the smell baseline from step 3** pasted in full — the reviewer lane has no other access to it.
-- The brief: "Report — per file/hunk where relevant — (a) every place the diff violates a documented standard or control doc: cite the source file and rule; (b) any architecture placement, runtime invariant, proof-policy, or active-plan scope issue; and (c) any baseline smell you spot: name it and quote the hunk. Distinguish hard violations from judgement calls — documented-standard/control-doc breaches can be hard, but baseline smells are always judgement calls, and a documented repo standard overrides the baseline. Skip anything tooling enforces. Under 500 words."
+- The list of standards/owner-source files you found in step 3, **plus the smell baseline from step 3** pasted in full — the reviewer lane has no other access to it.
+- The brief: "Report — per file/hunk where relevant — (a) every place the diff violates a documented standard or routed owner doc: cite the source file and rule; (b) any architecture placement, runtime invariant, proof, or plan-scope issue; and (c) any baseline smell you spot: name it and quote the hunk. Distinguish hard violations from judgement calls — documented owner-doc breaches can be hard, but baseline smells are always judgement calls, and a documented repo standard overrides the baseline. Skip anything tooling enforces. Under 500 words."
 
 **Spec lane packet** — include:
 
@@ -84,7 +89,12 @@ If the spec is missing, skip the Spec lane and note this in the final report.
 
 Present the two reports under `## Standards` and `## Spec` headings, verbatim or lightly cleaned. Do **not** merge or rerank findings — the two axes are deliberately separate (see _Why two axes_).
 
-Then add a `## Proof Gate` section. Read `PROCESS_AND_PROOF_POLICY.md` and `ACTIVE_EXECUTION_PLAN.md` if present, list the required proof for the change types in the diff, and mark each as `provided`, `missing`, or `unverified`. If required proof is missing, the review cannot say the change is done even if Standards and Spec have no findings.
+Then add a `## Proof Gate` section. Read `docs/process/DEVELOPMENT.md` and
+the relevant runtime owner document, and consult `PLANS.md` only when a plan
+governs the diff. List the required proof for the change types in the diff and
+mark each as `provided`, `missing`, or `unverified`. If required proof is
+missing, the review cannot say the change is done even if Standards and Spec
+have no findings.
 
 End with a one-line summary: total findings per axis, proof-gate status, and the worst issue _within each axis_ (if any). Don't pick a single winner across axes — that's the reranking the separation exists to prevent.
 

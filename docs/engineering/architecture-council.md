@@ -6,6 +6,11 @@ two independent proposers, a hostile challenge, evidence classification, and
 a durable verdict. The defining constraint is that reduced and full mode keep
 the same two-proposer breadth; only the runtime isolation changes.
 
+It starts with Work Routing and reads only the owner documents relevant to the
+boundary under discussion. An accepted verdict updates the canonical owner
+document when needed; it does not create a parallel control document for one
+decision.
+
 ## When to reach for it
 
 Type `/architecture-council`, or let the agent reach for it when a change

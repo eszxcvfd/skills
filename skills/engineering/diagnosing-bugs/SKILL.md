@@ -7,7 +7,12 @@ description: Diagnosis loop for hard bugs and performance regressions. Use when 
 
 A discipline for hard bugs. Skip phases only when explicitly justified.
 
-When exploring the codebase, read `CONTEXT.md` (if it exists) to get a clear mental model of the relevant modules. Also read `ARCHITECTURE.md`, `RUNTIME_CONSTITUTION.md`, `PROCESS_AND_PROOF_POLICY.md`, and relevant ADRs in the area you're touching. A bug fix is not done until it satisfies the repo's proof policy.
+When exploring the codebase, start with Work Routing and open only the
+smallest current set needed: `ARCHITECTURE.md` for placement,
+`docs/process/DEVELOPMENT.md` for the bug-fix lane and proof, and
+`docs/architecture/RUNTIME.md` when runtime invariants are involved. Read the
+relevant `CONTEXT.md` and ADRs only when the routed task needs them. A bug fix
+is not done until it satisfies the proof owner selected by Work Routing.
 
 ## Phase 1 — Build a feedback loop
 
@@ -117,11 +122,11 @@ If a correct seam exists:
 
 1. Turn the minimised repro into a failing test at that seam.
 2. Watch it fail.
-3. Identify affected runtime invariants from `RUNTIME_CONSTITUTION.md`.
+3. Identify affected runtime invariants from `docs/architecture/RUNTIME.md`.
 4. Apply the fix.
 5. Watch the regression test pass.
 6. Re-run the Phase 1 feedback loop against the original (un-minimised) scenario.
-7. Record the proof required by `PROCESS_AND_PROOF_POLICY.md`.
+7. Record the proof required by `docs/process/DEVELOPMENT.md`.
 
 ## Phase 6 — Cleanup + post-mortem
 
@@ -129,8 +134,8 @@ Required before declaring done:
 
 - [ ] Original repro no longer reproduces (re-run the Phase 1 loop)
 - [ ] Regression test passes (or absence of seam is documented)
-- [ ] Affected `RUNTIME_CONSTITUTION.md` invariants are preserved or explicitly updated through the appropriate architecture process
-- [ ] `PROCESS_AND_PROOF_POLICY.md` proof requirements for bug fixes are satisfied or marked unverified
+- [ ] Affected `docs/architecture/RUNTIME.md` invariants are preserved or explicitly updated through the appropriate architecture process
+- [ ] `docs/process/DEVELOPMENT.md` proof requirements for bug fixes are satisfied or marked unverified
 - [ ] All `[DEBUG-...]` instrumentation removed (`grep` the prefix)
 - [ ] Throwaway prototypes deleted (or moved to a clearly-marked debug location)
 - [ ] The hypothesis that turned out correct is stated in the commit / PR message — so the next debugger learns

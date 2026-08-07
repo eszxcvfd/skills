@@ -13,7 +13,11 @@ Non-Claude agents can copy this skill with `npx skills@latest add eszxcvfd/skill
 
 ## What it does
 
-`improve-codebase-architecture` scans a codebase for **deepening opportunities** — places where a shallow module (an interface nearly as complex as the thing it hides) could become a deep one — presents them as a self-contained visual HTML report, then grills through whichever one you pick.
+`improve-codebase-architecture` starts with Work Routing, then scans a
+codebase for **deepening opportunities** — places where a shallow module (an
+interface nearly as complex as the thing it hides) could become a deep one —
+presents them as a self-contained visual HTML report, then grills through
+whichever one you pick.
 
 It does **not** hand you a flat list of refactors. Every candidate has to pass the **deletion test** — would removing this module *concentrate* complexity behind a smaller interface, or just move it around? Only the "concentrates" cases earn a card. That filter is what stops the report from becoming generic cleanup advice.
 
@@ -29,7 +33,7 @@ Reach for it as a periodic health check: every few days, or whenever a codebase 
 
 The whole skill turns on one idea: **depth**. A deep module hides a lot of functionality behind a small, stable interface; a shallow one leaks its implementation through an interface almost as wide as the code beneath it. The report hunts for shallowness — pure functions extracted only for testability while the real bugs hide in how they're called (no **locality**), modules that leak across their **seams**, concepts you can't understand without opening five files — and proposes the deepening that would fix it.
 
-It speaks in the shared design vocabulary (**module**, **interface**, **depth**, **seam**, **adapter**, **leverage**, **locality**) and in your project's own domain language from `CONTEXT.md`, so a candidate reads as "deepen the Order intake module," never "refactor the FooBarHandler."
+It speaks in the shared design vocabulary (**module**, **interface**, **depth**, **seam**, **adapter**, **leverage**, **locality**) and in your project's own domain language from the routed `CONTEXT.md`, so a candidate reads as "deepen the Order intake module," never "refactor the FooBarHandler."
 
 ## The report, then the grill
 

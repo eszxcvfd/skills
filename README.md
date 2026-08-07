@@ -116,7 +116,7 @@ so runtime guidance has one source of truth.
 **User-invoked**
 
 - **[ask-matt](./skills/engineering/ask-matt/SKILL.md)** — Route an unclear engineering request to the right skill or SLP role.
-- **[setup-matt-pocock-skills](./skills/engineering/setup-matt-pocock-skills/SKILL.md)** — Configure the tracker, control docs, Paseo contract, and model defaults.
+- **[setup-matt-pocock-skills](./skills/engineering/setup-matt-pocock-skills/SKILL.md)** — Configure the tracker, Work Routing, Paseo contract, and model defaults.
 - **[wayfinder](./skills/engineering/wayfinder/SKILL.md)** — Turn a large foggy effort into decision tickets until the route is clear.
 - **[grill-with-docs](./skills/engineering/grill-with-docs/SKILL.md)** — Sharpen a plan through a one-question interview while recording decisions.
 - **[to-spec](./skills/engineering/to-spec/SKILL.md)** — Synthesize an aligned conversation into a spec with placement, invariants, and proof.

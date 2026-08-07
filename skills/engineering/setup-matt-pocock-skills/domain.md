@@ -1,18 +1,48 @@
 # Domain Docs
 
-How the engineering skills should consume this repo's domain documentation when exploring the codebase.
+How the engineering skills should discover and consume project documentation.
 
-## Before exploring, read these
+## Work Routing
 
-- **`CONTEXT.md`** at the repo root, or
-- **`CONTEXT-MAP.md`** at the repo root if it exists — it points at one `CONTEXT.md` per context. Read each one relevant to the topic.
-- **`docs/adr/`** — read ADRs that touch the area you're about to work in. In multi-context repos, also check `src/<context>/docs/adr/` for context-scoped decisions.
-- **`ARCHITECTURE.md`** — read the owner map, routing, allowed dependencies, and code placement rules before structural work.
-- **`RUNTIME_CONSTITUTION.md`** — read runtime invariants before touching jobs, retries, external calls, data ownership, security, concurrency, or failure paths.
-- **`PROCESS_AND_PROOF_POLICY.md`** — read the proof requirements before claiming a task is complete.
-- **`ACTIVE_EXECUTION_PLAN.md`** — when present, read the active task scope, steps, risks, and verification commands before continuing or reviewing work.
+Open only the smallest current document set needed:
 
-If any of these files don't exist, **proceed silently**. Don't flag their absence; don't suggest creating them upfront. The `/domain-modeling` skill (reached via `/grill-with-docs` and `/improve-codebase-architecture`) creates them lazily when terms or decisions actually get resolved.
+- orientation and change routing: `ARCHITECTURE.md`;
+- doc ownership and routing: `docs/README.md`;
+- lane selection and proof: `docs/process/DEVELOPMENT.md`;
+- current work queue: `docs/issues/ROADMAP.md`;
+- non-trivial plans or durable coordination: `PLANS.md`;
+- runtime or protocol ownership: `docs/architecture/RUNTIME.md` and
+  `docs/architecture/NETCODE.md`;
+- server-relevant resource and cook/package boundaries:
+  `docs/architecture/CONTENT.md`.
+
+Doctrine is editable repo truth. If governing docs are silent or stale, record
+the bounded inference or update the canonical owner doc before relying on a
+new rule.
+
+`docs/process/DEVELOPMENT.md` owns lane selection, and `PLANS.md` owns the
+conditions and contents for design notes and checked-in plans. Do not invent
+another routing rule here. Do not trigger closeout for doc-only edits, small
+owner-neutral fixes, or partial progress unless the governing plan requires it.
+
+This is a routing rule, not a checklist of files to create. Missing documents
+are evidence about the repository's current maturity; proceed with bounded
+inference and update the canonical owner only when a durable rule is needed.
+
+## Before exploring
+
+After the Work Routing preflight, read only the domain artifacts relevant to
+the task:
+
+- **`CONTEXT.md`** at the repo root, or the relevant files named by
+  **`CONTEXT-MAP.md`** when the repo has multiple contexts;
+- **`docs/adr/`** and any context-scoped ADR directory for decisions that
+  constrain the area you're touching;
+- the spec, ticket, or current work item.
+
+Do not require a glossary or ADR directory to exist. The `/domain-modeling`
+skill creates those artifacts lazily when terms or consequential decisions
+actually get resolved.
 
 ## File structure
 

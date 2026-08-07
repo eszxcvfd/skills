@@ -58,4 +58,5 @@ boring, standard, reversible architecture when evidence is close. Reject
 speculative scalability, abstractions without two concrete use cases,
 distributed operations without justification, and "refactor later" without a
 path. Write `templates/verdict.yaml` and an ADR draft with guardrails, reopen
-conditions, migration/rollback, and explicit control-doc updates or `none`.
+conditions, migration/rollback, and explicit canonical owner-doc updates or
+`none`.

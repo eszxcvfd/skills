@@ -29,11 +29,12 @@ for score >= 6, database/tenancy/auth architecture, service decomposition,
 public or event contracts, deployment topology, locked ADR changes, or an
 unclear/dead-ended architecture. Use **reduced** mode otherwise.
 
-Read only the decision context: the conversation, `CONTEXT.md` when present,
-relevant code/tests/docs, existing ADRs and locks, and any repo control docs
-that already exist. Follow the repo's ADR convention; default to `docs/adr/`.
+Read only the decision context: the conversation, the smallest document set
+selected by Work Routing, relevant code/tests, existing ADRs and locks, and
+the owner documents for the boundary being changed. Follow the repo's ADR
+convention; default to `docs/adr/`.
 
-## Five-role Council
+## Council roles
 
 The Lead stays in the current agent and owns framing, launch, artifact
 validation, user interaction, and final integration. Both modes use exactly
@@ -99,8 +100,9 @@ An accepted or deliberately rejected decision produces an ADR from
 `templates/adr.md` and updates a decision-lock registry from
 `templates/decision-locks.yaml` or the repo equivalent. Pending user approval
 stays under scratch. Record guardrails, migration/rollback, and reopen
-conditions; update existing architecture/runtime/proof control docs only when
-the verdict changes them.
+conditions; update the canonical owner documents selected by Work Routing only
+when the verdict changes them. Do not create a parallel control document for a
+single decision.
 
 Lock levels are `soft`, `guarded`, and `locked`. Never silently violate a
 guarded or locked decision.
@@ -110,6 +112,6 @@ guarded or locked decision.
 - the trigger, risk score, mode, and two-proposer run are recorded;
 - case, two proposals, challenge, verification, and verdict artifacts exist;
 - important claims carry evidence status;
-- the ADR/lock and required control-doc updates are written, or approval is
+- the ADR/lock and required owner-doc updates are written, or approval is
   explicitly pending;
 - no production code or architecture changed before acceptance.

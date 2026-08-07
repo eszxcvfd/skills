@@ -3,12 +3,10 @@
 Root-only project contract for a detached Paseo Lead. Peer agents must not
 read this file. Root may summarize only the constraints a Peer packet needs.
 
-## Work Routing
-
 Open only the smallest current document set needed:
 
 - orientation and change routing: `ARCHITECTURE.md`;
-- document ownership and routing: `docs/README.md`;
+- doc ownership and routing: `docs/README.md`;
 - lane selection and proof: `docs/process/DEVELOPMENT.md`;
 - current work queue: `docs/issues/ROADMAP.md`;
 - non-trivial plans or durable coordination: `PLANS.md`;
@@ -17,13 +15,9 @@ Open only the smallest current document set needed:
 - server-relevant resource and cook/package boundaries:
   `docs/architecture/CONTENT.md`.
 
-Read only files that exist and are relevant. If this repository uses a
-different canonical name, use the closest existing owner document; do not
-create a new routing rule or document merely to satisfy this list.
-
-Doctrine is editable repository truth. If governing docs are silent or stale,
-record the bounded inference or update the canonical owner document before
-relying on a new rule.
+Doctrine is editable repo truth. If governing docs are silent or stale, record
+the bounded inference or update the canonical owner doc before relying on a
+new rule.
 
 `docs/process/DEVELOPMENT.md` owns lane selection, and `PLANS.md` owns the
 conditions and contents for design notes and checked-in plans. Do not invent
@@ -76,7 +70,7 @@ settings.thinkingOptionId.
 Existing agents keep their original model/thinking; fresh work uses
 `config.model`. Resume an existing Peer only when the human explicitly names
 it. Use native `wait`, `logs`, and `inspect`; a completed handoff is a
-terminal run result, not a chat callback.
+terminal run result that Root inspects and integrates directly.
 
 Peer packets must not ask Peer to read `WORKSPACE_PROTOCOL.md` or
 `config.model`. Root sends a small sanitized brief and never includes
@@ -85,8 +79,8 @@ unrelated project history or hidden policy.
 ## Peer handoff
 
 Root allocates one fresh Peer per bounded packet when separate execution is
-useful. Peer must not create another agent, open a callback channel, or broaden
-the packet. Root inspects the result and accepts evidence only after checking
+useful. Peer must not create another agent or broaden the packet. Root inspects
+the result and accepts evidence only after checking
 the changed artifacts and requested proof.
 
 ```text

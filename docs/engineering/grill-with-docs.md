@@ -8,9 +8,9 @@ Select `grill-with-docs` when prompted, along with the agent you want to install
 
 ## What it does
 
-`grill-with-docs` interviews you relentlessly about a plan or design, one question at a time, until you and the agent reach a shared understanding — and it writes the vocabulary and decisions down as you go.
+`grill-with-docs` interviews you relentlessly about a plan or design, one question at a time, until you and the agent reach a shared understanding — and it writes only the routed vocabulary and consequential decisions down as you go.
 
-The grilling **leaves a paper trail**. A plain interview sharpens your thinking and then evaporates when the session ends; this one captures each term the moment it's resolved into a `CONTEXT.md` glossary, and records the hard, one-way decisions as ADRs. The alignment survives the conversation instead of living only in your head.
+The grilling **leaves a small paper trail**. A plain interview sharpens your thinking and then evaporates when the session ends; this one captures each term the moment it's resolved into the canonical `CONTEXT.md` glossary, and records the hard, one-way decisions as ADRs. Work Routing and `docs/README.md` decide where those artifacts belong; no extra control or session document is created.
 
 ## When to reach for it
 
@@ -20,7 +20,7 @@ Reach for it at the very start of a change, when the plan is still fuzzy and the
 
 ## Prerequisites
 
-This skill is stateful — it writes into your repo as it grills. Resolved terms land in a `CONTEXT.md` glossary at the root (or the relevant context's `CONTEXT.md` if a `CONTEXT-MAP.md` marks a multi-context repo), and genuinely hard-to-reverse decisions land as ADRs under `docs/adr/`. Both are created lazily — nothing exists until the first term or decision crystallises — so you don't need to scaffold anything up front, but you do need to be somewhere it's safe to write these files.
+This skill is stateful — it writes into your repo as it grills. Start with Work Routing. Resolved terms land in the canonical `CONTEXT.md` glossary (or the relevant context's glossary if a `CONTEXT-MAP.md` marks a multi-context repo), and genuinely hard-to-reverse decisions land in the canonical ADR location. Both are created lazily — nothing exists until the first term or decision crystallises — so you don't need to scaffold anything up front.
 
 ## The grill
 

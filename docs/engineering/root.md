@@ -16,7 +16,7 @@ Non-Claude agents can copy this skill with `npx skills@latest add eszxcvfd/skill
 `root` is the detached Lead for one active project. It owns the current task's
 scope, plan, sequencing, delegation, integration, acceptance, and final
 decision. Its defining constraint is autonomy: the Lead receives a task and
-project doctrine, not an operator management protocol.
+project doctrine and does not create a second project command path.
 
 ## When to reach for it
 
@@ -28,11 +28,26 @@ use [peer](https://aihero.dev/skills-peer).
 
 ## Work Routing
 
-Root opens only the smallest current document set: architecture/change owner,
-docs ownership, development/proof lane, current roadmap, durable plan, and
-runtime/content ownership docs when they exist. Missing names are skipped in
-favour of the repository's canonical equivalents; no routing document is
-created just to satisfy a checklist.
+Root opens only the smallest current document set needed:
+
+- orientation and change routing: `ARCHITECTURE.md`;
+- doc ownership and routing: `docs/README.md`;
+- lane selection and proof: `docs/process/DEVELOPMENT.md`;
+- current work queue: `docs/issues/ROADMAP.md`;
+- non-trivial plans or durable coordination: `PLANS.md`;
+- runtime or protocol ownership: `docs/architecture/RUNTIME.md` and
+  `docs/architecture/NETCODE.md`;
+- server-relevant resource and cook/package boundaries:
+  `docs/architecture/CONTENT.md`.
+
+Doctrine is editable repo truth. If governing docs are silent or stale, record
+the bounded inference or update the canonical owner doc before relying on a
+new rule.
+
+`docs/process/DEVELOPMENT.md` owns lane selection, and `PLANS.md` owns the
+conditions and contents for design notes and checked-in plans. Do not invent
+another routing rule here. Do not trigger closeout for doc-only edits, small
+owner-neutral fixes, or partial progress unless the governing plan requires it.
 
 `WORKSPACE_PROTOCOL.md` is the root-only execution contract. It keeps doctrine
 editable, makes `DEVELOPMENT.md` own lane selection, and makes `PLANS.md` own

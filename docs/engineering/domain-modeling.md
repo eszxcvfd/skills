@@ -15,7 +15,14 @@ Non-Claude agents can copy this skill with `npx skills@latest add eszxcvfd/skill
 
 `domain-modeling` builds and sharpens a project's **ubiquitous language** as you design — challenging fuzzy terms, stress-testing relationships with concrete scenarios, and writing the glossary and decisions down the moment they crystallise.
 
-This is the **active** discipline, not the passive one. Merely reading `CONTEXT.md` to borrow its vocabulary is a one-line habit any skill can do; this skill is for when you are *changing* the model — coining a canonical term, catching a contradiction between the code and what you just said, recording a hard-to-reverse decision. And it keeps the glossary clean: `CONTEXT.md` is a glossary and nothing else — no implementation details, no spec, no scratch pad.
+This is the **active** discipline, not the passive one. It starts with Work
+Routing, then uses `docs/README.md` to choose the owner for each artifact.
+Merely reading `CONTEXT.md` to borrow its vocabulary is a one-line habit any
+skill can do; this skill is for when you are *changing* the model — coining a
+canonical term, catching a contradiction between the code and what you just
+said, recording a hard-to-reverse decision. And it keeps the glossary clean:
+`CONTEXT.md` is a glossary and nothing else — no implementation details, no
+spec, no scratch pad.
 
 ## When to reach for it
 
@@ -25,7 +32,11 @@ Reach for it when the *words* are the problem: two people mean different things 
 
 ## Prerequisites
 
-The skill writes into two places, both created lazily — only once there is something to record. Resolved terms go into `CONTEXT.md` at the root (or, in a multi-context repo flagged by a `CONTEXT-MAP.md`, into the per-context `CONTEXT.md`). Decisions go into `docs/adr/`. Nothing needs to exist up front; the first resolved term creates the glossary, the first real trade-off creates the ADR.
+The skill writes into two artifact types, both created lazily — only once there
+is something to record. Resolved terms go into the canonical `CONTEXT.md` (or,
+in a multi-context repo flagged by a `CONTEXT-MAP.md`, the relevant context
+glossary). Decisions go into the canonical ADR location. Work Routing and
+`docs/README.md` own that placement; nothing needs to exist up front.
 
 ## Glossary vs. ADR
 

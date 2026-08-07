@@ -3,27 +3,26 @@
 Root-only contract for a detached Paseo Lead. Peer agents must not read this
 file. Keep it short and project-specific.
 
-## Work Routing
-
 Open only the smallest current document set needed:
 
-- `ARCHITECTURE.md` for orientation and change routing;
-- `docs/README.md` for document ownership and routing;
-- `docs/process/DEVELOPMENT.md` for lane selection and proof;
-- `docs/issues/ROADMAP.md` for the current queue;
-- `PLANS.md` for non-trivial plans or durable coordination;
-- `docs/architecture/RUNTIME.md`, `NETCODE.md`, and `CONTENT.md` for runtime,
-  protocol, and resource boundaries.
+- orientation and change routing: `ARCHITECTURE.md`;
+- doc ownership and routing: `docs/README.md`;
+- lane selection and proof: `docs/process/DEVELOPMENT.md`;
+- current work queue: `docs/issues/ROADMAP.md`;
+- non-trivial plans or durable coordination: `PLANS.md`;
+- runtime or protocol ownership: `docs/architecture/RUNTIME.md` and
+  `docs/architecture/NETCODE.md`;
+- server-relevant resource and cook/package boundaries:
+  `docs/architecture/CONTENT.md`.
 
-Read only files that exist and are relevant. Use the repository's canonical
-equivalent when a name differs; do not create a new routing rule just to fill
-this list. Doctrine is editable repository truth. If it is silent or stale,
-record the bounded inference or update the canonical owner document first.
+Doctrine is editable repo truth. If governing docs are silent or stale, record
+the bounded inference or update the canonical owner doc before relying on a
+new rule.
 
-`docs/process/DEVELOPMENT.md` owns lane selection and proof. `PLANS.md` owns
-design-note and checked-in-plan conditions. Do not trigger closeout for
-doc-only edits, small owner-neutral fixes, or partial progress unless the
-governing plan requires it.
+`docs/process/DEVELOPMENT.md` owns lane selection, and `PLANS.md` owns the
+conditions and contents for design notes and checked-in plans. Do not invent
+another routing rule here. Do not trigger closeout for doc-only edits, small
+owner-neutral fixes, or partial progress unless the governing plan requires it.
 
 ## Detached Root and Peer
 

@@ -44,11 +44,12 @@ Accepted
 
 - <rule future agents must preserve>
 
-## Control doc updates
+## Canonical owner updates
 
 - `ARCHITECTURE.md`: <owner map/routing/dependency/public contract update, or none>
-- `RUNTIME_CONSTITUTION.md`: <runtime invariant update, or none>
-- `PROCESS_AND_PROOF_POLICY.md`: <proof requirement update, or none>
+- `docs/architecture/RUNTIME.md`: <runtime invariant update, or none>
+- `docs/process/DEVELOPMENT.md`: <lane or proof requirement update, or none>
+- `PLANS.md`: <durable plan or coordination update, or none>
 
 ## Migration or rollback
 

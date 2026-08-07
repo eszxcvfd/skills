@@ -8,9 +8,16 @@ Select `implement` when prompted, along with the agent you want to install it fo
 
 ## What it does
 
-`implement` builds the work described in a spec or a set of tickets — reading the repo control docs, writing `ACTIVE_EXECUTION_PLAN.md`, driving test-driven slices, proving the work against policy, then handing off to review and committing to the current branch.
+`implement` builds the work described in a spec or a set of tickets — following
+Work Routing, driving test-driven slices, proving the work against the
+project's proof owner, then handing off to review and committing to the
+current branch.
 
-It does **not** decide what to build or silently change architecture. The spec is already settled, the seams are already agreed, and `ARCHITECTURE.md` / `RUNTIME_CONSTITUTION.md` / `PROCESS_AND_PROOF_POLICY.md` constrain execution. It is the hands, not the head — the thinking happened upstream.
+It does **not** decide what to build or silently change architecture. The spec
+is already settled, the seams are already agreed, and the routed owner docs —
+usually `ARCHITECTURE.md`, `docs/architecture/RUNTIME.md`, and
+`docs/process/DEVELOPMENT.md` — constrain execution. It is the hands, not the
+head — the thinking happened upstream.
 
 ## When to reach for it
 
@@ -18,11 +25,20 @@ You invoke this by typing `/implement` — the agent won't reach for it on its o
 
 Reach for it once the work is written down as a spec or split into tickets and you're ready to turn that into code. If the spec doesn't exist yet, write it first — for that, use [to-spec](https://aihero.dev/skills-to-spec), or [to-tickets](https://aihero.dev/skills-to-tickets) to break a spec into tickets. If you just want to build something test-first without a full spec, drop to [tdd](https://aihero.dev/skills-tdd) directly.
 
-## Active plan and proof
+## Plan and proof
 
-`implement` starts by reading the control docs, then creates or resumes `ACTIVE_EXECUTION_PLAN.md`. That file is the live task memory: objective, included and excluded scope, architecture placement, affected runtime invariants, planned files, current step, risks, and verification commands. It is updated as the work changes, then archived or deleted when the task is finished so stale plans do not mislead the next agent.
+`implement` starts with the smallest document set selected by Work Routing. If
+the work is non-trivial, `PLANS.md` decides whether a durable plan or design
+note is required and what it contains. Small changes stay in their ticket or
+conversation; the skill does not create a project-wide active-plan file.
 
-The idea `implement` runs on is still the **seam** — the stable interface a feature is tested at, chosen before any code is written. It doesn't invent seams mid-build; it uses the ones already picked (during [to-spec](https://aihero.dev/skills-to-spec)) and writes tests against them via [tdd](https://aihero.dev/skills-tdd). The final claim of done must match `PROCESS_AND_PROOF_POLICY.md`: commands actually run, outcomes, missing checks, and unverified claims are all reported.
+The idea `implement` runs on is still the **seam** — the stable interface a
+feature is tested at, chosen before any code is written. It doesn't invent
+seams mid-build; it uses the ones already picked (during
+[to-spec](https://aihero.dev/skills-to-spec)) and writes tests against them
+via [tdd](https://aihero.dev/skills-tdd). The final claim of done must match
+`docs/process/DEVELOPMENT.md`: commands actually run, outcomes, missing
+checks, and unverified claims are all reported.
 
 ## Where it fits
 

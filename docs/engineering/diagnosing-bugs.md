@@ -10,7 +10,12 @@ Select `diagnosing-bugs` when prompted, along with the agent you want to install
 
 `diagnosing-bugs` runs a disciplined diagnosis loop for hard bugs and performance regressions — building a repro, minimising it, ranking hypotheses, instrumenting, then fixing with a regression test.
 
-It refuses to hypothesise before you have a **tight feedback loop** — one runnable command that already goes red on *this* bug. Reading code to build a theory before that command exists is the exact failure this skill prevents. No red-capable loop, no diagnosis. The eventual fix must also preserve affected `RUNTIME_CONSTITUTION.md` invariants and satisfy `PROCESS_AND_PROOF_POLICY.md`.
+It refuses to hypothesise before you have a **tight feedback loop** — one
+runnable command that already goes red on *this* bug. Reading code to build a
+theory before that command exists is the exact failure this skill prevents. No
+red-capable loop, no diagnosis. The eventual fix must also preserve the
+affected invariants in `docs/architecture/RUNTIME.md` and satisfy the proof
+owner in `docs/process/DEVELOPMENT.md`.
 
 ## When to reach for it
 
@@ -30,7 +35,7 @@ It gives you a ladder of ways to build that loop — failing test, curl script, 
 - The loop asserts the symptom you actually reported, not a nearby failure.
 - Hypotheses arrive as a ranked, falsifiable list shown to you before any are tested.
 - Debug instrumentation is tagged (`[DEBUG-...]`) and grepped away before it declares done.
-- The final proof names the regression test, original repro rerun, affected runtime invariants, and any unverified checks.
+- The final proof names the regression test, original repro rerun, affected runtime invariants, and any unverified checks, following Work Routing.
 
 ## Where it fits
 

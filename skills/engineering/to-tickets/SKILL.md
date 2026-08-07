@@ -1,6 +1,6 @@
 ---
 name: to-tickets
-description: Break a plan, spec, or conversation into tracer-bullet tickets with blocking edges, architecture placement, affected runtime invariants, and required proof, published to the configured tracker.
+description: Break a plan, spec, or conversation into tracer-bullet tickets with blocking edges, routed architecture context, and required proof, published to the configured tracker.
 disable-model-invocation: true
 ---
 
@@ -18,7 +18,12 @@ Work from whatever is already in the conversation context. If the user passes a 
 
 ### 2. Explore the codebase (optional)
 
-If you have not already explored the codebase, do so to understand the current state of the code. Ticket titles and descriptions should use the project's domain glossary vocabulary. Read `ARCHITECTURE.md`, `RUNTIME_CONSTITUTION.md`, `PROCESS_AND_PROOF_POLICY.md`, and relevant ADRs in the area you're touching.
+If you have not already explored the codebase, start with Work Routing and
+open only the smallest current set needed: `ARCHITECTURE.md`, `docs/README.md`,
+and `docs/process/DEVELOPMENT.md`, plus `PLANS.md` or the relevant runtime,
+protocol, or resource owner document. Ticket titles and descriptions should
+use the project's domain glossary vocabulary; read only relevant `CONTEXT.md`
+and ADRs.
 
 Look for opportunities to prefactor the code to make the implementation easier. "Make the change easy, then make the easy change."
 
@@ -46,7 +51,7 @@ Present the proposed breakdown as a numbered list. For each ticket, show:
 - **Title**: short descriptive name
 - **Blocked by**: which other tickets (if any) must complete first
 - **What it delivers**: the end-to-end behaviour this ticket makes work
-- **Control notes**: owner module, affected runtime invariants, and minimum proof required
+- **Delivery notes**: owner module, affected runtime invariants, and minimum proof required
 
 Ask the user:
 
@@ -79,9 +84,9 @@ Do NOT close or modify any parent issue.
 
 **Architecture placement:** owner module, allowed dependencies, and public contracts this ticket must respect.
 
-**Affected runtime invariants:** `RC-XX` entries from `RUNTIME_CONSTITUTION.md`, or "None identified".
+**Affected runtime invariants:** entries from `docs/architecture/RUNTIME.md`, or "None identified".
 
-**Required proof:** minimum evidence from `PROCESS_AND_PROOF_POLICY.md`.
+**Required proof:** minimum evidence from `docs/process/DEVELOPMENT.md`.
 
 - [ ] Acceptance criterion 1
 - [ ] Acceptance criterion 2
@@ -103,11 +108,11 @@ The end-to-end behaviour this ticket makes work, from the user's perspective —
 - [ ] Criterion 1
 - [ ] Criterion 2
 
-## Control notes
+## Delivery notes
 
 - Architecture placement: owner module, allowed dependencies, and public contracts this ticket must respect.
-- Affected runtime invariants: `RC-XX` entries from `RUNTIME_CONSTITUTION.md`, or "None identified".
-- Required proof: minimum evidence from `PROCESS_AND_PROOF_POLICY.md`.
+- Affected runtime invariants: entries from `docs/architecture/RUNTIME.md`, or "None identified".
+- Required proof: minimum evidence from `docs/process/DEVELOPMENT.md`.
 
 ## Blocked by
 
