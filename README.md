@@ -21,8 +21,8 @@ npx skills@latest add eszxcvfd/skills
 
 - Chọn skill cần dùng và agent: Claude Code, Codex, OpenCode, Cursor, …
 - Nên tick `setup-matt-pocock-skills`.
-- Trong agent, chạy `/setup-matt-pocock-skills` một lần/repo để tạo toàn bộ
-  canonical project docs trong một manifest và một lần xác nhận.
+- Trong agent, chạy `/setup-matt-pocock-skills` một lần/repo; skill sẽ hỏi
+  tracker, labels và domain layout theo từng section rồi tạo toàn bộ docs.
 - Tải lại một skill đã cài: `npx skills@latest update <skill-name>`.
 - Đổi bộ skill hoặc thêm skill mới: chạy lại `npx skills@latest add eszxcvfd/skills`.
 

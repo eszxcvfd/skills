@@ -1,5 +1,5 @@
 interface:
   display_name: "Setup Matt Pocock Skills"
-  short_description: "Bootstrap canonical project docs and repo defaults"
+  short_description: "Prompt-driven tracker and project docs setup"
 policy:
   allow_implicit_invocation: false

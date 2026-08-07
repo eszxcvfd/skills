@@ -19,10 +19,10 @@ plan, runtime, protocol, and content documents; issue-tracker settings; triage
 labels; domain-doc routing; and, optionally, the Paseo SLP contract plus
 `config.model`.
 
-It explores the repository, builds one manifest of every target, asks for one
-confirmation, then writes all selected files in the same run. It follows the
-repository's Work Routing and does not create a second document system or
-hard-code a model into a prompt.
+It explores the repository, asks about the issue tracker, triage labels, and
+domain layout in sequence, then shows a complete draft before writing. It
+follows the repository's Work Routing and does not create a second document
+system or hard-code a model into a prompt.
 
 ## When to reach for it
 
@@ -49,10 +49,14 @@ The setup manifest always includes these canonical owner documents:
 - `docs/architecture/NETCODE.md`;
 - `docs/architecture/CONTENT.md`.
 
-Existing files are shown as `keep` or `update` with their diffs. Missing files
-are created from the bundled canonical seeds, then populated from verified
-repository evidence. Unknown facts are recorded as not established yet rather
-than guessed.
+There is no minimal-document mode: a setup run is incomplete if any required
+canonical owner document is omitted. Existing substantive and current files
+may be kept; missing or stale files must be created or updated.
+
+Existing files are shown as `keep` or `update` with their diffs after the three
+setup questions. Missing files are created from the bundled canonical seeds,
+then populated from verified repository evidence. Unknown facts are recorded as
+not established yet rather than guessed.
 
 - **Issue tracker** — where `triage`, `to-spec`, and `to-tickets` publish work,
   recorded in `docs/agents/issue-tracker.md`.
@@ -70,7 +74,8 @@ term or consequential decision actually exists, not as empty setup metadata.
 
 ## It's working if
 
-- the complete manifest has no unreviewed targets;
+- the tracker, labels, and domain choices were answered in sequence;
+- the complete draft was shown before any write;
 - all eight canonical owner documents exist and are non-empty;
 - all selected `docs/agents/` files match the real repository;
 - `docs/agents/domain.md` points to the canonical owner set;

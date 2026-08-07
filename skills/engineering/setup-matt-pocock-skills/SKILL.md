@@ -1,130 +1,228 @@
 ---
 name: setup-matt-pocock-skills
-description: Bootstrap the complete project documentation surface in one pass — canonical architecture, process, roadmap, plan, runtime, protocol, and content docs plus issue tracker, triage, domain routing, and optional detached Paseo defaults. Run once before first use of the other engineering skills.
+description: Configure this repo for the engineering skills — set up its issue tracker, triage label vocabulary, and domain doc layout. Run once before first use of the other engineering skills.
 disable-model-invocation: true
 ---
 
 # Setup Matt Pocock's Skills
 
-Bootstrap the complete project surface the engineering skills need:
+Scaffold the per-repo configuration that the engineering skills assume:
 
-- canonical project owner documents;
-- issue tracker;
-- triage label vocabulary, when `triage` is installed;
-- domain glossary and ADR routing;
-- optional detached Paseo Root/Peer contract and `config.model`.
+- **Issue tracker** — where issues live (GitHub by default; local markdown is also supported out of the box)
+- **Triage labels** — the strings used for the five canonical triage roles
+- **Domain docs** — where `CONTEXT.md` and ADRs live, and the consumer rules for reading them
+- **Canonical project docs** — the Work Routing owner documents used by the repository
 
-This is a one-pass setup. Explore the whole repository, build one complete
-setup manifest, get one confirmation, then write every selected target in one
-run. Do not stop after configuring only the tracker, guess at missing policy,
-or create a parallel documentation system.
+This is a prompt-driven skill, not a deterministic script. Explore, present
+what you found, ask the user one section at a time, show the complete draft,
+then write. Do not collapse Sections A, B, and C into one confirmation.
 
-## 1. Explore
+## Process
 
-Read what exists, starting with the project's Work Routing owner documents
-when they are present:
+### 1. Explore
 
-- `git remote -v` and `.git/config`;
-- the existing `AGENTS.md` or `CLAUDE.md` and any `## Agent skills` block;
+Look at the current repo to understand its starting state. Read whatever
+exists; don't assume:
+
+- `git remote -v` and `.git/config` — is this a GitHub repo? Which one?
+- `AGENTS.md` and `CLAUDE.md` at the repo root — does either exist? Is there
+  already an `## Agent skills` section in either?
 - `ARCHITECTURE.md`, `docs/README.md`, `docs/process/DEVELOPMENT.md`,
-  `PLANS.md`, and relevant `docs/architecture/` owner docs;
-- `CONTEXT.md`, `CONTEXT-MAP.md`, `docs/adr/`, `docs/agents/`, and `.scratch/`;
-- `config.model` and `WORKSPACE_PROTOCOL.md` when this repo uses Paseo SLP;
-- whether the `triage` skill is installed;
-- monorepo signals such as `pnpm-workspace.yaml`, package workspaces, or
-  populated packages with their own source trees.
+  `docs/issues/ROADMAP.md`, `PLANS.md`, and relevant `docs/architecture/`
+  owner docs;
+- `CONTEXT.md` and `CONTEXT-MAP.md` at the repo root;
+- `docs/adr/` and any `src/*/docs/adr/` directories;
+- `docs/agents/` — does this skill's prior output already exist?
+- `.scratch/` — sign that a local-markdown issue tracker convention is already
+  in use;
+- Is the `triage` skill installed? (a `triage` skill folder alongside this one,
+  or `triage` in your available skills.) This decides whether Section B runs at
+  all.
+- Monorepo signals — a `pnpm-workspace.yaml`, a `workspaces` field in
+  `package.json`, or a populated `packages/*` with its own `src/`. Present only
+  in a genuinely large multi-package repo; their absence means single-context,
+  which is almost every repo.
+- `WORKSPACE_PROTOCOL.md` and `config.model` when the repo uses the detached
+  Paseo Root/Peer runtime.
 
-Resolve the recommended defaults during this exploration:
+### 2. Present findings and ask
 
-- tracker: GitHub when the remote is GitHub; otherwise GitLab, local markdown
-  under `.scratch/<feature>/`, or the user's configured tracker;
-- triage labels: `needs-triage`, `needs-info`, `ready-for-agent`,
-  `ready-for-human`, and `wontfix` when `triage` is installed;
-- canonical owner docs: initialize the complete set below, preserving verified
-  project content when a file already exists;
-- domain layout: one root `CONTEXT.md` and `docs/adr/` when the repository has
-  domain content to record, unless genuine monorepo boundaries require
-  `CONTEXT-MAP.md`;
-- detached runtime: enable when the repository already uses the detached
-  `codex-root → codex-peer` path or the user selects it.
+Summarise what's present and what's missing. Then take the sections in order —
+one section, one answer, then the next.
 
-## 2. Build one setup manifest
+Lead each section with the recommended answer so the user can accept it in a
+word. Give a one-line explainer only when the choice genuinely branches; skip
+the section entirely when exploration already settled it (Section B when
+`triage` isn't installed, Section C when there is no monorepo).
 
-The manifest must name every target and classify it as `create`, `update`, or
-`keep`:
+Do not write any file while Sections A, B, or C are still being answered.
 
-- exactly one repo instruction file (`CLAUDE.md` preferred, otherwise
-  `AGENTS.md`), including one complete `## Agent skills` block;
-- the canonical owner documents, always:
-  - `ARCHITECTURE.md`;
-  - `docs/README.md`;
-  - `docs/process/DEVELOPMENT.md`;
-  - `docs/issues/ROADMAP.md`;
-  - `PLANS.md`;
-  - `docs/architecture/RUNTIME.md`;
-  - `docs/architecture/NETCODE.md`;
-  - `docs/architecture/CONTENT.md`;
+#### Section A — Issue tracker
+
+> Explainer: The "issue tracker" is where issues live for this repo. Skills
+> like `to-tickets`, `triage`, and `to-spec` read from and write to it — they
+> need to know whether to call `gh issue create`, write a markdown file under
+> `.scratch/`, or follow some other workflow you describe. Pick the place you
+> actually track work for this repo.
+
+Default posture: these skills were designed for GitHub. If a `git remote`
+points at GitHub, propose that. If a `git remote` points at GitLab
+(`gitlab.com` or a self-hosted host), propose GitLab. Otherwise (or if the
+user prefers), offer:
+
+- **GitHub** — issues live in the repo's GitHub Issues (uses the `gh` CLI)
+- **GitLab** — issues live in the repo's GitLab Issues (uses the [`glab`](https://gitlab.com/gitlab-org/cli) CLI)
+- **Local markdown** — issues live as files under `.scratch/<feature>/` in this repo (good for solo projects or repos without a remote)
+- **Other** (Jira, Linear, etc.) — ask the user to describe the workflow in one paragraph; record it as freeform prose
+
+Record the choice in `docs/agents/issue-tracker.md`. The GitHub and GitLab
+templates carry a "PRs as a request surface" flag, defaulted **off** — leave it
+off and don't raise it; a user who wants external PRs in the triage queue can
+flip the flag in the file later.
+
+#### Section B — Triage label vocabulary
+
+Skip this section entirely if the `triage` skill isn't installed — an uninstalled
+skill needs no labels.
+
+If it is installed, ask exactly one question:
+
+> Do you want to keep the default triage labels? (recommended: **yes**)
+
+The defaults are the five canonical roles, each label string equal to its name:
+`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`.
+On **yes**, write them as-is. Only if the user says no — usually because their
+tracker already uses other names (e.g. `bug:triage` for `needs-triage`) — collect
+the overrides so `triage` applies existing labels instead of creating
+duplicates.
+
+#### Section C — Domain docs
+
+Default to **single-context** — one `CONTEXT.md` + `docs/adr/` at the repo root.
+This fits almost every repo; write it without asking.
+
+Offer **multi-context** — a root `CONTEXT-MAP.md` pointing to per-context
+`CONTEXT.md` files — only when exploration found monorepo signals. Then confirm
+which layout they want.
+
+The eight Work Routing owner documents are initialized as part of the selected
+layout, without adding another question:
+
+- `ARCHITECTURE.md`;
+- `docs/README.md`;
+- `docs/process/DEVELOPMENT.md`;
+- `docs/issues/ROADMAP.md`;
+- `PLANS.md`;
+- `docs/architecture/RUNTIME.md`;
+- `docs/architecture/NETCODE.md`;
+- `docs/architecture/CONTENT.md`.
+
+`CONTEXT.md` and ADR files remain domain content. Create them when the
+repository has terms or consequential decisions to record; do not create
+empty placeholders solely because setup ran.
+
+#### Required output invariant
+
+There is no minimal-document mode. A setup run is incomplete unless its draft
+and final report include every required output below:
+
+- the selected `CLAUDE.md` or `AGENTS.md`;
 - `docs/agents/issue-tracker.md`;
 - `docs/agents/domain.md`;
+- all eight Work Routing owner documents listed above;
 - `docs/agents/triage-labels.md` when `triage` is installed;
 - `WORKSPACE_PROTOCOL.md` and `config.model` when the detached runtime is
   enabled.
 
-Use the matching sections in `templates/canonical-docs.md` for the eight
-canonical owner documents. `CONTEXT.md` and ADR files remain domain content,
-not setup metadata; create them later and lazily when a term or consequential
-decision actually exists.
+An existing required document may be classified as `keep` only after checking
+that it is present, substantive, and current. Otherwise classify it as
+`create` or `update`; never omit it because the repository did not have it
+before setup.
 
-Show the findings, the complete manifest, the selected template contents, and
-any overwrite diffs together. Ask for one confirmation for the whole manifest.
-If the user changes a choice, regenerate the manifest once; do not ask a
-sequence of per-file questions.
+### 3. Confirm and edit
 
-## 3. Write the manifest in one pass
+After Sections A, B, and C are settled, show the user a complete draft of:
 
-After the single confirmation, write every `create` and `update` target in the
-manifest during the same setup run. Edit exactly one repo instruction file:
+- the `## Agent skills` block to add to whichever of `CLAUDE.md` / `AGENTS.md`
+  is being edited (see step 4 for selection rules);
+- the contents of `docs/agents/issue-tracker.md`,
+  `docs/agents/domain.md`, and `docs/agents/triage-labels.md` (the last only
+  when `triage` is installed);
+- a compact manifest of the eight canonical owner documents and any existing
+  overwrite diffs;
+- `WORKSPACE_PROTOCOL.md` and `config.model` when the detached runtime is
+  enabled.
 
-- prefer `CLAUDE.md` when it exists;
-- otherwise use `AGENTS.md` when it exists;
-- if neither exists, include a new `AGENTS.md` in the manifest and confirm it
-  together with the other targets.
+Let the user edit the draft before writing. If they change a choice, update the
+affected draft and show it again; do not restart unrelated sections.
 
-Never create both. Update an existing `## Agent skills` block in place and do
-not overwrite surrounding user content. The block should point to
-`docs/agents/issue-tracker.md`, `docs/agents/domain.md`, and
-`docs/agents/triage-labels.md` only when those files apply. If SLP is enabled,
-add one short line pointing to `WORKSPACE_PROTOCOL.md` and `config.model`.
+### 4. Write
 
-Read `templates/canonical-docs.md` as the source for the eight canonical
-documents. For every target:
+**Pick the file to edit:**
 
-- copy the matching structure and replace generic bootstrap text with facts
-  verified from the repository;
-- preserve existing project decisions and edit only the owned sections;
-- if the repository does not establish a fact yet, say so explicitly and
-  record what would establish it; never invent architecture, process, runtime,
-  protocol, or content details;
-- create parent directories as part of the same write pass;
-- leave every canonical document substantive and non-empty, even when its
-  current state is explicitly `Not established yet`.
+- If `CLAUDE.md` exists, edit it.
+- Else if `AGENTS.md` exists, edit it.
+- If neither exists, ask the user which one to create — don't pick for them.
 
-Use the seed templates in this folder for every selected target. Do not pause
-between files or leave a half-configured setup. If an existing target differs,
-the manifest's one confirmation authorizes that replacement; preserve unrelated
-user content. Day-to-day edits belong in the generated files; rerun setup only
-to switch a backend or deliberately rebuild the setup manifest.
+Never create `AGENTS.md` when `CLAUDE.md` already exists (or vice versa) —
+always edit the one that's already there.
 
-The root-facing contract is intentionally blind to operator roles: keep
-`WORKSPACE_PROTOCOL.md`, `config.model`, the root skill, and the root agent
-metadata limited to project doctrine, Root ownership, and bounded Peer
-execution. Never put an upstream observer/manager name, callback protocol, or
-operator status channel in those files.
+If an `## Agent skills` block already exists in the chosen file, update its
+contents in-place rather than appending a duplicate. Don't overwrite user
+edits to the surrounding sections.
 
-## 4. Done
+The block:
 
-Report the complete manifest result — every file created, updated, or kept —
-and which skills now consume it. Before reporting success, verify that every
-canonical owner path in the manifest exists, is non-empty, and is referenced
-by `docs/agents/domain.md`. Keep the final message short; the generated files
-are the durable handoff.
+```markdown
+## Agent skills
+
+### Issue tracker
+
+[one-line summary of where issues are tracked]. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+[one-line summary of the label vocabulary]. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+[one-line summary of layout — "single-context" or "multi-context"]. See `docs/agents/domain.md`.
+```
+
+Include the `### Triage labels` sub-block, and write
+`docs/agents/triage-labels.md`, only when `triage` is installed and Section B
+ran. When it isn't, both are omitted.
+
+Then write the docs files using the seed templates in this skill folder as a
+starting point:
+
+- [issue-tracker-github.md](./issue-tracker-github.md) — GitHub issue tracker
+- [issue-tracker-gitlab.md](./issue-tracker-gitlab.md) — GitLab issue tracker
+- [issue-tracker-local.md](./issue-tracker-local.md) — local-markdown issue tracker
+- [triage-labels.md](./triage-labels.md) — label mapping (only if `triage` is installed)
+- [domain.md](./domain.md) — domain doc consumer rules + layout
+
+For "other" issue trackers, write `docs/agents/issue-tracker.md` from scratch
+using the user's description.
+
+For the canonical owner documents, use the matching sections in
+[templates/canonical-docs.md](./templates/canonical-docs.md). Replace generic
+bootstrap text with verified repository facts. If a fact is not established,
+record `Not established yet` and what would establish it; never invent project
+architecture, process, runtime, protocol, or content details. Create or update
+all eight canonical files in the same write pass, preserving unrelated user
+content and existing decisions.
+
+If the detached runtime is enabled, write `WORKSPACE_PROTOCOL.md` and
+`config.model` in the same pass. Keep those project files limited to project
+doctrine, Root ownership, and bounded Peer execution; do not put an upstream
+observer or operator status protocol in them.
+
+### 5. Done
+
+Tell the user the setup is complete and which engineering skills will now read
+from these files. Verify that all eight canonical owner documents are present
+and non-empty, and that `docs/agents/domain.md` routes to them. Mention they
+can edit `docs/agents/*.md` and the canonical owner docs directly later —
+re-running this skill is only necessary if they want to switch issue trackers,
+change domain layout, or rebuild the setup.
