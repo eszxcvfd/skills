@@ -16,8 +16,9 @@ Non-Claude agents can copy this skill with `npx skills@latest add eszxcvfd/skill
 `setup-matt-pocock-skills` bootstraps the complete project surface that the
 engineering skills need in one pass: canonical architecture, process, roadmap,
 plan, runtime, protocol, and content documents; issue-tracker settings; triage
-labels; domain-doc routing; and, optionally, the Paseo SLP contract plus
-`config.model`.
+labels; domain-doc routing; and the Paseo SLP project contract. When detached
+Paseo is enabled, it also prepares the three machine-local role profiles,
+provider registration, launcher target, and external Supervisor notebook.
 
 It explores the repository, asks about the issue tracker, triage labels, and
 domain layout in sequence, then shows a complete draft before writing. It
@@ -49,6 +50,11 @@ The setup manifest always includes these canonical owner documents:
 - `docs/architecture/NETCODE.md`;
 - `docs/architecture/CONTENT.md`.
 
+It also always creates or updates:
+
+- `WORKSPACE_PROTOCOL.md`;
+- `config.model`.
+
 There is no minimal-document mode: a setup run is incomplete if any required
 canonical owner document is omitted. Existing substantive and current files
 may be kept; missing or stale files must be created or updated.
@@ -64,10 +70,11 @@ not established yet rather than guessed.
   `docs/agents/triage-labels.md` when `triage` is installed.
 - **Domain routing** — `docs/agents/domain.md`, with a root `CONTEXT.md` and
   `docs/adr/` created lazily when there is content to record.
-- **Paseo detached runtime, when selected** — `WORKSPACE_PROTOCOL.md` is the
-  single Root/Peer coordination contract and `config.model` is the per-project
-  provider/model/thinking choice for those two roles. The external observer is
-  configured outside the repository.
+- **Paseo workspace** — `WORKSPACE_PROTOCOL.md` is the Root/Peer coordination
+  contract and `config.model` is the per-project provider/model/thinking choice
+  for those two roles. The three role profile TOMLs, provider registration,
+  launcher, and Supervisor notebook are machine-local and remain outside the
+  repository.
 
 `CONTEXT.md` and ADR files remain lazy domain content. They are created when a
 term or consequential decision actually exists, not as empty setup metadata.
@@ -77,12 +84,13 @@ term or consequential decision actually exists, not as empty setup metadata.
 - the tracker, labels, and domain choices were answered in sequence;
 - the complete draft was shown before any write;
 - all eight canonical owner documents exist and are non-empty;
+- `WORKSPACE_PROTOCOL.md` and `config.model` exist and are non-empty;
 - all selected `docs/agents/` files match the real repository;
 - `docs/agents/domain.md` points to the canonical owner set;
 - the existing `CLAUDE.md` or `AGENTS.md` has one accurate `## Agent skills`
   block;
-- detached-runtime repositories have one `WORKSPACE_PROTOCOL.md` and one
-  `config.model`, with no duplicate project contract;
+- enabled Paseo workspaces have all three machine-local profile files, the
+  three provider registrations, a launcher target, and an external notebook;
 - downstream skills use the configured tracker, labels, and Paseo role
   defaults without guessing.
 

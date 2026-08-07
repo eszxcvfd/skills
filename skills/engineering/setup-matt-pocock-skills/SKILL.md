@@ -44,6 +44,11 @@ exists; don't assume:
   which is almost every repo.
 - `WORKSPACE_PROTOCOL.md` and `config.model` when the repo uses the detached
   Paseo Root/Peer runtime.
+- the local Paseo/Codex prerequisites when the user uses detached roles:
+  `paseo --version`, `codex --version`, `~/.codex/config.toml`,
+  `~/.codex/{supervisor,root,peer}.config.toml`, the supported
+  `codex-profile` launcher, and the relevant `~/.paseo/config.json` provider
+  entries;
 
 ### 2. Present findings and ask
 
@@ -117,6 +122,33 @@ layout, without adding another question:
 - `docs/architecture/NETCODE.md`;
 - `docs/architecture/CONTENT.md`.
 
+#### Section D — Paseo workspace and role profiles
+
+Run this section when the repository uses Paseo or the user asks for the
+detached Root/Peer/Supervisor workflow. Lead with **enable the complete Paseo
+bootstrap** as the recommended answer and ask one question:
+
+> Should setup create the project `config.model` and `WORKSPACE_PROTOCOL.md`,
+> the machine-local `supervisor.config.toml`, `root.config.toml`, and
+> `peer.config.toml`, the registered Paseo role providers, and the external
+> Supervisor notebook? (recommended: **yes**)
+
+On **yes**, include every project and machine-local target in the draft. On
+**no**, still create the project `config.model` and `WORKSPACE_PROTOCOL.md`,
+but report the explicitly declined machine-local targets as omitted. Do not
+silently treat missing profiles, providers, or notebook as a complete Paseo
+setup.
+
+The three profile files use the local machine baseline plus the matching role
+instructions; they are not `.codex/agents/*.toml` and must not be replaced by
+editing an agent instruction file. Use
+[templates/paseo-profiles.md](./templates/paseo-profiles.md) and the supplied
+Paseo profile guide for their exact shape.
+
+The Supervisor notebook is operator-side state and must be stored outside the
+project under `$CODEX_HOME/supervisor-notebooks/<repo-slug>/`. It must never be
+linked from Root-facing project documents or passed to Root/Peer.
+
 `CONTEXT.md` and ADR files remain domain content. Create them when the
 repository has terms or consequential decisions to record; do not create
 empty placeholders solely because setup ran.
@@ -131,8 +163,11 @@ and final report include every required output below:
 - `docs/agents/domain.md`;
 - all eight Work Routing owner documents listed above;
 - `docs/agents/triage-labels.md` when `triage` is installed;
-- `WORKSPACE_PROTOCOL.md` and `config.model` when the detached runtime is
-  enabled.
+- `WORKSPACE_PROTOCOL.md` and `config.model`;
+- when Section D is enabled: `~/.codex/supervisor.config.toml`,
+  `~/.codex/root.config.toml`, `~/.codex/peer.config.toml`, the three Paseo
+  provider registrations, the supported `codex-profile` launcher, and the
+  external Supervisor notebook.
 
 An existing required document may be classified as `keep` only after checking
 that it is present, substantive, and current. Otherwise classify it as
@@ -150,8 +185,9 @@ After Sections A, B, and C are settled, show the user a complete draft of:
   when `triage` is installed);
 - a compact manifest of the eight canonical owner documents and any existing
   overwrite diffs;
-- `WORKSPACE_PROTOCOL.md` and `config.model` when the detached runtime is
-  enabled.
+- the contents of `WORKSPACE_PROTOCOL.md` and `config.model`;
+- when Section D applies, the three profile TOMLs, provider-registration diffs,
+  launcher target, and external notebook path/content.
 
 Let the user edit the draft before writing. If they change a choice, update the
 affected draft and show it again; do not restart unrelated sections.
@@ -201,6 +237,8 @@ starting point:
 - [issue-tracker-local.md](./issue-tracker-local.md) — local-markdown issue tracker
 - [triage-labels.md](./triage-labels.md) — label mapping (only if `triage` is installed)
 - [domain.md](./domain.md) — domain doc consumer rules + layout
+- [templates/paseo-profiles.md](./templates/paseo-profiles.md) — role profiles,
+  Paseo registration, and the external Supervisor notebook seed
 
 For "other" issue trackers, write `docs/agents/issue-tracker.md` from scratch
 using the user's description.
@@ -213,16 +251,25 @@ architecture, process, runtime, protocol, or content details. Create or update
 all eight canonical files in the same write pass, preserving unrelated user
 content and existing decisions.
 
-If the detached runtime is enabled, write `WORKSPACE_PROTOCOL.md` and
-`config.model` in the same pass. Keep those project files limited to project
-doctrine, Root ownership, and bounded Peer execution; do not put an upstream
-observer or operator status protocol in them.
+Always write `WORKSPACE_PROTOCOL.md` and `config.model` in the same pass. Keep
+those project files limited to project doctrine, Root ownership, and bounded
+Peer execution; do not put an upstream observer or operator status protocol in
+them.
+
+When Section D is enabled, write or update the three machine-local profile
+files, the three Paseo provider entries, the supported launcher target, and the
+external notebook in the same confirmed setup operation. Preserve unrelated
+machine configuration, never commit machine-local files, and never create the
+notebook inside the project.
 
 ### 5. Done
 
 Tell the user the setup is complete and which engineering skills will now read
-from these files. Verify that all eight canonical owner documents are present
-and non-empty, and that `docs/agents/domain.md` routes to them. Mention they
-can edit `docs/agents/*.md` and the canonical owner docs directly later —
+from these files. Verify that all eight canonical owner documents,
+`WORKSPACE_PROTOCOL.md`, and `config.model` are present and non-empty, and that
+`docs/agents/domain.md` routes to them. When Section D was enabled, verify all
+three profile files, provider registrations, launcher, and external notebook
+too; otherwise report each declined or unavailable target explicitly. Mention
+they can edit `docs/agents/*.md` and the canonical owner docs directly later —
 re-running this skill is only necessary if they want to switch issue trackers,
-change domain layout, or rebuild the setup.
+change domain layout, rebuild the setup, or repair the Paseo machine bootstrap.

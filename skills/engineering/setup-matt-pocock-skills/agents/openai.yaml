@@ -1,5 +1,5 @@
 interface:
   display_name: "Setup Matt Pocock Skills"
-  short_description: "Prompt-driven tracker and project docs setup"
+  short_description: "Prompt-driven project and Paseo setup"
 policy:
   allow_implicit_invocation: false
