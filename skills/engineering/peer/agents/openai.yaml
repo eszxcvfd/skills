@@ -1,0 +1,6 @@
+interface:
+  display_name: "Peer"
+  short_description: "Task-local engineering Peer for one bounded Lead packet with evidence handback"
+  default_prompt: "Use $peer to execute exactly one bounded packet from detached Lead (runtime codex-root). Never read WORKSPACE_PROTOCOL.md or config.model; reject any packet that asks for either and ask Lead for a sanitized brief. Never spawn internal subagents, create another Peer, or open a callback channel. Return exactly one PEER_STATUS block as the terminal run result, including evidence, risks, and the Lead action needed."
+policy:
+  allow_implicit_invocation: false

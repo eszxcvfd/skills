@@ -1,154 +1,97 @@
 ---
 name: setup-matt-pocock-skills
-description: Configure this repo for the engineering skills — set up its issue tracker, triage labels, domain docs, root control docs, WORKSPACE_PROTOCOL.md, SUPERVISOR_NOTEBOOK.md, and config.model. Run once before first use of the other engineering skills.
+description: Configure this repo for the engineering skills — issue tracker, triage labels, domain docs, and optional detached Paseo Lead/Peer defaults. Run once before first use of the other engineering skills.
 disable-model-invocation: true
 ---
 
 # Setup Matt Pocock's Skills
 
-Scaffold the per-repo configuration that the engineering skills assume:
+Scaffold only the repo configuration the engineering skills actually need:
 
-- **Issue tracker** — where issues live (GitHub by default; local markdown is also supported out of the box)
-- **Triage labels** — the strings used for the five canonical triage roles
-- **Domain docs** — where `CONTEXT.md` and ADRs live, and the consumer rules for reading them
-- **Control docs** — where architecture ownership, runtime invariants, proof requirements, and active execution state live
-- **Paseo hierarchy config** — `WORKSPACE_PROTOCOL.md`, `SUPERVISOR_NOTEBOOK.md`, plus per-project supervisor/root/peer model defaults in `config.model`
+- issue tracker;
+- triage label vocabulary, when `triage` is installed;
+- domain glossary and ADR layout;
+- optional detached Paseo Root/Peer contract and `config.model`.
 
-This is a prompt-driven skill, not a deterministic script. Explore, present what you found, confirm with the user, then write.
+This is a prompt-driven setup. Explore, present findings, confirm, then write;
+do not guess or create a parallel documentation system.
 
-## Process
+## 1. Explore
 
-### 1. Explore
+Read what exists:
 
-Look at the current repo to understand its starting state. Read whatever exists; don't assume:
+- `git remote -v` and `.git/config`;
+- the existing `AGENTS.md` or `CLAUDE.md` and any `## Agent skills` block;
+- `CONTEXT.md`, `CONTEXT-MAP.md`, `docs/adr/`, `docs/agents/`, and `.scratch/`;
+- `config.model` and `WORKSPACE_PROTOCOL.md` when this repo uses Paseo SLP;
+- whether the `triage` skill is installed;
+- monorepo signals such as `pnpm-workspace.yaml`, package workspaces, or
+  populated packages with their own source trees.
 
-- `git remote -v` and `.git/config` — is this a GitHub repo? Which one?
-- `AGENTS.md` and `CLAUDE.md` at the repo root — does either exist? Is there already an `## Agent skills` section in either?
-- `CONTEXT.md` and `CONTEXT-MAP.md` at the repo root
-- `docs/adr/` and any `src/*/docs/adr/` directories
-- `ARCHITECTURE.md`, `RUNTIME_CONSTITUTION.md`, `PROCESS_AND_PROOF_POLICY.md`, `WORKSPACE_PROTOCOL.md`, `SUPERVISOR_NOTEBOOK.md`, and `ACTIVE_EXECUTION_PLAN.md` at the repo root
-- `config.model` at the repo root — per-project Paseo provider/model/thinking defaults
-- `docs/agents/` — does this skill's prior output already exist?
-- `.scratch/` — sign that a local-markdown issue tracker convention is already in use
-- Is the optional `triage` workflow installed? (Check `skills/misc/triage` in this repo or `triage` in the available skills.) This decides whether Section B runs at all.
-- Monorepo signals — a `pnpm-workspace.yaml`, a `workspaces` field in `package.json`, or a populated `packages/*` with its own `src/`. Present only in a genuinely large multi-package repo; their absence means single-context, which is almost every repo.
+## 2. Present findings and ask
 
-### 2. Present findings and ask
-
-Summarise what's present and what's missing. Then take the sections in order — one section, one answer, then the next.
-
-Lead each section with the recommended answer so the user can accept it in a word. Give a one-line explainer only when the choice genuinely branches; skip the section entirely when exploration already settled it (Section B when `triage` isn't installed, Section C when there's no monorepo).
-
-**Section A — Issue tracker.**
-
-> Explainer: The "issue tracker" is where issues live for this repo. Promoted workflows like `to-tickets` and `to-spec`, plus optional `triage`, read from and write to it — they need to know whether to call `gh issue create`, write a markdown file under `.scratch/`, or follow some other workflow you describe. Pick the place you actually track work for this repo.
-
-Default posture: these skills were designed for GitHub. If a `git remote` points at GitHub, propose that. If a `git remote` points at GitLab (`gitlab.com` or a self-hosted host), propose GitLab. Otherwise (or if the user prefers), offer:
-
-- **GitHub** — issues live in the repo's GitHub Issues (uses the `gh` CLI)
-- **GitLab** — issues live in the repo's GitLab Issues (uses the [`glab`](https://gitlab.com/gitlab-org/cli) CLI)
-- **Local markdown** — issues live as files under `.scratch/<feature>/` in this repo (good for solo projects or repos without a remote)
-- **Other** (Jira, Linear, etc.) — ask the user to describe the workflow in one paragraph; the skill will record it as freeform prose
-
-Record the choice in `docs/agents/issue-tracker.md`. The GitHub and GitLab templates carry a "PRs as a request surface" flag, defaulted **off** — leave it off and don't raise it; a user who wants external PRs in the triage queue can flip the flag in the file later.
-
-**Section B — Triage label vocabulary.** Skip this section entirely if the `triage` skill isn't installed (exploration told you) — an uninstalled skill needs no labels.
-
-If it is installed, ask exactly one question:
-
-> Do you want to keep the default triage labels? (recommended: **yes**)
-
-The defaults are the five canonical roles, each label string equal to its name: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. On **yes**, write them as-is. Only if the user says no — usually because their tracker already uses other names (e.g. `bug:triage` for `needs-triage`) — collect the overrides so `triage` applies existing labels instead of creating duplicates.
-
-**Section C — Domain docs.** Default to **single-context** — one `CONTEXT.md` + `docs/adr/` at the repo root. This fits almost every repo; write it without asking.
-
-Offer **multi-context** — a root `CONTEXT-MAP.md` pointing to per-context `CONTEXT.md` files — only when exploration found monorepo signals. Then confirm which layout they want.
-
-**Section D — Control docs and Paseo hierarchy config.** Default to a strict repo control loop:
-
-- `ARCHITECTURE.md` — owner map, allowed dependencies, routing, and where new code belongs
-- `RUNTIME_CONSTITUTION.md` — runtime invariants that must not be violated
-- `PROCESS_AND_PROOF_POLICY.md` — required proof before an agent may claim done
-- `WORKSPACE_PROTOCOL.md` — root-only Paseo hierarchy law; root reads it, peer must not
-- `SUPERVISOR_NOTEBOOK.md` — supervisor-owned memory for coordination failures, anti-patterns, root/peer wait traps, missing env/config, quota exhaustion, and protocol experiments
-- `config.model` — per-project supervisor/root/peer provider, model, and thinking defaults
-- `ACTIVE_EXECUTION_PLAN.md` — task-local working memory, created by `/implement` when work starts and archived or deleted when work finishes
-
-If the first five control/notebook files are missing, propose creating them from the seed templates. If they already exist, do not overwrite them; add only missing headings after user confirmation. Create `config.model` from the seed template only when missing. Do not create `ACTIVE_EXECUTION_PLAN.md` during setup unless the user is already starting an implementation task.
-
-### 3. Confirm and edit
-
-Show the user a draft of:
-
-- The `## Agent skills` block to add to whichever of `CLAUDE.md` / `AGENTS.md` is being edited (see step 4 for selection rules)
-- The contents of `docs/agents/issue-tracker.md`, `docs/agents/domain.md`, and `docs/agents/triage-labels.md` (the last only when `triage` is installed)
-- The proposed root control docs and supervisor memory: `ARCHITECTURE.md`, `RUNTIME_CONSTITUTION.md`, `PROCESS_AND_PROOF_POLICY.md`, `WORKSPACE_PROTOCOL.md`, and `SUPERVISOR_NOTEBOOK.md` when they are missing or need missing headings added, plus `config.model` when missing
-
-Let them edit before writing.
-
-### 4. Write
-
-**Pick the file to edit:**
-
-- If `CLAUDE.md` exists, edit it.
-- Else if `AGENTS.md` exists, edit it.
-- If neither exists, ask the user which one to create — don't pick for them.
-
-Never create `AGENTS.md` when `CLAUDE.md` already exists (or vice versa) — always edit the one that's already there.
-
-If an `## Agent skills` block already exists in the chosen file, update its contents in-place rather than appending a duplicate. Don't overwrite user edits to the surrounding sections.
-
-The block:
-
-```markdown
-## Agent skills
+Take the sections in order, one answer at a time. Lead each with the
+recommended choice; skip a section when exploration already settled it.
 
 ### Issue tracker
 
-[one-line summary of where issues are tracked]. See `docs/agents/issue-tracker.md`.
+Explain that `to-spec`, `to-tickets`, and `triage` need to know where work is
+published. Recommend GitHub when the remote is GitHub; otherwise offer GitLab,
+local markdown under `.scratch/<feature>/`, or a user-described tracker.
+Record the choice in `docs/agents/issue-tracker.md`.
 
 ### Triage labels
 
-[one-line summary of the label vocabulary]. See `docs/agents/triage-labels.md`.
+Skip when `triage` is not installed. Otherwise ask exactly:
+
+> Do you want to keep the default triage labels? (recommended: yes)
+
+The defaults are `needs-triage`, `needs-info`, `ready-for-agent`,
+`ready-for-human`, and `wontfix`. Record overrides only when the user asks.
 
 ### Domain docs
 
-[one-line summary of layout — "single-context" or "multi-context"]. See `docs/agents/domain.md`.
+Default to single-context: one `CONTEXT.md` and `docs/adr/` at the repo root.
+Offer multi-context only when exploration finds genuine monorepo signals.
 
-### Control docs
+### Paseo detached runtime (optional)
 
-Architecture, runtime invariants, proof requirements, and current execution state live in `ARCHITECTURE.md`, `RUNTIME_CONSTITUTION.md`, `PROCESS_AND_PROOF_POLICY.md`, `WORKSPACE_PROTOCOL.md`, and task-local `ACTIVE_EXECUTION_PLAN.md`.
+Ask only when this repo uses the detached `codex-root → codex-peer` runtime.
+The small setup is two files:
 
-### Supervisor notebook
+- `WORKSPACE_PROTOCOL.md` — one canonical Work Routing and Root/Peer handoff
+  contract;
+- `config.model` — per-project Root/Peer provider/model/thinking defaults.
 
-Supervisor coordination memory lives in `SUPERVISOR_NOTEBOOK.md`. Supervisor appends concrete failure lessons there when monitoring reveals reusable anti-patterns, missing env/config, quota exhaustion, stalled root/peer waits, permission loops, stale sessions, or protocol friction.
+The external observer/launcher is not a project document and is not scaffolded
+here. Do not create `ARCHITECTURE.md`, `RUNTIME_CONSTITUTION.md`,
+`PROCESS_AND_PROOF_POLICY.md`, an execution plan, or an observer notebook here;
+create project doctrine only when it genuinely needs it.
 
-### Paseo model config
+## 3. Confirm and write
 
-Supervisor/root/peer provider, model, and thinking defaults live in `config.model`. Edit that file per project instead of hard-coding model IDs in prompts.
-```
+Show a draft of the `## Agent skills` block and the selected
+`docs/agents/*.md` files before writing. If the detached runtime was selected,
+show the two Root/Peer files as well.
 
-Include the `### Triage labels` sub-block, and write `docs/agents/triage-labels.md`, only when `triage` is installed and Section B ran. When it isn't, both are omitted.
+Edit exactly one repo instruction file:
 
-Then write the docs files using the seed templates in this skill folder as a starting point:
+- prefer `CLAUDE.md` when it exists;
+- otherwise use `AGENTS.md` when it exists;
+- if neither exists, ask the user which one to create.
 
-- [issue-tracker-github.md](./issue-tracker-github.md) — GitHub issue tracker
-- [issue-tracker-gitlab.md](./issue-tracker-gitlab.md) — GitLab issue tracker
-- [issue-tracker-local.md](./issue-tracker-local.md) — local-markdown issue tracker
-- [triage-labels.md](./triage-labels.md) — label mapping (only if `triage` is installed)
-- [domain.md](./domain.md) — domain doc consumer rules + layout
-- [architecture.md](./architecture.md) — seed for root `ARCHITECTURE.md`
-- [runtime-constitution.md](./runtime-constitution.md) — seed for root `RUNTIME_CONSTITUTION.md`
-- [process-and-proof-policy.md](./process-and-proof-policy.md) — seed for root `PROCESS_AND_PROOF_POLICY.md`
-- [workspace-protocol.md](./workspace-protocol.md) — seed for root-only `WORKSPACE_PROTOCOL.md`
-- [supervisor-notebook.md](./supervisor-notebook.md) — seed for supervisor-owned `SUPERVISOR_NOTEBOOK.md`
-- [config.model](./config.model) — seed for per-project supervisor/root/peer provider, model, and thinking defaults
-- [active-execution-plan.md](./active-execution-plan.md) — template for task-local `ACTIVE_EXECUTION_PLAN.md` (do not create during setup unless active work is starting)
+Never create both. Update an existing `## Agent skills` block in place and do
+not overwrite surrounding user content. The block should point to
+`docs/agents/issue-tracker.md`, `docs/agents/domain.md`, and
+`docs/agents/triage-labels.md` only when those files apply. If SLP is enabled,
+add one short line pointing to `WORKSPACE_PROTOCOL.md` and `config.model`.
 
-When writing from these seeds, copy `workspace-protocol.md` to repo-root `WORKSPACE_PROTOCOL.md`, `supervisor-notebook.md` to repo-root `SUPERVISOR_NOTEBOOK.md`, and `config.model` to repo-root `config.model` when each target is missing. These are setup outputs, not docs under `docs/agents/`.
+Use the seed templates in this folder for the chosen issue tracker, domain,
+triage labels, and optional SLP files. Write each target only when missing or
+after the user confirms a replacement. Day-to-day edits belong in the generated
+files; rerun setup only to switch backend or restart setup.
 
-For "other" issue trackers, write `docs/agents/issue-tracker.md` from scratch using the user's description.
+## 4. Done
 
-### 5. Done
-
-Tell the user the setup is complete and which engineering skills will now read from these files. Mention they can edit `docs/agents/*.md`, `config.model`, `SUPERVISOR_NOTEBOOK.md`, and the root control docs directly later, but structural changes to `ARCHITECTURE.md` should go through `/architecture-council` or an ADR. Re-running this skill is only necessary if they want to switch issue trackers or restart from scratch.
+Report which files were created or updated and which skills now consume them.
+Keep the final message short; the generated files are the durable handoff.

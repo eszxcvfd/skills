@@ -7,48 +7,67 @@ disable-model-invocation: true
 # Ask Matt
 
 Use this router when the next engineering move is unclear. The promoted
-engineering surface has thirteen skills. Paseo role instructions remain preserved
-under `skills/misc/`, while the matching Codex profiles contain those
-instructions inline.
+engineering surface includes the workflow skills, the architecture disciplines,
+and the three SLP role contracts.
 
-## Paseo hierarchy
+## Project routing
 
-Use this for macro decisions, multiple agents, recovery, or quality gates:
+The project execution path is:
 
 ```text
-codex-supervisor → codex-root → codex-peer
+task prompt → detached Root → bounded Peer
 ```
 
-- **`codex-supervisor`** represents the human on requirements, architecture,
-  scope, acceptance, quality, and momentum recovery.
-- **`codex-root`** is the active project lead. It reads `WORKSPACE_PROTOCOL.md`,
-  preserves the mainline, keeps design/lead decisions, and allocates bounded
-  peer work.
-- **`codex-peer`** executes one sanitized packet from root and returns evidence.
-  It must not read root-only protocol or create internal agents.
+The runtime profiles call the autonomous Lead `codex-root` and the bounded
+executor `codex-peer`. An external observer may start or watch Root, but it is
+outside the project contract and adds no project command path, callback, or
+doctrine.
 
-The role contract is embedded in each Codex profile. Fresh downstream launches
-must read exact role provider, model, and thinking values from
-`config.model`, verify them against the provider catalog, and pass
-`--model "$MODEL" --thinking "$THINKING" --mode full-access`. MCP creation uses
-`<configured-provider>/<model>` and `settings.thinkingOptionId`; do not put the
-model in settings or pass a bare model id.
+Root owns project scope, planning, integration, and acceptance. Peer owns
+task-local engineering judgment inside its packet. Root does not receive an
+upstream status schema.
+
+## Andrew Ng comparison
+
+Andrew Ng's agentic playbook contributes workflow patterns: reflection, tool
+use, planning, and multi-agent collaboration. SLP contributes the governance
+layer those patterns do not define: concern-specific authority, room ownership,
+many-to-many workspace relationships, provenance, and reconciliation.
+
+The earlier AI Transformation Playbook is an enterprise adoption guide, not a
+runtime role topology. Use SLP to operate the work safely after the enterprise
+has chosen its AI transformation path. The runtime contract lives in
+`WORKSPACE_PROTOCOL.md`; it is the single source of truth for the role graph.
 
 ## Active routing
 
 - First use in a repository → `/setup-matt-pocock-skills`.
-- Macro decision, recovery, or multi-agent work → `codex-supervisor`.
+- New autonomous project task, sequencing, delegation, integration, or
+  acceptance → `codex-root` / `/root` (the detached Lead role).
+- One bounded implementation, research, review, proof, or cleanup packet →
+  `codex-peer` / `/peer`.
+- Lifecycle observation or starting a fresh detached Root outside the project
+  → `codex-supervisor` or `/supervisor`.
 - Large, foggy effort spanning multiple sessions → `/wayfinder`.
-- Fuzzy plan that needs a recorded interview and decision docs → `/grill-with-docs`.
-- Architecture decision or unclear safe next step → `/architecture-council`.
+- Fuzzy plan that needs a recorded interview and decision docs →
+  `/grill-with-docs`.
+- Architecture decision or unclear safe next step → `/architecture-council`
+  (two independent proposers, then challenge, verification, and verdict;
+  reduced mode uses peer/delegated workers, full mode uses Paseo root agents).
+- Deep-module interface, seam, or locality question → `/codebase-design`.
+- Domain terms, scenarios, glossary, or ADR decision → `/domain-modeling`.
 - Aligned conversation that needs a durable spec → `/to-spec`.
 - Finished spec that needs implementation slices → `/to-tickets`.
 - Settled spec or ticket ready to build → `/implement`.
-- Design or state-model question that needs a throwaway artifact → `/prototype`.
 - Test-first feature or fix → `/tdd`.
 - Broken, failing, slow, or regressed behavior → `/diagnosing-bugs`.
 - Primary-source investigation → `/research`.
 - Diff, branch, or PR review → `/code-review`.
+- Active merge or rebase conflict → `/resolving-merge-conflicts`.
+- Periodic deepening scan with a visual report → `/improve-codebase-architecture`.
+- Incoming issue or external PR workflow → `/triage`.
+- Manual setup or one-off state transition → `/wizard`.
+- Design or state-model question needing a throwaway artifact → `/prototype`.
 
 The normal small-work chain is:
 
@@ -56,18 +75,7 @@ The normal small-work chain is:
 /grill-with-docs → /to-spec → /to-tickets → /implement → /code-review
 ```
 
-## Preserved specialized workflows
-
-From a repository clone, use the matching skill under `skills/misc/` when the
-specialized workflow is more appropriate:
-
-- terminology and domain vocabulary → `domain-modeling`;
-- architecture depth and premise checks → `architecture-premise-audit`,
-  `codebase-design`, `structural-antipatterns`,
-  `improve-codebase-architecture`;
-- incoming issue workflow → `triage`;
-- cleanup, conflict repair, or maximum-recall review → `repo-refresh`,
-  `resolving-merge-conflicts`, `ultra-review`.
-
-These utilities and role sources are intentionally not listed in the promoted
-plugin manifest, but their source remains available in the clone.
+Use `/architecture-council` before that chain when the change affects a
+hard-to-reverse boundary or the safe next step is unclear. Use the roles when
+the work needs a detached Lead or bounded independent execution; keep observer
+concerns outside the project documents.

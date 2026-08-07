@@ -1,38 +1,59 @@
 ```bash
-npx skills@latest add eszxcvfd/skills
+claude plugin marketplace add --scope project eszxcvfd/skills
+claude plugin install --scope project mattpocock-skills@eszxcvfd
 ```
 
-Select `ask-matt` when prompted, along with the agent you want to install it for.
+```bash
+claude plugin update --scope project mattpocock-skills@eszxcvfd
+```
+
+Non-Claude agents can copy this skill with `npx skills@latest add eszxcvfd/skills --skill=ask-matt`.
 
 [Source](https://github.com/eszxcvfd/skills/tree/main/skills/engineering/ask-matt)
 
 ## What it does
 
-`ask-matt` is the router over the skills in this repo. It routes the Paseo management hierarchy first — [supervisor](https://aihero.dev/skills-supervisor) → [root](https://aihero.dev/skills-root) → [peer](https://aihero.dev/skills-peer) — when work needs macro decisions, momentum recovery, an active project lead, or independent peers. It keeps the older grill/spec/ticket/implement flow available for smaller work.
+`ask-matt` is the router over the promoted engineering skills and the Paseo
+roles. It decides whether the next owner is a detached Root for project
+planning, a Peer for one bounded packet, an external observer for lifecycle
+work, or a standalone workflow skill.
 
-It does no implementation itself. It answers which flow fits, which layer owns the next decision, and when to reach for design control, review, cleanup, or debugging skills.
+It does no implementation itself. Its defining constraint is that project
+routing stays small and local: task prompt → detached Root → bounded Peer.
+Observer concerns remain outside the project documents.
 
 ## When to reach for it
 
-You invoke this by typing `/ask-matt` — the agent won't reach for it on its own.
+You invoke this by typing `/ask-matt`; the agent will not reach for it on its own.
 
-Reach for it whenever you're unsure whether work belongs to the Paseo hierarchy, the direct spec/build chain, a design-control review, a cleanup pass, or a standalone skill.
+Reach for it whenever the next engineering move, owner, or workflow is unclear.
+Use [root / Lead](https://aihero.dev/skills-root) for autonomous project
+coordination, [peer](https://aihero.dev/skills-peer) for a bounded execution
+packet, and [supervisor](https://aihero.dev/skills-supervisor) only for
+external lifecycle observation or starting a fresh Root.
 
 ## The map
 
-The current management chain is:
-
-```txt
-/supervisor → /root → /peer
+```text
+task prompt → detached Root → bounded Peer
 ```
 
-Supervisor decides macro issues and recovers momentum for the human. Root is the active lead: it preserves the mainline, does central work, and starts peer only when bounded independent execution is useful. Peer executes bounded packets without reading `WORKSPACE_PROTOCOL.md` or `config.model` or spawning internal subagents.
+The runtime profile calls the autonomous Lead `codex-root`. The normal
+small-work chain remains:
 
-Supervisor creates fresh root agents through Paseo for fresh requests, optionally overridden by `<repo>/config.model`'s `[root]` provider/model/thinking settings after exact catalog preflight. Root creates fresh peer agents through Paseo for bounded work, optionally overridden by `<repo>/config.model`'s `[peer]` provider/model/thinking settings after exact catalog preflight. Supervisor appends reusable coordination failures and anti-pattern lessons to `SUPERVISOR_NOTEBOOK.md`; root retrieves peer completion through native wait/log/inspect, and peer does not call upward or sideways.
-CLI launches must pass both `--model "$MODEL"` and `--thinking "$THINKING"` from `config.model`; MCP `paseo_create_agent` provider must be `<role>/<model>` and `settings.thinkingOptionId` must equal the configured thinking value. Existing agents keep their original model/thinking; fresh work uses `config.model`, so stale sessions are reused only when explicitly named.
+```text
+/grill-with-docs → /to-spec → /to-tickets → /implement → /code-review
+```
 
-For ordinary small work, `ask-matt` still routes to `grill-with-docs → to-spec → to-tickets → implement → code-review`. For design-shape concerns it points at [structural-antipatterns](https://aihero.dev/skills-structural-antipatterns), [codebase-design](https://aihero.dev/skills-codebase-design), [architecture-premise-audit](https://aihero.dev/skills-architecture-premise-audit), or [architecture-council](https://aihero.dev/skills-architecture-council). For cleanup it points at [repo-refresh](https://aihero.dev/skills-repo-refresh). For maximum-recall peer review it points at [ultra-review](https://aihero.dev/skills-ultra-review).
+The router also covers architecture council, deep-module design, domain
+modeling, debugging, research, TDD, prototypes, code review, merge conflicts,
+architecture deepening, triage, and manual setup wizards. The role contract is
+kept in the repo's `WORKSPACE_PROTOCOL.md` so there is one source of truth.
 
 ## Where it fits
 
-`ask-matt` is the router. It sits above the skills and points into the right chain. Every docs page can link back here instead of redrawing the map.
+`ask-matt` is the router above the skill set. Every skill page can point back to
+it instead of redrawing the graph. For the Andrew Ng comparison, it treats
+reflection, tool use, planning, and multi-agent collaboration as workflow
+patterns, then adds detached Root ownership, bounded Peer packets, and
+evidence handback as the project execution layer.

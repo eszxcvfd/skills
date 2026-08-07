@@ -1,6 +1,6 @@
 # skills
 
-Agent skills for real engineering — fork of [mattpocock/skills](https://github.com/mattpocock/skills) plus a Paseo supervisor/root/peer hierarchy.
+Agent skills for real engineering — fork of [mattpocock/skills](https://github.com/mattpocock/skills) plus detached Paseo Lead/Peer execution and an external lifecycle observer.
 
 **Repo:** https://github.com/eszxcvfd/skills
 
@@ -66,16 +66,23 @@ Workflow chạy `npm ci` rồi `claude plugin validate . --strict`. Nếu `paseo
 npm ci && claude plugin validate . --strict
 ```
 
-### Flow Paseo
+### Flow Paseo / detached Lead
 
 Sau khi cài:
 
 1. `/setup-matt-pocock-skills`
 2. `/ask-matt` nếu không chắc skill nào.
-3. `codex-supervisor` → `codex-root` → `codex-peer` cho flow lớn; ba profile chứa role instructions inline.
+3. External Paseo observer starts a detached `codex-root`; Root creates
+   `codex-peer` only for bounded packets. The project itself manages only
+   Root/Peer routing.
 4. Với flow nhỏ: `/grill-with-docs` → `/implement` → `/code-review`; effort lớn hoặc còn mù đường bắt đầu bằng `/wayfinder`.
 
-Root đọc `WORKSPACE_PROTOCOL.md`; peer không đọc file đó. `SUPERVISOR_NOTEBOOK.md` là memory của supervisor cho failure/anti-pattern quan sát được. `config.model` giữ provider/model/thinking mặc định cho supervisor/root/peer theo từng project, để đổi model mà không sửa prompt. Root giữ design/lead; coding/TDD/bugfix/test/proof/code-review mặc định đẩy xuống peer khi vượt quá một bước inline nhỏ, trừ khi bạn yêu cầu root tự làm.
+Project execution is deliberately small: task prompt → detached Root →
+bounded Peer. Root owns project doctrine, planning, integration, and
+acceptance; Peer owns task-local execution and evidence. The external observer
+is configured outside the repository and does not add a project document,
+callback, or authority path. Root reads `WORKSPACE_PROTOCOL.md`; Peer does
+not. `config.model` contains only Root/Peer defaults.
 
 ---
 
@@ -102,34 +109,37 @@ These split on one axis — who can invoke them. **User-invoked** skills are rea
 
 ### Engineering
 
-Skills I use daily for code work. The promoted surface currently has thirteen
-skills, within the requested 10–15 range; specialized utilities remain in
-`skills/misc/`.
+Promoted skills for code work, architecture, delivery, and the SLP agent roles.
+The role contract is kept in [`WORKSPACE_PROTOCOL.md`](./WORKSPACE_PROTOCOL.md)
+so runtime guidance has one source of truth.
 
 **User-invoked**
 
-- **[ask-matt](./skills/engineering/ask-matt/SKILL.md)** — Ask which active engineering skill or preserved specialized workflow fits the situation.
-- **[setup-matt-pocock-skills](./skills/engineering/setup-matt-pocock-skills/SKILL.md)** — Configure this repo for the engineering skills (issue tracker, triage labels, domain docs, root control docs, `WORKSPACE_PROTOCOL.md`, `SUPERVISOR_NOTEBOOK.md`, and `config.model`). Run once per repo.
-- **[wayfinder](./skills/engineering/wayfinder/SKILL.md)** — Map a very large, foggy effort as decision tickets until the route is clear.
-- **[grill-with-docs](./skills/engineering/grill-with-docs/SKILL.md)** — Sharpen a plan through a one-question-at-a-time interview while recording terms and decisions.
-- **[to-spec](./skills/engineering/to-spec/SKILL.md)** — Turn an aligned conversation into a spec with architecture placement, invariants, and proof.
-- **[to-tickets](./skills/engineering/to-tickets/SKILL.md)** — Split a spec or plan into tracer-bullet tickets with blocking edges and required proof.
-- **[implement](./skills/engineering/implement/SKILL.md)** — Build the work described by a spec or set of tickets, maintaining `ACTIVE_EXECUTION_PLAN.md`, applying TDD inline, proving per policy, and closing with `/code-review` before committing.
+- **[ask-matt](./skills/engineering/ask-matt/SKILL.md)** — Route an unclear engineering request to the right skill or SLP role.
+- **[setup-matt-pocock-skills](./skills/engineering/setup-matt-pocock-skills/SKILL.md)** — Configure the tracker, control docs, Paseo contract, and model defaults.
+- **[wayfinder](./skills/engineering/wayfinder/SKILL.md)** — Turn a large foggy effort into decision tickets until the route is clear.
+- **[grill-with-docs](./skills/engineering/grill-with-docs/SKILL.md)** — Sharpen a plan through a one-question interview while recording decisions.
+- **[to-spec](./skills/engineering/to-spec/SKILL.md)** — Synthesize an aligned conversation into a spec with placement, invariants, and proof.
+- **[to-tickets](./skills/engineering/to-tickets/SKILL.md)** — Split a spec into tracer-bullet tickets with blocking edges and proof.
+- **[implement](./skills/engineering/implement/SKILL.md)** — Execute a settled spec or ticket with TDD, proof, review, and commit discipline.
+- **[improve-codebase-architecture](./skills/engineering/improve-codebase-architecture/SKILL.md)** — Find and explore deepening opportunities in an existing codebase.
+- **[triage](./skills/engineering/triage/SKILL.md)** — Move issues and external PRs through the configured triage state machine.
+- **[wizard](./skills/engineering/wizard/SKILL.md)** — Generate an interactive shell wizard for a manual setup or one-off transition.
+- **[supervisor](./skills/engineering/supervisor/SKILL.md)** — Observe Paseo lifecycle and launch detached Root sessions from outside the project.
+- **[root](./skills/engineering/root/SKILL.md)** — Act as the autonomous Lead (runtime `codex-root`) that plans, delegates, integrates, and accepts.
+- **[peer](./skills/engineering/peer/SKILL.md)** — Execute one bounded Root packet with task-local engineering judgment and evidence handback.
 
 **Model-invoked**
 
 - **[architecture-council](./skills/engineering/architecture-council/SKILL.md)** — Mandatory pre-code gate for every architecture decision or unclear architectural next step.
+- **[codebase-design](./skills/engineering/codebase-design/SKILL.md)** — Provide the deep-module vocabulary: interface, depth, seam, adapter, leverage, and locality.
+- **[domain-modeling](./skills/engineering/domain-modeling/SKILL.md)** — Sharpen domain language, scenarios, context, and consequential decisions.
 - **[diagnosing-bugs](./skills/engineering/diagnosing-bugs/SKILL.md)** — Disciplined diagnosis loop for hard bugs and performance regressions: reproduce → minimise → hypothesise → instrument → fix → regression-test.
 - **[research](./skills/engineering/research/SKILL.md)** — Investigate questions against high-trust primary sources and leave cited findings.
 - **[tdd](./skills/engineering/tdd/SKILL.md)** — Drive implementation with a red-green-refactor loop and seam-level proof.
 - **[prototype](./skills/engineering/prototype/SKILL.md)** — Build a throwaway artifact to answer a design or state-model question.
 - **[code-review](./skills/engineering/code-review/SKILL.md)** — Review a fixed-point diff along Standards and Spec axes, including the proof gate.
-
-The three Paseo role sources are intentionally not promoted as user skills:
-`skills/misc/supervisor`, `skills/misc/root`, and `skills/misc/peer` remain
-repository references. The matching Codex profiles contain their role
-instructions inline. Other specialized utilities remain available from a
-repository clone but are not shipped in the promoted plugin.
+- **[resolving-merge-conflicts](./skills/engineering/resolving-merge-conflicts/SKILL.md)** — Resolve an active merge or rebase conflict by preserving intent.
 
 ### Productivity
 

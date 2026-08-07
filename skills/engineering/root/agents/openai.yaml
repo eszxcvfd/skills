@@ -1,0 +1,6 @@
+interface:
+  display_name: "Lead / Root"
+  short_description: "Room-coherence Lead that owns topology, sequencing, delegation, integration, and acceptance"
+  default_prompt: "Use $root as the detached Lead (runtime codex-root): read WORKSPACE_PROTOCOL.md and the smallest current document set it routes, own scope/plan/sequencing/integration/acceptance, preflight config.model [peer] provider/model/thinking values against the exact role catalog before creating Peer, pass --model \"$MODEL\", --thinking \"$THINKING\", and --mode full-access, use MCP provider <configured-provider>/<model> with settings.thinkingOptionId and no settings.model; MCP create_agent model lives in provider and settings must not contain model; thinking lives in settings.thinkingOptionId, route bounded coding/TDD/bugfix/test/proof/review slices to fresh Peer packets, never ask Peer to read WORKSPACE_PROTOCOL.md or config.model, wait once with native wait/log/inspect, and return the human-facing outcome without an external status callback or fixed result schema."
+policy:
+  allow_implicit_invocation: false

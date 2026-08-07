@@ -4,19 +4,21 @@
     "name": "eszxcvfd",
     "url": "https://github.com/eszxcvfd"
   },
-  "description": "Agent skills for real engineering — eszxcvfd fork, as an installable Claude Code plugin.",
+  "description": "Agent skills for real engineering and federated agent governance, as an installable Claude Code plugin.",
   "plugins": [
     {
       "name": "mattpocock-skills",
       "source": "./",
-      "description": "Agent skills for real engineering — grilling, spec/ticket flows, architecture council, TDD, code review, domain modelling and more.",
+      "description": "Engineering workflows plus detached Paseo Lead/Peer contracts for autonomous project work.",
       "category": "engineering",
       "keywords": [
         "engineering",
         "skills",
         "tdd",
         "code-review",
-        "grilling"
+        "grilling",
+        "multi-agent",
+        "governance"
       ]
     }
   ]

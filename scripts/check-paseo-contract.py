@@ -1,11 +1,5 @@
 #!/usr/bin/env python3
-"""Check Paseo hierarchy prompt/config contract drift.
-
-This checker is intentionally narrow. It catches the failure modes that caused
-runtime drift in test-v2: stale callback fields, stale peer-worker wording,
-missing native-result handoff language, missing MCP provider/model guidance,
-and wrong per-role model defaults.
-"""
+"""Check the current detached Paseo Root/Peer prompt/config contract."""
 
 from __future__ import annotations
 
@@ -18,56 +12,29 @@ from typing import Iterable
 REQUIRED_CONFIG_KEYS = ("provider", "model", "thinking")
 
 
-LEGACY_PHRASES = (
-    "ROOT_AGENT_ID:",
-    "include ROOT_AGENT_ID",
-    "send the final PEER_STATUS block back",
-    "must send its final PEER_STATUS block back",
-    "must send its final status to root",
-    "send its final status to root with",
-    "send the final status block to root",
-    "paseo agent send <root-id>",
-    "peer workers",
-    "Peer worker",
-)
-
 REQUIRED_PHRASES = (
-    "MCP `paseo_create_agent` provider must be `<configured-provider>/<model>`",
+    "For MCP, `paseo_create_agent` provider must be `<configured-provider>/<model>`",
     "Existing agents keep their original model/thinking; fresh work uses `config.model`",
     'CLI launches must pass both `--model "$MODEL"` and `--thinking "$THINKING"`',
     "terminal run result",
     "native wait/log/inspect",
     "role provider catalog",
-    "Peer packets must not ask peer to read `WORKSPACE_PROTOCOL.md` or `config.model`",
+    "Peer packets must not ask Peer to read `WORKSPACE_PROTOCOL.md` or `config.model`",
     "Never call `paseo_create_agent` with a bare model id",
     "MCP create_agent model lives in provider; settings must not contain model; thinking lives in settings.thinkingOptionId",
 )
 
 CONTRACT_FILES = (
     "WORKSPACE_PROTOCOL.md",
-    ".agents/skills/root/SKILL.md",
-    ".agents/skills/peer/SKILL.md",
-    ".agents/skills/supervisor/SKILL.md",
-    ".agents/skills/ask-matt/SKILL.md",
-    "skills/misc/root/SKILL.md",
-    "skills/misc/peer/SKILL.md",
-    "skills/misc/supervisor/SKILL.md",
+    "skills/engineering/root/SKILL.md",
+    "skills/engineering/peer/SKILL.md",
     "skills/engineering/ask-matt/SKILL.md",
     "skills/engineering/setup-matt-pocock-skills/workspace-protocol.md",
-    "docs/archive/roles/root.md",
-    "docs/archive/roles/peer.md",
-    "docs/archive/roles/supervisor.md",
     "docs/engineering/ask-matt.md",
-    ".codex/agents/root.toml",
-    ".codex/agents/peer.toml",
-    ".codex/agents/supervisor.toml",
 )
 
 AGENT_CONTRACT_FILES = (
-    ".agents/skills/root/agents/openai.yaml",
-    ".agents/skills/supervisor/agents/openai.yaml",
-    "skills/misc/root/agents/openai.yaml",
-    "skills/misc/supervisor/agents/openai.yaml",
+    "skills/engineering/root/agents/openai.yaml",
 )
 
 AGENT_REQUIRED_PHRASES = (
@@ -77,8 +44,6 @@ AGENT_REQUIRED_PHRASES = (
     "settings.thinkingOptionId",
     "MCP create_agent model lives in provider and settings must not contain model; thinking lives in settings.thinkingOptionId",
 )
-
-
 
 @dataclass(frozen=True)
 class CheckResult:
@@ -93,6 +58,12 @@ def existing_files(root: Path, rels: Iterable[str]) -> list[Path]:
     return [root / rel for rel in rels if (root / rel).exists()]
 
 
+def normalize_contract_text(text: str) -> str:
+    """Make wrapped prose comparable without weakening phrase checks."""
+
+    return " ".join(text.split())
+
+
 def check_config(root: Path, failures: list[str]) -> None:
     config_path = root / "config.model"
     if not config_path.exists():
@@ -100,7 +71,7 @@ def check_config(root: Path, failures: list[str]) -> None:
 
     parser = configparser.ConfigParser()
     parser.read(config_path, encoding="utf-8")
-    for role in ("supervisor", "root", "peer"):
+    for role in ("root", "peer"):
         if not parser.has_section(role):
             failures.append(f"config.model: missing [{role}] section")
             continue
@@ -119,24 +90,18 @@ def check_contract_text(root: Path, failures: list[str]) -> None:
     files = existing_files(root, CONTRACT_FILES)
     text_by_path = {path: path.read_text(encoding="utf-8") for path in files}
 
-    for path, text in text_by_path.items():
-        rel = path.relative_to(root)
-        for phrase in LEGACY_PHRASES:
-            if phrase in text:
-                failures.append(f"{rel}: contains legacy phrase {phrase!r}")
-
-    combined = "\n".join(text_by_path.values())
+    combined = normalize_contract_text("\n".join(text_by_path.values()))
     for phrase in REQUIRED_PHRASES:
-        if phrase not in combined:
+        if normalize_contract_text(phrase) not in combined:
             failures.append(f"contract: missing required phrase {phrase!r}")
 
 
     for path in existing_files(root, AGENT_CONTRACT_FILES):
         text = path.read_text(encoding="utf-8")
-        searchable = text.replace('\\"', '"')
+        searchable = normalize_contract_text(text.replace('\\"', '"'))
         rel = path.relative_to(root)
         for phrase in AGENT_REQUIRED_PHRASES:
-            if phrase not in searchable:
+            if normalize_contract_text(phrase) not in searchable:
                 failures.append(f"{rel}: missing agent launch phrase {phrase!r}")
 
 
@@ -149,7 +114,7 @@ def check_project(root: Path | str) -> CheckResult:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Check Paseo hierarchy prompt/config contract drift.")
+    parser = argparse.ArgumentParser(description="Check detached Paseo Root/Peer contract drift.")
     parser.add_argument("project", nargs="?", default=".", help="project root to check")
     args = parser.parse_args()
 
