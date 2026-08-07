@@ -21,7 +21,8 @@ npx skills@latest add eszxcvfd/skills
 
 - Chọn skill cần dùng và agent: Claude Code, Codex, OpenCode, Cursor, …
 - Nên tick `setup-matt-pocock-skills`.
-- Trong agent, chạy `/setup-matt-pocock-skills` một lần/repo.
+- Trong agent, chạy `/setup-matt-pocock-skills` một lần/repo để tạo toàn bộ
+  canonical project docs trong một manifest và một lần xác nhận.
 - Tải lại một skill đã cài: `npx skills@latest update <skill-name>`.
 - Đổi bộ skill hoặc thêm skill mới: chạy lại `npx skills@latest add eszxcvfd/skills`.
 
@@ -116,7 +117,7 @@ so runtime guidance has one source of truth.
 **User-invoked**
 
 - **[ask-matt](./skills/engineering/ask-matt/SKILL.md)** — Route an unclear engineering request to the right skill or SLP role.
-- **[setup-matt-pocock-skills](./skills/engineering/setup-matt-pocock-skills/SKILL.md)** — Configure the tracker, Work Routing, Paseo contract, and model defaults.
+- **[setup-matt-pocock-skills](./skills/engineering/setup-matt-pocock-skills/SKILL.md)** — Bootstrap canonical project docs, Work Routing, and optional Paseo defaults.
 - **[wayfinder](./skills/engineering/wayfinder/SKILL.md)** — Turn a large foggy effort into decision tickets until the route is clear.
 - **[grill-with-docs](./skills/engineering/grill-with-docs/SKILL.md)** — Sharpen a plan through a one-question interview while recording decisions.
 - **[to-spec](./skills/engineering/to-spec/SKILL.md)** — Synthesize an aligned conversation into a spec with placement, invariants, and proof.

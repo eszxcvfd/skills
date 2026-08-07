@@ -13,9 +13,11 @@ Non-Claude agents can copy this skill with `npx skills@latest add eszxcvfd/skill
 
 ## What it does
 
-`setup-matt-pocock-skills` configures the complete small repo surface that the
-engineering skills need in one pass: issue-tracker settings, triage labels,
-domain-doc routing, and, optionally, the Paseo SLP contract plus `config.model`.
+`setup-matt-pocock-skills` bootstraps the complete project surface that the
+engineering skills need in one pass: canonical architecture, process, roadmap,
+plan, runtime, protocol, and content documents; issue-tracker settings; triage
+labels; domain-doc routing; and, optionally, the Paseo SLP contract plus
+`config.model`.
 
 It explores the repository, builds one manifest of every target, asks for one
 confirmation, then writes all selected files in the same run. It follows the
@@ -34,7 +36,23 @@ If [triage](https://aihero.dev/skills-triage),
 lives, setup has not happened yet. Re-run it only to switch a backend or
 restart setup; day-to-day changes belong in the generated config.
 
-## The small setup
+## The complete setup
+
+The setup manifest always includes these canonical owner documents:
+
+- `ARCHITECTURE.md`;
+- `docs/README.md`;
+- `docs/process/DEVELOPMENT.md`;
+- `docs/issues/ROADMAP.md`;
+- `PLANS.md`;
+- `docs/architecture/RUNTIME.md`;
+- `docs/architecture/NETCODE.md`;
+- `docs/architecture/CONTENT.md`.
+
+Existing files are shown as `keep` or `update` with their diffs. Missing files
+are created from the bundled canonical seeds, then populated from verified
+repository evidence. Unknown facts are recorded as not established yet rather
+than guessed.
 
 - **Issue tracker** — where `triage`, `to-spec`, and `to-tickets` publish work,
   recorded in `docs/agents/issue-tracker.md`.
@@ -47,14 +65,15 @@ restart setup; day-to-day changes belong in the generated config.
   provider/model/thinking choice for those two roles. The external observer is
   configured outside the repository.
 
-The setup does not scaffold extra architecture, runtime, proof, execution-plan,
-or observer documents. Work Routing points at the canonical owner when a
-project has one; create project doctrine only when it actually needs it.
+`CONTEXT.md` and ADR files remain lazy domain content. They are created when a
+term or consequential decision actually exists, not as empty setup metadata.
 
 ## It's working if
 
 - the complete manifest has no unreviewed targets;
+- all eight canonical owner documents exist and are non-empty;
 - all selected `docs/agents/` files match the real repository;
+- `docs/agents/domain.md` points to the canonical owner set;
 - the existing `CLAUDE.md` or `AGENTS.md` has one accurate `## Agent skills`
   block;
 - detached-runtime repositories have one `WORKSPACE_PROTOCOL.md` and one

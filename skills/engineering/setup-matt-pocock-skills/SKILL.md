@@ -1,13 +1,14 @@
 ---
 name: setup-matt-pocock-skills
-description: Configure this repo for the engineering skills in one pass — issue tracker, triage labels, domain routing, and optional detached Paseo Root/Peer defaults. Run once before first use of the other engineering skills.
+description: Bootstrap the complete project documentation surface in one pass — canonical architecture, process, roadmap, plan, runtime, protocol, and content docs plus issue tracker, triage, domain routing, and optional detached Paseo defaults. Run once before first use of the other engineering skills.
 disable-model-invocation: true
 ---
 
 # Setup Matt Pocock's Skills
 
-Scaffold the complete small repo surface the engineering skills actually need:
+Bootstrap the complete project surface the engineering skills need:
 
+- canonical project owner documents;
 - issue tracker;
 - triage label vocabulary, when `triage` is installed;
 - domain glossary and ADR routing;
@@ -39,8 +40,11 @@ Resolve the recommended defaults during this exploration:
   under `.scratch/<feature>/`, or the user's configured tracker;
 - triage labels: `needs-triage`, `needs-info`, `ready-for-agent`,
   `ready-for-human`, and `wontfix` when `triage` is installed;
-- domain layout: one root `CONTEXT.md` and `docs/adr/` unless genuine
-  monorepo boundaries require `CONTEXT-MAP.md`;
+- canonical owner docs: initialize the complete set below, preserving verified
+  project content when a file already exists;
+- domain layout: one root `CONTEXT.md` and `docs/adr/` when the repository has
+  domain content to record, unless genuine monorepo boundaries require
+  `CONTEXT-MAP.md`;
 - detached runtime: enable when the repository already uses the detached
   `codex-root → codex-peer` path or the user selects it.
 
@@ -51,15 +55,25 @@ The manifest must name every target and classify it as `create`, `update`, or
 
 - exactly one repo instruction file (`CLAUDE.md` preferred, otherwise
   `AGENTS.md`), including one complete `## Agent skills` block;
+- the canonical owner documents, always:
+  - `ARCHITECTURE.md`;
+  - `docs/README.md`;
+  - `docs/process/DEVELOPMENT.md`;
+  - `docs/issues/ROADMAP.md`;
+  - `PLANS.md`;
+  - `docs/architecture/RUNTIME.md`;
+  - `docs/architecture/NETCODE.md`;
+  - `docs/architecture/CONTENT.md`;
 - `docs/agents/issue-tracker.md`;
 - `docs/agents/domain.md`;
 - `docs/agents/triage-labels.md` when `triage` is installed;
 - `WORKSPACE_PROTOCOL.md` and `config.model` when the detached runtime is
   enabled.
 
-`CONTEXT.md` and ADR files are domain content, not setup metadata. Create them
-later and lazily when a term or consequential decision actually exists; do not
-create empty placeholders just to make setup look complete.
+Use the matching sections in `templates/canonical-docs.md` for the eight
+canonical owner documents. `CONTEXT.md` and ADR files remain domain content,
+not setup metadata; create them later and lazily when a term or consequential
+decision actually exists.
 
 Show the findings, the complete manifest, the selected template contents, and
 any overwrite diffs together. Ask for one confirmation for the whole manifest.
@@ -82,6 +96,19 @@ not overwrite surrounding user content. The block should point to
 `docs/agents/triage-labels.md` only when those files apply. If SLP is enabled,
 add one short line pointing to `WORKSPACE_PROTOCOL.md` and `config.model`.
 
+Read `templates/canonical-docs.md` as the source for the eight canonical
+documents. For every target:
+
+- copy the matching structure and replace generic bootstrap text with facts
+  verified from the repository;
+- preserve existing project decisions and edit only the owned sections;
+- if the repository does not establish a fact yet, say so explicitly and
+  record what would establish it; never invent architecture, process, runtime,
+  protocol, or content details;
+- create parent directories as part of the same write pass;
+- leave every canonical document substantive and non-empty, even when its
+  current state is explicitly `Not established yet`.
+
 Use the seed templates in this folder for every selected target. Do not pause
 between files or leave a half-configured setup. If an existing target differs,
 the manifest's one confirmation authorizes that replacement; preserve unrelated
@@ -97,5 +124,7 @@ operator status channel in those files.
 ## 4. Done
 
 Report the complete manifest result — every file created, updated, or kept —
-and which skills now consume it. Keep the final message short; the generated
-files are the durable handoff.
+and which skills now consume it. Before reporting success, verify that every
+canonical owner path in the manifest exists, is non-empty, and is referenced
+by `docs/agents/domain.md`. Keep the final message short; the generated files
+are the durable handoff.

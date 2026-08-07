@@ -1,5 +1,5 @@
 interface:
   display_name: "Setup Matt Pocock Skills"
-  short_description: "Configure repo docs, protocol, and model defaults"
+  short_description: "Bootstrap canonical project docs and repo defaults"
 policy:
   allow_implicit_invocation: false

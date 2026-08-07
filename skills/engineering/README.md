@@ -13,7 +13,7 @@ Reachable only when the human types them (`disable-model-invocation: true` in
 `agents/openai.yaml`).
 
 - **[ask-matt](./ask-matt/SKILL.md)** — Route an unclear engineering request to the right skill or SLP role.
-- **[setup-matt-pocock-skills](./setup-matt-pocock-skills/SKILL.md)** — Configure the issue tracker, Work Routing, detached Paseo contract, and model defaults.
+- **[setup-matt-pocock-skills](./setup-matt-pocock-skills/SKILL.md)** — Bootstrap canonical project docs, Work Routing, and optional detached Paseo defaults.
 - **[wayfinder](./wayfinder/SKILL.md)** — Turn a large foggy effort into decision tickets until the route is clear.
 - **[grill-with-docs](./grill-with-docs/SKILL.md)** — Sharpen a plan through a one-question interview while recording decisions.
 - **[to-spec](./to-spec/SKILL.md)** — Synthesize an aligned conversation into a spec with placement, invariants, and proof.

@@ -25,9 +25,11 @@ conditions and contents for design notes and checked-in plans. Do not invent
 another routing rule here. Do not trigger closeout for doc-only edits, small
 owner-neutral fixes, or partial progress unless the governing plan requires it.
 
-This is a routing rule, not a checklist of files to create. Missing documents
-are evidence about the repository's current maturity; proceed with bounded
-inference and update the canonical owner only when a durable rule is needed.
+The setup skill initializes this canonical owner set together. It is a routing
+map, not a requirement to read every file on every task: open only the smallest
+current set relevant to the work. Missing or stale content is evidence about
+the repository's maturity; record bounded inference and update the canonical
+owner before relying on a durable rule.
 
 ## Before exploring
 
