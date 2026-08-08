@@ -1,7 +1,8 @@
 # Work Routing
 
-Root-only project contract for a detached Paseo Lead. Peer agents must not
-read this file. Root may summarize only the constraints a Peer packet needs.
+Root-only project contract for a detached Paseo Lead. Root must read this file
+before planning, delegation, or edits. Peer agents must never read, quote, or
+request it; Root may summarize only the constraints a Peer packet needs.
 
 Open only the smallest current document set needed:
 
@@ -29,8 +30,14 @@ owner-neutral fixes, or partial progress unless the governing plan requires it.
 The current task prompt, project doctrine, current artifacts, and explicit
 human follow-up are the complete working context for Root. Root is
 self-governing: it owns scope, sequencing, plan, delegation, integration,
-acceptance, and the final decision for the active work. It does not create a
-second command path or a separate status channel.
+acceptance, and the final decision for the active work. Root also owns the
+coordination method: it may choose review, recon, dual-seat, sequencing,
+topology, delegation, recovery, and acceptance tactics as the work requires.
+It does not wait for approval of that method, create a second command path, or
+open a separate status channel.
+Assess deviations by the result against the task, doctrine, and locked
+boundaries; method choice alone is not a deviation. The examples above are
+not a required workflow.
 
 The execution path inside the project is only:
 
@@ -56,9 +63,10 @@ from the selected role entry, plus `--mode full-access` and the labels
 `role=peer,parent=root`:
 
 ```bash
-paseo agent run --provider "$PEER_PROVIDER" \
+paseo run --provider "$PEER_PROVIDER" \
   --model "$MODEL" --thinking "$THINKING" --mode full-access \
-  --label role=peer --label parent=root --cwd <repo> "<packet>"
+  --label role=peer --label parent=root --cwd <repo> \
+  --wait-timeout 30m "<packet>"
 ```
 
 For MCP, `paseo_create_agent` provider must be
@@ -71,6 +79,14 @@ Existing agents keep their original model/thinking; fresh work uses
 `config.model`. Resume an existing Peer only when the human explicitly names
 it. Use native `wait`, `logs`, and `inspect`; a completed handoff is a
 terminal run result that Root inspects and integrates directly.
+
+Delegated work is never fire-and-forget. A fresh Peer launch must enable the
+native completion notification (`notifyOnFinish: true`) and wait for at most
+30 minutes. A synchronous CLI run uses `--wait-timeout 30m`; a background run
+must immediately use `paseo wait --timeout 1800 <agent-id>`. The completion
+notification is the release signal: the parent stops waiting, reads the
+terminal handoff, and proceeds. On timeout, mark the packet `BLOCKED` or
+time-limited and do not claim that it finished.
 
 Peer packets must not ask Peer to read `WORKSPACE_PROTOCOL.md` or
 `config.model`. Root sends a small sanitized brief and never includes

@@ -36,6 +36,7 @@ def write_project(root: Path, *, bad_config: bool = False) -> None:
         'CLI launches must pass both `--model "$MODEL"` and `--thinking "$THINKING"`.\n'
         "Peer completion is a terminal run result retrieved through native wait/log/inspect.\n"
         "Use the role provider catalog before launch.\n"
+        "Delegated work uses notifyOnFinish: true, --wait-timeout 30m, and paseo wait --timeout 1800; completion notification releases the parent.\n"
         "Peer packets must not ask Peer to read `WORKSPACE_PROTOCOL.md` or `config.model`.\n"
         "Never call `paseo_create_agent` with a bare model id.\n"
         "MCP create_agent model lives in provider; settings must not contain model; thinking lives in settings.thinkingOptionId.\n"
@@ -45,8 +46,16 @@ def write_project(root: Path, *, bad_config: bool = False) -> None:
 
     good_profile = (
         "You are codex-supervisor, an external observer.\n"
+        "ROOT_BRIEF is intentionally not a fixed prompt shape.\n"
+        "The brief must tell Root to read `WORKSPACE_PROTOCOL.md` before planning; that file is Root-only.\n"
+        "Make the working flow explicit.\n"
+        "Describe the work flow, but leave agent routing and coordination method to Root/Lead.\n"
+        "notifyOnFinish: true; --wait-timeout 30m; paseo wait --timeout 1800.\n"
         "You are codex-root, an autonomous Lead.\n"
+        "Before planning, read `WORKSPACE_PROTOCOL.md`; it is the Root-only project contract.\n"
         "You are codex-peer, a bounded execution agent.\n"
+        "`WORKSPACE_PROTOCOL.md` is Root-only.\n"
+        "Accept work direction only through the self-contained Root packet.\n"
         'CLI launches must pass both --model "$MODEL" and --thinking "$THINKING" from config.model, '
         "pass --mode full-access, use settings.thinkingOptionId, and\n"
         "Keep the notebook at "
@@ -86,6 +95,57 @@ def test_checker_requires_root_only_packet_boundary(tmp_path: Path) -> None:
 
     assert not result.ok
     assert any("Peer packets must not ask Peer" in failure for failure in result.failures)
+
+
+def test_checker_requires_root_protocol_read_and_flexible_brief(tmp_path: Path) -> None:
+    checker = load_checker()
+    write_project(tmp_path)
+    profile = tmp_path / "skills/engineering/setup-matt-pocock-skills/templates/paseo-profiles.md"
+    profile.write_text(
+        profile.read_text(encoding="utf-8")
+        .replace("ROOT_BRIEF is intentionally not a fixed prompt shape.\n", "")
+        .replace("The brief must tell Root to read `WORKSPACE_PROTOCOL.md` before planning; that file is Root-only.\n", "")
+        .replace("Make the working flow explicit.\n", ""),
+        encoding="utf-8",
+    )
+
+    result = checker.check_project(tmp_path)
+
+    assert not result.ok
+    assert any("ROOT_BRIEF" in failure or "WORKSPACE_PROTOCOL.md" in failure for failure in result.failures)
+
+
+def test_checker_requires_explicit_role_boundaries(tmp_path: Path) -> None:
+    checker = load_checker()
+    write_project(tmp_path)
+    profile = tmp_path / "skills/engineering/setup-matt-pocock-skills/templates/paseo-profiles.md"
+    profile.write_text(
+        profile.read_text(encoding="utf-8")
+        .replace("Describe the work flow, but leave agent routing and coordination method to Root/Lead.\n", "")
+        .replace("Accept work direction only through the self-contained Root packet.\n", ""),
+        encoding="utf-8",
+    )
+
+    result = checker.check_project(tmp_path)
+
+    assert not result.ok
+    assert any("coordination method" in failure or "Accept work direction" in failure for failure in result.failures)
+
+
+def test_checker_requires_bounded_completion_wait(tmp_path: Path) -> None:
+    checker = load_checker()
+    write_project(tmp_path)
+    profile = tmp_path / "skills/engineering/setup-matt-pocock-skills/templates/paseo-profiles.md"
+    profile.write_text(
+        profile.read_text(encoding="utf-8")
+        .replace("notifyOnFinish: true; --wait-timeout 30m; paseo wait --timeout 1800.\n", ""),
+        encoding="utf-8",
+    )
+
+    result = checker.check_project(tmp_path)
+
+    assert not result.ok
+    assert any("notifyOnFinish" in failure or "wait-timeout" in failure for failure in result.failures)
 
 
 def test_checker_requires_explicit_model_and_thinking_cli_flags(tmp_path: Path) -> None:

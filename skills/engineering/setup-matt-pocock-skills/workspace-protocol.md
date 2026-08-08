@@ -1,7 +1,8 @@
 # Work Routing
 
-Root-only contract for a detached Paseo Lead. Peer agents must not read this
-file. Keep it short and project-specific.
+Root-only contract for a detached Paseo Lead. Root must read this file before
+planning, delegation, or edits. Peer agents must never read, quote, or request
+it. Keep it short and project-specific.
 
 Open only the smallest current document set needed:
 
@@ -28,12 +29,18 @@ owner-neutral fixes, or partial progress unless the governing plan requires it.
 
 The task prompt, project doctrine, artifacts, and explicit human follow-up are
 the only authorities visible to Root. Root owns scope, plan, sequencing,
-delegation, integration, acceptance, and the final decision. The execution
-path is only:
+delegation, integration, acceptance, and the final decision. Root/Lead owns the
+coordination method too: it may choose review, recon, dual-seat, sequencing,
+topology, delegation, recovery, and acceptance tactics as needed. The
+execution path is only:
 
 ```text
 task prompt → detached Root → bounded Peer
 ```
+
+Assess deviations by the result against the task, doctrine, and locked
+boundaries; method choice alone is not a deviation. The examples above are
+not a required workflow.
 
 ## Runtime
 
@@ -44,8 +51,13 @@ Pass both `--model "$MODEL"` and `--thinking "$THINKING"`; for MCP use
 in settings.thinkingOptionId.
 
 Existing agents keep their original model/thinking; fresh work uses
-`config.model`. Use native wait/log/inspect. Never call
-`paseo_create_agent` with a bare model id.
+`config.model`. Delegated work is never fire-and-forget: enable native
+completion notification (`notifyOnFinish: true`) and wait at most 30 minutes.
+For CLI use `--wait-timeout 30m`; for a background run immediately use
+`paseo wait --timeout 1800 <agent-id>`. The completion notification releases
+the parent, which then reads the terminal handoff and inspects the artifacts.
+On timeout, mark the packet `BLOCKED` or time-limited. Use native
+wait/log/inspect. Never call `paseo_create_agent` with a bare model id.
 
 Peer packets must not ask Peer to read `WORKSPACE_PROTOCOL.md` or
 `config.model`. Root sends only a sanitized packet-specific brief.

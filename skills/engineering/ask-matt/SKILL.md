@@ -22,7 +22,9 @@ task prompt → detached Root → bounded Peer
 The runtime profiles call the autonomous Lead `codex-root` and the bounded
 executor `codex-peer`. An external observer may start or watch Root, but it is
 outside the project contract and adds no project command path, callback, or
-doctrine.
+doctrine. Root owns the coordination method and may adapt it to the task;
+observation does not approve or micromanage that method. Escalate only a
+material result deviation to the human.
 
 Root owns project scope, planning, integration, and acceptance. Peer owns
 task-local engineering judgment inside its packet. Root does not receive an

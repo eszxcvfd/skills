@@ -46,6 +46,11 @@ small-work chain remains:
 /grill-with-docs → /to-spec → /to-tickets → /implement → /code-review
 ```
 
+Role boundary: Root owns the coordination method and may adapt it to the task.
+The external observer does not approve or micromanage that method; it alerts
+the human only when the final result materially deviates from the directive or
+locked boundaries.
+
 The router also covers architecture council, deep-module design, frontend/UI
 design through [impeccable](https://aihero.dev/skills-impeccable), domain
 modeling, debugging, research, TDD, prototypes, code review, merge conflicts,

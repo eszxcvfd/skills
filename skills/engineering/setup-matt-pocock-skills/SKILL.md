@@ -149,6 +149,23 @@ The Supervisor notebook is operator-side state and must be stored outside the
 project under `$CODEX_HOME/supervisor-notebooks/<repo-slug>/`. It must never be
 linked from Root-facing project documents or passed to Root/Peer.
 
+The generated role boundary has only a few fixed invariants: Root/Lead owns
+coordination method and acceptance; Supervisor only observes and alerts the
+human on material result deviation; Peer executes one sanitized Root packet.
+Root must read `WORKSPACE_PROTOCOL.md` before planning, while Peer must never
+read, quote, or request that Root-only document. Do not turn the Supervisor
+into a second project command path.
+
+Keep capability guidance role-scoped: Supervisor gets routing and Paseo
+lifecycle guidance; Root gets task-matching engineering skills; Peer gets only
+the skills and public files named by its Root packet. Supervisor remains
+observer-only and never becomes a second project command path.
+
+Delegation must use Paseo's native completion signal: fresh Root/Peer launches
+enable `notifyOnFinish: true` and wait no longer than 30 minutes. A background
+launch is immediately followed by `paseo wait --timeout 1800 <agent-id>`;
+timeouts are reported as blocked or time-limited, never as success.
+
 `CONTEXT.md` and ADR files remain domain content. Create them when the
 repository has terms or consequential decisions to record; do not create
 empty placeholders solely because setup ran.

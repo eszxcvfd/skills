@@ -25,6 +25,14 @@ domain layout in sequence, then shows a complete draft before writing. It
 follows the repository's Work Routing and does not create a second document
 system or hard-code a model into a prompt.
 
+Its Paseo profiles keep the roles separate while leaving the workflow flexible:
+Root/Lead owns coordination method and acceptance, Supervisor observes and
+alerts only on material result deviation, and Peer executes one sanitized Root
+packet. Root reads the Root-only `WORKSPACE_PROTOCOL.md`; Peer never reads or
+requests it. The profiles use role-scoped capability guidance rather than a
+fixed ROOT_BRIEF prompt template, and delegated runs use native completion
+notification with a 30-minute wait bound.
+
 ## When to reach for it
 
 You invoke this by typing `/setup-matt-pocock-skills` — the agent won't reach
@@ -72,7 +80,9 @@ not established yet rather than guessed.
   `docs/adr/` created lazily when there is content to record.
 - **Paseo workspace** — `WORKSPACE_PROTOCOL.md` is the Root/Peer coordination
   contract and `config.model` is the per-project provider/model/thinking choice
-  for those two roles. The three role profile TOMLs, provider registration,
+  for those two roles. Root owns its coordination method and may adapt it to
+  the task; the external Supervisor only observes and alerts the human on
+  material result deviation. The three role profile TOMLs, provider registration,
   launcher, and Supervisor notebook are machine-local and remain outside the
   repository.
 
