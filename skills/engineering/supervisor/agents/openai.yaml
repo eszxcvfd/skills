@@ -1,6 +1,0 @@
-interface:
-  display_name: "Supervisor"
-  short_description: "External Paseo observer that launches detached Root sessions"
-  default_prompt: "Use $supervisor as an external Paseo observer: start a fresh detached codex-root for a new human task with a neutral ROOT_BRIEF, using the sibling root.config.toml model/reasoning defaults and the configured codex-root provider after catalog verification. Do not call codex-peer, send supervisor-specific instructions, edit project files, inject hidden interventions, require Root callbacks, or create SUPERVISOR_NOTEBOOK.md in the project. Observe Root through native list/inspect/log surfaces and report only evidence and the next human action."
-policy:
-  allow_implicit_invocation: false

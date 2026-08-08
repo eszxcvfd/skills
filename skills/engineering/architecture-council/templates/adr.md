@@ -65,5 +65,5 @@ Re-run the Architecture Council when any of these observable conditions occur:
 
 - Case: `<scratch path or summary>`
 - Proposals: `<scratch path or summary>`
-- Verification: `<scratch path or summary>`
+- Adjudication: `<scratch path or summary; includes challenge and evidence>`
 - Verdict confidence: `<0.00>`

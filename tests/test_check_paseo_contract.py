@@ -25,9 +25,8 @@ def write_project(root: Path, *, bad_config: bool = False) -> None:
         encoding="utf-8",
     )
     for rel in (
-        "skills/engineering/root/agents",
-        "skills/engineering/peer",
         "skills/engineering/ask-matt",
+        "skills/engineering/setup-matt-pocock-skills/templates",
     ):
         (root / rel).mkdir(parents=True)
 
@@ -41,26 +40,21 @@ def write_project(root: Path, *, bad_config: bool = False) -> None:
         "Never call `paseo_create_agent` with a bare model id.\n"
         "MCP create_agent model lives in provider; settings must not contain model; thinking lives in settings.thinkingOptionId.\n"
     )
-    good_agent_prompt = (
-        'CLI launches must pass both --model "$MODEL" and --thinking "$THINKING" from config.model, '
-        "pass --mode full-access, "
-        "use MCP paseo_create_agent provider as <configured-provider>/<model> after catalog verification, "
-        "settings.thinkingOptionId must equal the configured thinking value, "
-        "MCP create_agent model lives in provider and settings must not contain model; thinking lives in settings.thinkingOptionId"
-    )
-
-    for rel in [
-        "WORKSPACE_PROTOCOL.md",
-        "skills/engineering/root/SKILL.md",
-        "skills/engineering/peer/SKILL.md",
-        "skills/engineering/ask-matt/SKILL.md",
-    ]:
+    for rel in ["WORKSPACE_PROTOCOL.md", "skills/engineering/ask-matt/SKILL.md"]:
         (root / rel).write_text(good_contract, encoding="utf-8")
 
-    for rel in [
-        "skills/engineering/root/agents/openai.yaml",
-    ]:
-        (root / rel).write_text(good_agent_prompt, encoding="utf-8")
+    good_profile = (
+        "You are codex-supervisor, an external observer.\n"
+        "You are codex-root, an autonomous Lead.\n"
+        "You are codex-peer, a bounded execution agent.\n"
+        'CLI launches must pass both --model "$MODEL" and --thinking "$THINKING" from config.model, '
+        "pass --mode full-access, use settings.thinkingOptionId, and\n"
+        "Keep the notebook at "
+        "$CODEX_HOME/supervisor-notebooks/<repo-slug>/SUPERVISOR_NOTEBOOK.md.\n"
+        "Return a terminal PEER_STATUS handoff.\n"
+    )
+    profile_path = root / "skills/engineering/setup-matt-pocock-skills/templates/paseo-profiles.md"
+    profile_path.write_text(good_profile, encoding="utf-8")
 
 
 
@@ -78,12 +72,7 @@ def test_checker_flags_bad_config(tmp_path: Path) -> None:
 def test_checker_requires_root_only_packet_boundary(tmp_path: Path) -> None:
     checker = load_checker()
     write_project(tmp_path)
-    for rel in [
-        "WORKSPACE_PROTOCOL.md",
-        "skills/engineering/root/SKILL.md",
-        "skills/engineering/peer/SKILL.md",
-        "skills/engineering/ask-matt/SKILL.md",
-    ]:
+    for rel in ["WORKSPACE_PROTOCOL.md", "skills/engineering/ask-matt/SKILL.md"]:
         path = tmp_path / rel
         path.write_text(
             path.read_text(encoding="utf-8").replace(
@@ -103,12 +92,7 @@ def test_checker_requires_explicit_model_and_thinking_cli_flags(tmp_path: Path) 
     checker = load_checker()
     write_project(tmp_path)
     required_phrase = 'CLI launches must pass both `--model "$MODEL"` and `--thinking "$THINKING"`'
-    for rel in [
-        "WORKSPACE_PROTOCOL.md",
-        "skills/engineering/root/SKILL.md",
-        "skills/engineering/peer/SKILL.md",
-        "skills/engineering/ask-matt/SKILL.md",
-    ]:
+    for rel in ["WORKSPACE_PROTOCOL.md", "skills/engineering/ask-matt/SKILL.md"]:
         path = tmp_path / rel
         path.write_text(
             path.read_text(encoding="utf-8").replace(required_phrase + ".\n", ""),
@@ -121,19 +105,20 @@ def test_checker_requires_explicit_model_and_thinking_cli_flags(tmp_path: Path) 
     assert any("--thinking" in failure for failure in result.failures)
 
 
-def test_checker_requires_agent_prompts_to_pass_thinking(tmp_path: Path) -> None:
+def test_checker_requires_profile_instructions_to_pass_thinking(tmp_path: Path) -> None:
     checker = load_checker()
     write_project(tmp_path)
-    agent_prompt = tmp_path / "skills/engineering/root/agents/openai.yaml"
-    agent_prompt.write_text(
-        agent_prompt.read_text(encoding="utf-8").replace("--thinking \"$THINKING\"", ""),
+    profile = tmp_path / "skills/engineering/setup-matt-pocock-skills/templates/paseo-profiles.md"
+    profile.write_text(
+        profile.read_text(encoding="utf-8").replace("--thinking \"$THINKING\"", ""),
         encoding="utf-8",
     )
 
     result = checker.check_project(tmp_path)
 
     assert not result.ok
-    assert any("root/agents/openai.yaml" in failure and "--thinking" in failure for failure in result.failures)
+    assert any("paseo-profiles.md" in failure and "--thinking" in failure for failure in result.failures)
+
 
 def test_checker_accepts_current_contract(tmp_path: Path) -> None:
     checker = load_checker()

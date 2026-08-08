@@ -7,7 +7,7 @@ claude plugin install --scope project mattpocock-skills@eszxcvfd
 claude plugin update --scope project mattpocock-skills@eszxcvfd
 ```
 
-Non-Claude agents can copy this skill with `npx skills@latest add eszxcvfd/skills --skill=setup-matt-pocock-skills`.
+Non-Claude agents can install the skill set with `npx skills@latest add eszxcvfd/skills`.
 
 [Source](https://github.com/eszxcvfd/skills/tree/main/skills/engineering/setup-matt-pocock-skills)
 
@@ -100,8 +100,7 @@ term or consequential decision actually exists, not as empty setup metadata.
 [triage](https://aihero.dev/skills-triage),
 [to-spec](https://aihero.dev/skills-to-spec), and
 [to-tickets](https://aihero.dev/skills-to-tickets), which consume the issue
-tracker and label config, plus
-[root](https://aihero.dev/skills-root), and
-[peer](https://aihero.dev/skills-peer), which consume the optional detached
-Root/Peer contract. When the next step is unclear,
-[ask-matt](https://aihero.dev/skills-ask-matt) routes you.
+tracker and label config. When detached Paseo is enabled, this setup writes
+the machine-local `supervisor.config.toml`, `root.config.toml`, and
+`peer.config.toml` instructions consumed by the runtime profiles. When the
+next step is unclear, [ask-matt](https://aihero.dev/skills-ask-matt) routes you.

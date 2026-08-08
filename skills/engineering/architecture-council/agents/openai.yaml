@@ -1,3 +1,3 @@
 interface:
   display_name: "Architecture Council"
-  short_description: "Run a lean architecture council with two proposers and evidence"
+  short_description: "Run two architecture proposals through one evidence review"

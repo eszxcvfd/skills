@@ -7,7 +7,7 @@ claude plugin install --scope project mattpocock-skills@eszxcvfd
 claude plugin update --scope project mattpocock-skills@eszxcvfd
 ```
 
-Non-Claude agents can copy this skill with `npx skills@latest add eszxcvfd/skills --skill=triage`.
+Non-Claude agents can install the skill set with `npx skills@latest add eszxcvfd/skills`.
 
 [Source](https://github.com/eszxcvfd/skills/tree/main/skills/engineering/triage)
 

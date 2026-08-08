@@ -1,62 +1,48 @@
 # Council role prompts
 
-Every role receives the shared `COUNCIL_AGENT_BOUNDARY` from `SKILL.md`, the
-case, the relevant prior artifacts, and one output path. Do not add agents or
-edit production files.
+Give every role the shared `COUNCIL_AGENT_BOUNDARY`, the case path, only the
+relevant owner/code paths, and one output path. Agents must cite paths or
+commands instead of pasting source. Keep outputs bounded; do not restate the
+case.
 
 ## Case
 
-Frame the decision without proposing a solution. State the current
-architecture and evidence inspected, constraints, non-goals, existing ADRs or
-locks, risk score, exact question, and evidence that could change the answer.
-Write `case.yaml` from `templates/case.yaml`.
+Frame one decision without proposing a solution. Record current architecture,
+constraints, non-goals, existing ADRs/locks, risk score, exact question, and
+evidence that could change the answer. Write `case.yaml` from
+`templates/case.yaml`.
 
 ## Proposer
 
 You are one of exactly two independent proposers. Do not read the other
 proposal. Prefer the simplest standard solution and explain any deviation.
-Return:
+Write at most 600 words with these headings:
 
 ```markdown
 # Proposal: <name>
-
-## Summary
-## Architecture
-## Why this fits the case
-## Trade-offs and failure modes
-## Migration and rollback
-## Lock impact
-## When this stops fitting
-## Claims that need verification
+## Choice and shape
+## Fit and trade-offs
+## Migration, rollback, and lock impact
+## Claims needing verification
 ```
 
-Use the role name `proposer-a` or `proposer-b` in the artifact path.
+Name the output `proposer-a.md` or `proposer-b.md`. List no more than five
+load-bearing claims and three trade-offs.
 
-## Challenger
+## Adjudicator
 
-Break both proposals. For each, identify unproven assumptions, hidden
-complexity, lock-in, operational burden, migration risk, scale failure,
-requirements-change failure, over-engineering, and any missed boring option.
-Do not invent a third proposal.
+Read the case and both proposals only after both are complete. Do not propose a
+third architecture. In one bounded pass:
 
-## Verifier
+1. attack each proposal's assumptions, complexity, migration, operations, and
+   failure modes;
+2. inspect only the evidence needed for load-bearing claims and classify each
+   `Verified`, `Likely`, `Unverified`, or `Contradicted`;
+3. apply `references/rubric.yaml`, choose or reject an option, and record
+   guardrails, migration/rollback, reopen conditions, lock impact, and
+   canonical owner-doc updates.
 
-Inspect code, tests, ADRs, dependency paths, framework limits, official docs,
-and a small spike only when needed. Classify every load-bearing claim:
-
-- `Verified` — directly supported by evidence;
-- `Likely` — strongly supported but not proven;
-- `Unverified` — plausible without sufficient evidence;
-- `Contradicted` — evidence points the other way.
-
-Include concrete paths, commands, URLs, and caveats.
-
-## Judge
-
-Read the case, both proposals, challenge, verification, and rubric. Prefer
-boring, standard, reversible architecture when evidence is close. Reject
-speculative scalability, abstractions without two concrete use cases,
-distributed operations without justification, and "refactor later" without a
-path. Write `templates/verdict.yaml` and an ADR draft with guardrails, reopen
-conditions, migration/rollback, and explicit canonical owner-doc updates or
-`none`.
+Write `verdict.yaml` from `templates/verdict.yaml` and an ADR draft from
+`templates/adr.md` when the decision is durable. Keep the challenge concise:
+up to three findings per proposal, and keep free text under 900 words. Do not
+copy proposal text or full transcripts into either artifact.

@@ -7,7 +7,7 @@ claude plugin install --scope project mattpocock-skills@eszxcvfd
 claude plugin update --scope project mattpocock-skills@eszxcvfd
 ```
 
-Non-Claude agents can copy this skill with `npx skills@latest add eszxcvfd/skills --skill=domain-modeling`.
+Non-Claude agents can install the skill set with `npx skills@latest add eszxcvfd/skills`.
 
 [Source](https://github.com/eszxcvfd/skills/tree/main/skills/engineering/domain-modeling)
 
@@ -49,7 +49,7 @@ The move that makes it click: when you state how something works, the skill cros
 
 ## Pulled out on purpose
 
-`domain-modeling` is the **single source of truth** for building the project's ubiquitous language, split out as its own model-invoked skill so any other skill can reach it. [grill-with-docs](https://aihero.dev/skills-grill-with-docs) leans on it to record terms and decisions as a grilling session runs, [triage](https://aihero.dev/skills-triage) uses it to keep tickets in the project's own words, and [improve-codebase-architecture](https://aihero.dev/skills-improve-codebase-architecture) reaches for it while it works.
+`domain-modeling` is the **single source of truth** for building the project's ubiquitous language, split out as its own model-invoked skill so any other skill can reach it. [grill-with-docs](https://aihero.dev/skills-grill-with-docs) leans on it to record terms and decisions as a grilling session runs, [triage](https://aihero.dev/skills-triage) uses it to keep tickets in the project's own words, and the preserved [`improve-codebase-architecture`](../../skills/misc/improve-codebase-architecture/SKILL.md) workflow reaches for it while it works.
 
 Keeping it standalone means you can also reach for it directly — as a **reference** for how to sharpen a model — without committing to the steps any of those skills mandate. The language lives in one place, and everything that needs it points there.
 

@@ -1,0 +1,4 @@
+interface:
+  display_name: Impeccable
+  short_description: Design and improve frontend interfaces with context and bounded verification
+  default_prompt: Use Impeccable for frontend design, UX critique, visual audits, and polish.

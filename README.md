@@ -110,9 +110,10 @@ These split on one axis — who can invoke them. **User-invoked** skills are rea
 
 ### Engineering
 
-Promoted skills for code work, architecture, delivery, and the SLP agent roles.
-The role contract is kept in [`WORKSPACE_PROTOCOL.md`](./WORKSPACE_PROTOCOL.md)
-so runtime guidance has one source of truth.
+Promoted skills for code work, architecture, delivery, and the SLP workflow.
+The project role contract is kept in [`WORKSPACE_PROTOCOL.md`](./WORKSPACE_PROTOCOL.md);
+machine-local `supervisor.config.toml`, `root.config.toml`, and
+`peer.config.toml` carry the generated runtime instructions.
 
 **User-invoked**
 
@@ -123,17 +124,13 @@ so runtime guidance has one source of truth.
 - **[to-spec](./skills/engineering/to-spec/SKILL.md)** — Synthesize an aligned conversation into a spec with placement, invariants, and proof.
 - **[to-tickets](./skills/engineering/to-tickets/SKILL.md)** — Split a spec into tracer-bullet tickets with blocking edges and proof.
 - **[implement](./skills/engineering/implement/SKILL.md)** — Execute a settled spec or ticket with TDD, proof, review, and commit discipline.
-- **[improve-codebase-architecture](./skills/engineering/improve-codebase-architecture/SKILL.md)** — Find and explore deepening opportunities in an existing codebase.
 - **[triage](./skills/engineering/triage/SKILL.md)** — Move issues and external PRs through the configured triage state machine.
-- **[wizard](./skills/engineering/wizard/SKILL.md)** — Generate an interactive shell wizard for a manual setup or one-off transition.
-- **[supervisor](./skills/engineering/supervisor/SKILL.md)** — Observe Paseo lifecycle and launch detached Root sessions from outside the project.
-- **[root](./skills/engineering/root/SKILL.md)** — Act as the autonomous Lead (runtime `codex-root`) that plans, delegates, integrates, and accepts.
-- **[peer](./skills/engineering/peer/SKILL.md)** — Execute one bounded Root packet with task-local engineering judgment and evidence handback.
 
 **Model-invoked**
 
-- **[architecture-council](./skills/engineering/architecture-council/SKILL.md)** — Mandatory pre-code gate for every architecture decision or unclear architectural next step.
+- **[architecture-council](./skills/engineering/architecture-council/SKILL.md)** — Mandatory pre-code gate with two independent proposals and one evidence-based adjudication.
 - **[codebase-design](./skills/engineering/codebase-design/SKILL.md)** — Provide the deep-module vocabulary: interface, depth, seam, adapter, leverage, and locality.
+- **[impeccable](./skills/engineering/impeccable/SKILL.md)** — Design, critique, audit, and polish frontend interfaces with durable product and design context.
 - **[domain-modeling](./skills/engineering/domain-modeling/SKILL.md)** — Sharpen domain language, scenarios, context, and consequential decisions.
 - **[diagnosing-bugs](./skills/engineering/diagnosing-bugs/SKILL.md)** — Disciplined diagnosis loop for hard bugs and performance regressions: reproduce → minimise → hypothesise → instrument → fix → regression-test.
 - **[research](./skills/engineering/research/SKILL.md)** — Investigate questions against high-trust primary sources and leave cited findings.

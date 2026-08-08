@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check the current detached Paseo Root/Peer prompt/config contract."""
+"""Check the current detached Paseo Root/Peer config/instruction contract."""
 
 from __future__ import annotations
 
@@ -26,23 +26,26 @@ REQUIRED_PHRASES = (
 
 CONTRACT_FILES = (
     "WORKSPACE_PROTOCOL.md",
-    "skills/engineering/root/SKILL.md",
-    "skills/engineering/peer/SKILL.md",
     "skills/engineering/ask-matt/SKILL.md",
     "skills/engineering/setup-matt-pocock-skills/workspace-protocol.md",
+    "skills/engineering/setup-matt-pocock-skills/templates/paseo-profiles.md",
     "docs/engineering/ask-matt.md",
 )
 
-AGENT_CONTRACT_FILES = (
-    "skills/engineering/root/agents/openai.yaml",
+PROFILE_CONTRACT_FILES = (
+    "skills/engineering/setup-matt-pocock-skills/templates/paseo-profiles.md",
 )
 
-AGENT_REQUIRED_PHRASES = (
+PROFILE_REQUIRED_PHRASES = (
+    "You are codex-supervisor",
+    "You are codex-root",
+    "You are codex-peer",
     '--model "$MODEL"',
     '--thinking "$THINKING"',
     "--mode full-access",
     "settings.thinkingOptionId",
-    "MCP create_agent model lives in provider and settings must not contain model; thinking lives in settings.thinkingOptionId",
+    "Keep the notebook at",
+    "terminal PEER_STATUS handoff",
 )
 
 @dataclass(frozen=True)
@@ -96,13 +99,13 @@ def check_contract_text(root: Path, failures: list[str]) -> None:
             failures.append(f"contract: missing required phrase {phrase!r}")
 
 
-    for path in existing_files(root, AGENT_CONTRACT_FILES):
+    for path in existing_files(root, PROFILE_CONTRACT_FILES):
         text = path.read_text(encoding="utf-8")
         searchable = normalize_contract_text(text.replace('\\"', '"'))
         rel = path.relative_to(root)
-        for phrase in AGENT_REQUIRED_PHRASES:
+        for phrase in PROFILE_REQUIRED_PHRASES:
             if normalize_contract_text(phrase) not in searchable:
-                failures.append(f"{rel}: missing agent launch phrase {phrase!r}")
+                failures.append(f"{rel}: missing profile instruction phrase {phrase!r}")
 
 
 def check_project(root: Path | str) -> CheckResult:

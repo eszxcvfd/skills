@@ -7,7 +7,7 @@ claude plugin install --scope project mattpocock-skills@eszxcvfd
 claude plugin update --scope project mattpocock-skills@eszxcvfd
 ```
 
-Non-Claude agents can copy this skill with `npx skills@latest add eszxcvfd/skills --skill=codebase-design`.
+Non-Claude agents can install the skill set with `npx skills@latest add eszxcvfd/skills`.
 
 [Source](https://github.com/eszxcvfd/skills/tree/main/skills/engineering/codebase-design)
 
@@ -21,7 +21,7 @@ It is a **language, not a procedure**. It doesn't restructure your code or hand 
 
 Type `/codebase-design`, or the agent reaches for it automatically when a task fits.
 
-Reach for it when you're designing or improving a module's interface, hunting for deepening opportunities, deciding where a seam goes, or making code more testable and AI-navigable. Other skills pull it in whenever they need the deep-module vocabulary. If you want to sharpen the project's *domain* terms rather than its module design, use [domain-modeling](https://aihero.dev/skills-domain-modeling) instead; to run a whole architecture pass over an existing codebase, use [improve-codebase-architecture](https://aihero.dev/skills-improve-codebase-architecture).
+Reach for it when you're designing or improving a module's interface, hunting for deepening opportunities, deciding where a seam goes, or making code more testable and AI-navigable. Other skills pull it in whenever they need the deep-module vocabulary. If you want to sharpen the project's *domain* terms rather than its module design, use [domain-modeling](https://aihero.dev/skills-domain-modeling) instead; to run a whole architecture pass over an existing codebase, use the preserved [`improve-codebase-architecture`](../../skills/misc/improve-codebase-architecture/SKILL.md) workflow.
 
 ## Deep, not shallow
 
@@ -35,7 +35,7 @@ Callers and tests cross the same seam, so a well-placed interface gives tests so
 
 ## Pulled out on purpose
 
-`codebase-design` is the **single source of truth** for the deep-module vocabulary, split out as its own model-invoked skill so anything can reach it. Other skills point at it rather than restating the words: [tdd](https://aihero.dev/skills-tdd) borrows it to place a seam before writing the test, [improve-codebase-architecture](https://aihero.dev/skills-improve-codebase-architecture) leans on it while restructuring existing code, and [to-spec](https://aihero.dev/skills-to-spec) speaks it when it sketches seams and deepening opportunities before writing a spec.
+`codebase-design` is the **single source of truth** for the deep-module vocabulary, split out as its own model-invoked skill so anything can reach it. Other skills point at it rather than restating the words: [tdd](https://aihero.dev/skills-tdd) borrows it to place a seam before writing the test, the preserved [`improve-codebase-architecture`](../../skills/misc/improve-codebase-architecture/SKILL.md) workflow leans on it while restructuring existing code, and [to-spec](https://aihero.dev/skills-to-spec) speaks it when it sketches seams and deepening opportunities before writing a spec.
 
 The point of keeping it standalone is that you can also reach for it on its own — as a **reference** for how to think about module design — without triggering the larger process any of those skills mandate. Fix the words once, in one place, and every design conversation inherits them.
 

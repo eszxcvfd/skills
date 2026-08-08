@@ -8,6 +8,13 @@ why:
 rejected:
   "<option>":
     reason: "<why rejected>"
+challenge:
+  proposer_a:
+    - finding: "<strongest failure mode or unproven assumption>"
+      consequence: "<why it matters>"
+  proposer_b:
+    - finding: "<strongest failure mode or unproven assumption>"
+      consequence: "<why it matters>"
 evidence:
   verified:
     - claim: "<claim>"
