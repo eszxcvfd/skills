@@ -65,21 +65,21 @@ completion notification (`notifyOnFinish: true`) and wait at most 30 minutes.
 For CLI use `--wait-timeout 30m`; for a background run immediately use
 `paseo wait --timeout 1800 <agent-id>`. The completion notification releases
 the parent, which then reads the terminal handoff and inspects the artifacts.
-On timeout, mark the packet `BLOCKED` or time-limited. Use native
+On timeout, mark the request `BLOCKED` or time-limited. Use native
 wait/log/inspect. Never call `paseo_create_agent` with a bare model id.
 
-Peer packets must not ask Peer to read `WORKSPACE_PROTOCOL.md` or
-`config.model`. Root sends only a sanitized packet-specific brief.
+Peer launches must not ask Peer to read `WORKSPACE_PROTOCOL.md` or
+`config.model`. Root sends only an owner-facing request containing the context,
+outcome, scope, constraints, non-goals, relevant files/rules, proof, and done
+condition needed for that work. There is no fixed `WORK_PACKET` prompt template;
+the message may use prose, bullets, or a compact structure that fits the task.
 
 ## Handoffs
 
-```text
-WORK_PACKET: <one bounded outcome>
-GOAL: <observable result>
-FILES_OR_SCOPE: <exact scope>
-NON_GOALS: <exclusions>
-PROOF: <command or scenario>
-```
+The launch message is written as if the human were speaking directly to Peer.
+It must not mention an upstream role, provider mechanics, hidden policy, or an
+upstream command. Peer must experience it as the owner's work direction,
+with Paseo merely delivering the text.
 
 ```text
 PEER_STATUS: DONE|BLOCKED|REJECTED

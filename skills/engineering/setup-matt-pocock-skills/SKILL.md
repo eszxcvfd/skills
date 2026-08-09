@@ -149,19 +149,22 @@ The Supervisor notebook is operator-side state and must be stored outside the
 project under `$CODEX_HOME/supervisor-notebooks/<repo-slug>/`. It must never be
 linked from Root-facing project documents or passed to Root/Peer.
 
-The generated role boundary has only a few fixed invariants: Root/Lead owns
-coordination method and acceptance; Supervisor only observes and alerts the
-human on material result deviation; Peer executes one sanitized Root packet.
+The generated role boundary has only a few fixed invariants: Supervisor works
+on the human's task directly by default and launches a detached Root only when
+the human explicitly asks for that handoff; Root/Lead owns coordination method
+and acceptance once chosen; Peer executes one bounded owner-facing request.
 Root must read `WORKSPACE_PROTOCOL.md` before planning, while Peer must never
-read, quote, or request that Root-only document. Do not turn the Supervisor
-into a second project command path.
+read, quote, or request that Root-only document. Supervisor can observe a named
+Paseo session, but must not invent a hidden command path or silently transfer
+ownership.
 
-Keep capability guidance role-scoped: Supervisor gets routing and Paseo
-lifecycle guidance; Root gets task-matching engineering skills; Peer gets only
-the skills and public files named by its Root packet. Supervisor remains
-observer-only and never becomes a second project command path.
+Keep capability guidance role-scoped: Supervisor gets normal task-matching
+skills lazily plus Paseo lifecycle when needed; Root gets task-matching
+engineering skills; Peer gets only the skills and public files named by its
+owner-facing launch message.
 
-Make the Supervisor-to-Root launch message human-facing. Carry the owner's
+When the human explicitly asks Supervisor to hand work to Root, make the
+Supervisor-to-Root launch message human-facing. Carry the owner's
 language, intent, tone, uncertainty, and decisions as if the owner were
 speaking directly to Root. Use the prompt-leverage discipline selectively:
 identify the real job, then add only the context, work expectations, tool/file
@@ -171,9 +174,16 @@ Root's coordination method autonomous. This applies to the launch message only;
 do not impose a response style or fixed report format on Root unless the owner
 actually asked for one.
 
+When Root delegates, its Peer launch message follows the same human-facing
+rule: write as if the owner were speaking directly to Peer, with no fixed
+`WORK_PACKET` template and no mention of an upstream role or command. Include
+only the context, outcome, scope, constraints, non-goals, relevant files/rules,
+proof, and done condition needed for that request. Peer should experience the
+message as the owner's work direction, with Paseo merely delivering it.
+
 Keep prompt transport lossless: when a task arrives with literal `\\n` escape
 sequences standing in for prose line breaks, decode those to real newlines
-before launching Root or forwarding a packet. Preserve escapes inside code,
+before launching Root or forwarding a handoff. Preserve escapes inside code,
 regexes, paths, JSON examples, and other literal values; never pass a
 JSON-serialized or `repr`-style prompt to Paseo.
 

@@ -26,23 +26,21 @@ follows the repository's Work Routing and does not create a second document
 system or hard-code a model into a prompt.
 
 Its Paseo profiles keep the roles separate while leaving the workflow flexible:
-Root/Lead owns coordination method and acceptance, Supervisor observes and
-alerts only on material result deviation, and Peer executes one sanitized Root
-packet. Root reads the Root-only `WORKSPACE_PROTOCOL.md`; Peer never reads or
-requests it. The profiles use role-scoped capability guidance rather than a
-fixed `ROOT_BRIEF` prompt template. Supervisor carries the owner's request to
-Root in natural language, preserving intent and uncertainty without inventing
-decisions; it adds only the context, work expectations, tool rules,
-verification, and done condition that the task needs. Root treats that launch
-message as the project owner's request and chooses its own working method. The
-human-like requirement applies only to the launch message; Root is not forced
-into natural-language confirmation, a writing style, or a report schema unless
-the owner asks for one. This applies the selective prompt-leverage principle
-while keeping the role boundary intact. Delegated runs use native
-completion notification with a 30-minute wait bound. Prompt transport must
-remain lossless: prose `\\n` escapes are decoded to real newlines before a
-launch or handoff, while escapes inside code, regexes, paths, and JSON examples
-are preserved.
+Supervisor works like a normal agent by default and only launches a detached
+Root when the human explicitly asks for that handoff. Root/Lead owns
+coordination method and acceptance once chosen, and Peer executes one bounded
+owner-facing request. Root reads the Root-only `WORKSPACE_PROTOCOL.md`; Peer
+never reads or requests it. The profiles use role-scoped capability guidance
+rather than fixed prompt templates. When delegation is explicitly requested,
+Supervisor carries the owner's request to Root as if the owner were speaking
+directly, preserving intent and uncertainty without inventing decisions. Root
+does the same when it asks Peer to work: the message contains only the context,
+outcome, scope, constraints, non-goals, relevant files/rules, proof, and done
+condition needed for that request, without mentioning an upstream role. Neither
+handoff imposes a response style. Delegated runs use native completion
+notification with a 30-minute wait bound. Prompt transport remains lossless:
+prose `\\n` escapes become real newlines before launch or handoff, while
+escapes inside code, regexes, paths, and JSON examples are preserved.
 
 ## When to reach for it
 
@@ -92,8 +90,9 @@ not established yet rather than guessed.
 - **Paseo workspace** — `WORKSPACE_PROTOCOL.md` is the Root/Peer coordination
   contract and `config.model` is the per-project provider/model/thinking choice
   for those two roles. Root owns its coordination method and may adapt it to
-  the task; the external Supervisor only observes and alerts the human on
-  material result deviation. The three role profile TOMLs, provider registration,
+  the task; Supervisor normally works directly and only becomes the Root
+  handoff point when the human explicitly asks for that delegation. The three
+  role profile TOMLs, provider registration,
   launcher, and Supervisor notebook are machine-local and remain outside the
   repository.
 

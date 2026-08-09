@@ -2,7 +2,7 @@
 
 Root-only project contract for a detached Paseo Lead. Root must read this file
 before planning, delegation, or edits. Peer agents must never read, quote, or
-request it; Root may summarize only the constraints a Peer packet needs.
+request it; Root may summarize only the constraints a Peer launch needs.
 
 Open only the smallest current document set needed:
 
@@ -75,7 +75,7 @@ from the selected role entry, plus `--mode full-access` and the labels
 paseo run --provider "$PEER_PROVIDER" \
   --model "$MODEL" --thinking "$THINKING" --mode full-access \
   --label role=peer --label parent=root --cwd <repo> \
-  --wait-timeout 30m "<packet>"
+  --wait-timeout 30m "<owner-facing request>"
 ```
 
 For MCP, `paseo_create_agent` provider must be
@@ -94,29 +94,27 @@ native completion notification (`notifyOnFinish: true`) and wait for at most
 30 minutes. A synchronous CLI run uses `--wait-timeout 30m`; a background run
 must immediately use `paseo wait --timeout 1800 <agent-id>`. The completion
 notification is the release signal: the parent stops waiting, reads the
-terminal handoff, and proceeds. On timeout, mark the packet `BLOCKED` or
+terminal handoff, and proceeds. On timeout, mark the request `BLOCKED` or
 time-limited and do not claim that it finished.
 
-Peer packets must not ask Peer to read `WORKSPACE_PROTOCOL.md` or
-`config.model`. Root sends a small sanitized brief and never includes
-unrelated project history or hidden policy.
+Peer launches must not ask Peer to read `WORKSPACE_PROTOCOL.md` or
+`config.model`. Root sends a small owner-facing request and never includes
+unrelated project history or hidden policy. The request is written as if the
+human were speaking directly to Peer; it carries only the context, outcome,
+scope, constraints, non-goals, relevant files/rules, proof, and done condition
+this task needs. There is no fixed `WORK_PACKET` prompt template, and Root must
+not mention an upstream role or command in that request.
 
 ## Peer handoff
 
-Root allocates one fresh Peer per bounded packet when separate execution is
-useful. Peer must not create another agent or broaden the packet. Root inspects
+Root allocates one fresh Peer per bounded request when separate execution is
+useful. Peer must not create another agent or broaden the request. Root inspects
 the result and accepts evidence only after checking
 the changed artifacts and requested proof.
 
-```text
-WORK_PACKET: <one bounded outcome>
-GOAL: <observable result>
-FILES_OR_SCOPE: <exact paths or discovery boundary>
-INPUTS: <task facts and current constraints>
-NON_GOALS: <explicit exclusions>
-OUTPUT: <files or report shape>
-PROOF: <command or scenario>
-```
+The launch message may use prose, bullets, or a compact structure that fits
+the work. It must make the requested outcome and working boundary clear, but
+must not be a stock command prompt or impose a response style on Peer.
 
 ```text
 PEER_STATUS: DONE|BLOCKED|REJECTED
