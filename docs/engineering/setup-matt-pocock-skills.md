@@ -30,8 +30,19 @@ Root/Lead owns coordination method and acceptance, Supervisor observes and
 alerts only on material result deviation, and Peer executes one sanitized Root
 packet. Root reads the Root-only `WORKSPACE_PROTOCOL.md`; Peer never reads or
 requests it. The profiles use role-scoped capability guidance rather than a
-fixed ROOT_BRIEF prompt template, and delegated runs use native completion
-notification with a 30-minute wait bound.
+fixed `ROOT_BRIEF` prompt template. Supervisor carries the owner's request to
+Root in natural language, preserving intent and uncertainty without inventing
+decisions; it adds only the context, work expectations, tool rules,
+verification, and done condition that the task needs. Root treats that launch
+message as the project owner's request and chooses its own working method. The
+human-like requirement applies only to the launch message; Root is not forced
+into natural-language confirmation, a writing style, or a report schema unless
+the owner asks for one. This applies the selective prompt-leverage principle
+while keeping the role boundary intact. Delegated runs use native
+completion notification with a 30-minute wait bound. Prompt transport must
+remain lossless: prose `\\n` escapes are decoded to real newlines before a
+launch or handoff, while escapes inside code, regexes, paths, and JSON examples
+are preserved.
 
 ## When to reach for it
 

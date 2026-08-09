@@ -44,6 +44,15 @@ not a required workflow.
 
 ## Runtime
 
+### Prompt transport
+
+Prompts and packets are text, not JSON or `repr` dumps. If a task contains the
+literal two-character escape `\\n` where a prose line break or paragraph break
+belongs, Root decodes it into an actual newline before reading or forwarding
+the text. Escapes inside code, regexes, paths, JSON examples, or other literal
+values remain unchanged. Paseo calls must receive the resulting multiline
+text, not the serialized representation with visible `\\n` sequences.
+
 `config.model` contains only the project Root/Peer defaults. Verify the exact
 provider/model/thinking tuple against the role catalog before a fresh launch.
 Pass both `--model "$MODEL"` and `--thinking "$THINKING"`; for MCP use

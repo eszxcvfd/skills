@@ -46,9 +46,14 @@ def write_project(root: Path, *, bad_config: bool = False) -> None:
 
     good_profile = (
         "You are codex-supervisor, an external observer.\n"
-        "ROOT_BRIEF is intentionally not a fixed prompt shape.\n"
+        "Write the launch message as if the human were speaking directly to Root.\n"
+        "Before launching, identify the real job to be done. Apply the prompt-leverage discipline selectively.\n"
         "The brief must tell Root to read `WORKSPACE_PROTOCOL.md` before planning; that file is Root-only.\n"
-        "Make the working flow explicit.\n"
+        "Do not invent a human decision.\n"
+        "The human-like requirement applies only to this launch message.\n"
+        "Do not tell Root to answer in natural language, plain prose, or a conversational style.\n"
+        "Prompt transport is text, not a JSON or repr dump.\n"
+        "decode it into an actual newline; never forward the serialized representation.\n"
         "Describe the work flow, but leave agent routing and coordination method to Root/Lead.\n"
         "notifyOnFinish: true; --wait-timeout 30m; paseo wait --timeout 1800.\n"
         "You are codex-root, an autonomous Lead.\n"
@@ -97,22 +102,22 @@ def test_checker_requires_root_only_packet_boundary(tmp_path: Path) -> None:
     assert any("Peer packets must not ask Peer" in failure for failure in result.failures)
 
 
-def test_checker_requires_root_protocol_read_and_flexible_brief(tmp_path: Path) -> None:
+def test_checker_requires_root_protocol_read_and_human_facing_brief(tmp_path: Path) -> None:
     checker = load_checker()
     write_project(tmp_path)
     profile = tmp_path / "skills/engineering/setup-matt-pocock-skills/templates/paseo-profiles.md"
     profile.write_text(
         profile.read_text(encoding="utf-8")
-        .replace("ROOT_BRIEF is intentionally not a fixed prompt shape.\n", "")
+        .replace("Write the launch message as if the human were speaking directly to Root.\n", "")
         .replace("The brief must tell Root to read `WORKSPACE_PROTOCOL.md` before planning; that file is Root-only.\n", "")
-        .replace("Make the working flow explicit.\n", ""),
+        .replace("Before launching, identify the real job to be done. Apply the prompt-leverage discipline selectively.\n", ""),
         encoding="utf-8",
     )
 
     result = checker.check_project(tmp_path)
 
     assert not result.ok
-    assert any("ROOT_BRIEF" in failure or "WORKSPACE_PROTOCOL.md" in failure for failure in result.failures)
+    assert any("human were speaking" in failure or "prompt-leverage" in failure for failure in result.failures)
 
 
 def test_checker_requires_explicit_role_boundaries(tmp_path: Path) -> None:
@@ -146,6 +151,42 @@ def test_checker_requires_bounded_completion_wait(tmp_path: Path) -> None:
 
     assert not result.ok
     assert any("notifyOnFinish" in failure or "wait-timeout" in failure for failure in result.failures)
+
+
+def test_checker_requires_prompt_output_style_boundary(tmp_path: Path) -> None:
+    checker = load_checker()
+    write_project(tmp_path)
+    profile = tmp_path / "skills/engineering/setup-matt-pocock-skills/templates/paseo-profiles.md"
+    profile.write_text(
+        profile.read_text(encoding="utf-8").replace(
+            "The human-like requirement applies only to this launch message.\n",
+            "",
+        ),
+        encoding="utf-8",
+    )
+
+    result = checker.check_project(tmp_path)
+
+    assert not result.ok
+    assert any("human-like requirement" in failure for failure in result.failures)
+
+
+def test_checker_requires_lossless_prompt_transport(tmp_path: Path) -> None:
+    checker = load_checker()
+    write_project(tmp_path)
+    profile = tmp_path / "skills/engineering/setup-matt-pocock-skills/templates/paseo-profiles.md"
+    profile.write_text(
+        profile.read_text(encoding="utf-8").replace(
+            "Prompt transport is text, not a JSON or repr dump.\n",
+            "",
+        ),
+        encoding="utf-8",
+    )
+
+    result = checker.check_project(tmp_path)
+
+    assert not result.ok
+    assert any("Prompt transport" in failure for failure in result.failures)
 
 
 def test_checker_requires_explicit_model_and_thinking_cli_flags(tmp_path: Path) -> None:

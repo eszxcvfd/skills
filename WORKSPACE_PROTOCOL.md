@@ -51,6 +51,15 @@ session.
 
 ## Runtime contract
 
+### Prompt transport
+
+Prompts and packets are text, not JSON or `repr` dumps. If a task contains the
+literal two-character escape `\\n` where a prose line break or paragraph break
+belongs, Root decodes it into an actual newline before reading or forwarding
+the text. Escapes inside code, regexes, paths, JSON examples, or other literal
+values remain unchanged. Paseo calls must receive the resulting multiline
+text, not the serialized representation with visible `\\n` sequences.
+
 `config.model` is the per-project source of truth for the provider, model, and
 thinking defaults that Root needs to create a Peer. Root reads only `[peer]`
 from it when present; other profile settings are outside this project

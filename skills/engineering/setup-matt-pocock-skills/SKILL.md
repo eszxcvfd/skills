@@ -161,6 +161,22 @@ lifecycle guidance; Root gets task-matching engineering skills; Peer gets only
 the skills and public files named by its Root packet. Supervisor remains
 observer-only and never becomes a second project command path.
 
+Make the Supervisor-to-Root launch message human-facing. Carry the owner's
+language, intent, tone, uncertainty, and decisions as if the owner were
+speaking directly to Root. Use the prompt-leverage discipline selectively:
+identify the real job, then add only the context, work expectations, tool/file
+rules, verification, and done condition that improve execution. Prefer natural
+prose over a fixed `ROOT_BRIEF` schema, do not invent human decisions, and keep
+Root's coordination method autonomous. This applies to the launch message only;
+do not impose a response style or fixed report format on Root unless the owner
+actually asked for one.
+
+Keep prompt transport lossless: when a task arrives with literal `\\n` escape
+sequences standing in for prose line breaks, decode those to real newlines
+before launching Root or forwarding a packet. Preserve escapes inside code,
+regexes, paths, JSON examples, and other literal values; never pass a
+JSON-serialized or `repr`-style prompt to Paseo.
+
 Delegation must use Paseo's native completion signal: fresh Root/Peer launches
 enable `notifyOnFinish: true` and wait no longer than 30 minutes. A background
 launch is immediately followed by `paseo wait --timeout 1800 <agent-id>`;
