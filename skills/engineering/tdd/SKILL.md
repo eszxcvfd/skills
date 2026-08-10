@@ -1,20 +1,15 @@
 ---
 name: tdd
-description: Test-driven development. Use when the user wants to build features or fix bugs test-first, mentions "red-green-refactor", wants integration tests, or needs proof for runtime invariants at public seams.
+description: Test-driven development. Use when the user wants to build features or fix bugs test-first, mentions "red-green-refactor", or wants integration tests.
 ---
+
+Before repository-facing work, read [`../../WORK-ROUTING.md`](../../WORK-ROUTING.md). It is the shared routing source for project documents, lane selection, plan ownership, and closeout.
 
 # Test-Driven Development
 
 TDD is the red → green loop. This skill is the reference that makes that loop produce tests worth keeping: what a good test is, where tests go, the anti-patterns, and the rules of the loop. Every section applies on every cycle — consult them before and during the loop, not after.
 
-When exploring the codebase, start with Work Routing and open only the smallest
-current document set needed: `ARCHITECTURE.md` for placement,
-`docs/process/DEVELOPMENT.md` for the test lane and proof, and
-`docs/architecture/RUNTIME.md` when runtime invariants are involved. Read the
-relevant `CONTEXT.md` and ADRs only when the routed task needs their vocabulary
-or decisions. Tests must target the owning module's public seam, protect
-affected runtime invariants, and satisfy the proof owner selected by Work
-Routing.
+When exploring the codebase, read `CONTEXT.md` (if it exists) so test names and interface vocabulary match the project's domain language, and respect ADRs in the area you're touching.
 
 ## What a good test is
 
@@ -28,7 +23,9 @@ A **seam** is the public boundary you test at: the interface where you observe b
 
 **Test only at pre-agreed seams.** Before writing any test, write down the seams under test and confirm them with the user. No test is written at an unconfirmed seam. You can't test everything — agreeing the seams up front is how testing effort lands on the critical paths and complex logic instead of every edge case.
 
-Ask: "What's the public interface, which runtime invariants are affected, and which seams should we test?"
+Ask: "What's the public interface, and which seams should we test?"
+
+When the shape of that interface is itself in question — how deep the module is, where the seam belongs, what the interface should expose — use the `/codebase-design` skill for the vocabulary. It is the shared source of the module, interface, depth, seam, adapter, leverage and locality terms, and it is a reference to consult, not a session to run.
 
 ## Anti-patterns
 
@@ -38,6 +35,6 @@ Ask: "What's the public interface, which runtime invariants are affected, and wh
 
 ## Rules of the loop
 
-- **Red before green.** Write the failing test first, then only enough code to pass it. If `docs/process/DEVELOPMENT.md` requires a reproduction, benchmark, integration test, migration test, or concurrency harness, that proof is the red signal. Don't anticipate future tests or add speculative features.
+- **Red before green.** Write the failing test first, then only enough code to pass it. Don't anticipate future tests or add speculative features.
 - **One slice at a time.** One seam, one test, one minimal implementation per cycle.
 - **Refactoring is not part of the loop.** It belongs to the review stage (see the `code-review` skill), not the red → green implementation cycle.

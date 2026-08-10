@@ -1,138 +1,139 @@
-```bash
-claude plugin marketplace add --scope project eszxcvfd/skills
-claude plugin install --scope project mattpocock-skills@eszxcvfd
-```
-
-```bash
-claude plugin update --scope project mattpocock-skills@eszxcvfd
-```
-
-Non-Claude agents can install the skill set with `npx skills@latest add eszxcvfd/skills`.
-
-[Source](https://github.com/eszxcvfd/skills/tree/main/skills/engineering/setup-matt-pocock-skills)
-
 ## What it does
 
-`setup-matt-pocock-skills` bootstraps the complete project surface that the
-engineering skills need in one pass: canonical architecture, process, roadmap,
-plan, runtime, protocol, and content documents; issue-tracker settings; triage
-labels; domain-doc routing; and the Paseo SLP project contract. When detached
-Paseo is enabled, it also prepares the three machine-local Supervisor/Lead/Peer
-role profiles, provider registration, launcher target, and external Supervisor
-notebook. The Codex adapter calls its Lead provider `codex-root`; the Pi
-equivalent is `pi-lead`.
+Repository-facing runs begin with [Work Routing](https://github.com/mattpocock/skills/blob/main/skills/WORK-ROUTING.md), the shared source for the target repository's document, lane, plan, and closeout routing.
 
-It explores the repository, asks about the issue tracker, triage labels, and
-domain layout in sequence, then shows a complete draft before writing. It
-follows the repository's Work Routing and does not create a second document
-system or hard-code a model into a prompt.
+`setup-matt-pocock-skills` answers three questions about one repo — where issues live, what the triage labels are called, and where the domain docs sit — then seeds the Work Routing documents that tell every later skill where orientation, lanes, plans, runtime/protocol ownership, and content boundaries live.
 
-Its Paseo profiles keep the roles separate while leaving the workflow flexible:
-Supervisor is a governance observer and only starts or recovers a detached Lead
-when the human explicitly asks. Lead owns model/workspace routing, coordination
-method, and acceptance; Peer executes one bounded current-turn V3 brief. Lead
-reads the Lead-only `WORKSPACE_PROTOCOL.md`; Peer never reads or requests it.
-The profiles use role-scoped capability guidance rather than fixed prompt
-templates. When delegation is explicitly requested, Supervisor carries the
-owner's request to Lead as if the owner were speaking directly, preserving
-intent and uncertainty without inventing decisions. Lead does the same when it
-asks Peer to work: the message contains only the context, outcome, scope,
-constraints, non-goals, relevant files/rules, proof, and done condition needed
-for that request, without mentioning an upstream role. Neither handoff imposes
-a response style. Delegated runs use native completion
-notification with a 30-minute wait bound: the parent uses a foreground wait, or
-one background `paseo wait --timeout 1800` fallback, and does no polling or
-progress chatter before the wait returns. Prompt transport remains lossless:
-prose `\\n` escapes become real newlines before launch or handoff, while
-escapes inside code, regexes, paths, and JSON examples are preserved.
+The tracker and domain configuration varies between repos; the Work Routing files provide the shared shape and then become editable repository doctrine. The skills themselves remain identical everywhere: they read the repo's configuration and canonical owner documents at run time. Invoking it with "link the skills to a custom issue tracker" works with anything you can connect to programmatically, with zero changes to the skills.
+
+It is a prompt-driven skill, not a deterministic script. It reads your `git remote`, your existing `CLAUDE.md`, your existing `CONTEXT.md`, proposes what it found, and waits for you to confirm before writing anything.
 
 ## When to reach for it
 
-You invoke this by typing `/setup-matt-pocock-skills` — the agent won't reach
-for it on its own.
+You invoke this by typing `/setup-matt-pocock-skills` — the [agent](https://www.aihero.dev/ai-coding-dictionary/agent) won't reach for it on its own. It is deliberately marked non-invokable, so no other skill can fire it for you.
 
-Reach for it once per repo, before the first use of another engineering skill.
-If [triage](https://aihero.dev/skills-triage),
-[to-spec](https://aihero.dev/skills-to-spec), or
-[to-tickets](https://aihero.dev/skills-to-tickets) are guessing where work
-lives, setup has not happened yet. Re-run it only to switch a backend or
-restart setup; day-to-day changes belong in the generated config.
+Reach for it once per repo, before the first use of any other engineering skill. If [triage](https://aihero.dev/skills-triage), [to-spec](https://aihero.dev/skills-to-spec), [to-tickets](https://aihero.dev/skills-to-tickets) or [wayfinder](https://aihero.dev/skills-wayfinder) start guessing where your issues go, or apply labels your tracker doesn't have, they have not been set up here yet. A repo already halfway through a project is a fine place to run it; the skill reads what is already there and no earlier work is wasted.
 
-## The complete setup
+## Prerequisites
 
-The setup manifest always includes these canonical owner documents:
+It writes into the repo you run it in:
 
-- `ARCHITECTURE.md`;
-- `docs/README.md`;
-- `docs/process/DEVELOPMENT.md`;
-- `docs/issues/ROADMAP.md`;
-- `PLANS.md`;
-- `docs/architecture/RUNTIME.md`;
-- `docs/architecture/NETCODE.md`;
-- `docs/architecture/CONTENT.md`.
+| It writes | Where |
+| --- | --- |
+| `issue-tracker.md` | `docs/agents/` |
+| `domain.md` | `docs/agents/` |
+| `triage-labels.md` | `docs/agents/`, only when the `triage` skill is installed |
+| Work Routing documents | `ARCHITECTURE.md`, `docs/README.md`, `docs/process/DEVELOPMENT.md`, `docs/issues/ROADMAP.md`, `PLANS.md`, and `docs/architecture/` |
+| An `## Agent skills` block | whichever of `CLAUDE.md` / `AGENTS.md` already exists |
 
-It also always creates or updates:
+All of it is committed markdown. There is no user-level or global mode: the config lives in the repo, so every repo gets its own copy.
 
-- `WORKSPACE_PROTOCOL.md`;
-- `config.model`.
+## The three decisions
 
-There is no minimal-document mode: a setup run is incomplete if any required
-canonical owner document is omitted. Existing substantive and current files
-may be kept; missing or stale files must be created or updated.
+It leads each section with the recommended answer, and skips whatever exploration already settled. Most runs are two confirmations and done.
 
-Existing files are shown as `keep` or `update` with their diffs after the three
-setup questions. Missing files are created from the bundled canonical seeds,
-then populated from verified repository evidence. Unknown facts are recorded as
-not established yet rather than guessed.
+| Decision | What it proposes | When it actually asks |
+| --- | --- | --- |
+| **Issue tracker** | the one matching your `git remote` | always — this is the one real choice |
+| **Triage labels** | keep the five canonical names (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`) | only if the `triage` skill is installed |
+| **Domain docs** | single-context: one `CONTEXT.md` plus `docs/adr/` at the root | only if it spots monorepo signals, and then it offers a multi-context `CONTEXT-MAP.md` |
 
-- **Issue tracker** — where `triage`, `to-spec`, and `to-tickets` publish work,
-  recorded in `docs/agents/issue-tracker.md`.
-- **Triage labels** — the vocabulary those workflows apply, recorded in
-  `docs/agents/triage-labels.md` when `triage` is installed.
-- **Domain routing** — `docs/agents/domain.md`, with a root `CONTEXT.md` and
-  `docs/adr/` created lazily when there is content to record.
-- **Paseo workspace** — `WORKSPACE_PROTOCOL.md` is the Lead/Peer coordination
-  contract and `config.model` is the Codex adapter's provider/model/thinking
-  choice for those roles. Host-specific Pi routes use logical `MODEL_CLASS`
-  values and `HOST_ID` from the controller-local
-  `cluster-routing.local.json`; the single-host `model-routing.local.json` is
-  only legacy resolver input. Neither route is committed. Lead owns its
-  coordination method and may adapt it to the task;
-  Supervisor remains read-only and only becomes the Lead handoff point when the
-  human explicitly asks for that delegation. The three
-  role profile TOMLs, provider registration,
-  launcher, and Supervisor notebook are machine-local and remain outside the
-  repository.
+## The Work Routing set
 
-`CONTEXT.md` and ADR files remain lazy domain content. They are created when a
-term or consequential decision actually exists, not as empty setup metadata.
+Every setup run checks this exact set. It creates a missing document from the
+seed templates, but preserves an existing document as repository doctrine and
+shows any proposed addition before editing it:
+
+| Document | Owns |
+| --- | --- |
+| `ARCHITECTURE.md` | orientation and change routing |
+| `docs/README.md` | documentation ownership and routing |
+| `docs/process/DEVELOPMENT.md` | lane selection and proof |
+| `docs/issues/ROADMAP.md` | the current work queue |
+| `PLANS.md` | non-trivial plans and durable coordination |
+| `docs/architecture/RUNTIME.md` | runtime ownership and lifecycle boundaries |
+| `docs/architecture/NETCODE.md` | protocol and compatibility-admission boundaries |
+| `docs/architecture/CONTENT.md` | server-relevant resources and cook/package boundaries |
+
+The seed contains no invented product facts. If a governing document is silent
+or stale, setup records the bounded inference or updates the canonical owner
+before relying on a new rule. `docs/process/DEVELOPMENT.md` owns lane
+selection, `PLANS.md` owns the conditions and contents for design notes and
+checked-in plans, and neither setup nor a downstream skill invents another
+routing rule. Doc-only edits, small owner-neutral fixes, and partial progress
+do not trigger closeout unless a governing plan requires it.
+
+The tracker options:
+
+| Option | Where issues live | Needs |
+| --- | --- | --- |
+| **GitHub** | the repo's GitHub Issues | the `gh` CLI |
+| **GitLab** | the repo's GitLab Issues | the `glab` CLI |
+| **Local markdown** | files under `.scratch/<feature>/` in this repo | nothing — no remote at all |
+| **Other** | wherever you say | one paragraph from you describing the workflow |
+
+The first three ship as templates in the skill and work out of the box. Local markdown is a first-class option, not a fallback: a solo project with no remote is fully supported. One caveat is worth repeating: don't use local markdown if you're using GitHub. They are alternatives, not layers.
+
+"Other" is not a stub either. It is the reason Jira, Linear, Azure DevOps and Beads all work: you describe the workflow, the skill records your prose in `docs/agents/issue-tracker.md`, and the downstream skills follow the prose. The community has already done this — a Jira-over-[MCP](https://www.aihero.dev/ai-coding-dictionary/mcp) variant, a Gitea CLI shaped like `gh`, a hand-built local dashboard.
+
+## Common questions
+
+**Do I have to use GitHub?**
+
+No. GitHub, GitLab and local markdown under `.scratch/` all ship as ready-made templates, and anything else works through the "other" path. This is the most-repeated question in the record, in roughly these words: *"hard locked to github"*, *"can I use GitLab / Jira"*, *"what about Azure DevOps"*. The answer every time is that the tracker is a setup answer, not a skill property.
+
+**Do I need to re-run it after updating the skills?**
+
+Asked directly after v1.1, Matt said yes. The skill's own closing message is softer — it tells you re-running is only needed to switch trackers or start over. Both are defensible and the reason for the gap is real: the seed templates change between versions, so a `docs/agents/issue-tracker.md` written by an older release can go stale against the skills now reading it. If a downstream skill starts doing something the docs describe differently, re-running is the cheap fix.
+
+**Will setup overwrite an existing Work Routing document?**
+
+No. A present `ARCHITECTURE.md`, `docs/README.md`, `docs/process/DEVELOPMENT.md`,
+`docs/issues/ROADMAP.md`, `PLANS.md`, or architecture owner document is treated
+as editable repository doctrine. Setup proposes only a narrowly scoped missing
+section or addition; it does not replace project-specific content with the
+seed.
+
+**Does the Work Routing seed decide my architecture or compatibility policy?**
+
+No. It creates the ownership map and leaves current-shape sections for verified
+facts. A pre-publication hard-cut rule applies only when the governing
+repository docs identify that phase; otherwise the bounded inference must be
+recorded before relying on it.
+
+**It wrote to `CLAUDE.md`, but I'm on Codex.**
+
+Known gap, still open. The file-selection rule is "edit `CLAUDE.md` if it exists, else `AGENTS.md`" — it checks which file exists, not which [harness](https://www.aihero.dev/ai-coding-dictionary/harness) is running. A repo with a `CLAUDE.md` left over from Claude Code will get its `## Agent skills` block somewhere Codex never reads. Two workarounds are in circulation: move the block to `AGENTS.md` by hand, or keep `AGENTS.md` canonical and make `CLAUDE.md` a one-line pointer at it. If neither file exists, the skill asks you which to create rather than picking, which has confused people who expected it to just decide.
+
+**It didn't create my triage labels.**
+
+It doesn't. `docs/agents/triage-labels.md` is a *mapping* — it tells `/triage` which strings in your tracker correspond to the five canonical roles. It does not run `gh label create`. On a fresh GitHub repo the labels genuinely do not exist yet, and this has been filed as a bug more than once. Two follow-ons:
+
+- If your tracker already uses the canonical names, the mapping is an identity table and there is nothing to configure. That is the intended common case, not a missing step.
+- [wayfinder](https://aihero.dev/skills-wayfinder)'s `wayfinder:map` and `wayfinder:<type>` labels are not created here either, and `gh issue create --label <missing>` fails outright rather than creating the label. Create them by hand before the first wayfinder run on a GitHub repo.
+
+**Can I configure the other skills' behaviour here — [grilling](https://www.aihero.dev/ai-coding-dictionary/grilling) cadence, question format, tone?**
+
+No. It configures three things: tracker, labels, doc layout. There have been direct requests to make it the home for per-user preferences, and the standing answer is that skills stay opinionated: *"Config is death."* Preferences belong in your `CLAUDE.md` as plain instructions, which every skill already reads.
+
+**Can I keep the config in `~/.claude` instead of committing it to every repo?**
+
+Not today. There is an open request for exactly this from someone running the skills across many repos, and no user-level mode exists. Every repo carries its own `docs/agents/`.
+
+**Isn't it strange to have a skill that configures the other skills?**
+
+One long-standing complaint says yes, in these words: *"having a skill to set up the other skill does not feel right to me — that means the LLM is configuring its own skills."* The trade is real and acknowledged: the alternative to a setup step is duplicating tracker instructions into every skill that touches issues. The output is inspectable, editable markdown, which is the mitigation — you can read every file it wrote and change it by hand, and day-to-day tweaks are exactly that, not another run.
 
 ## It's working if
 
-- the tracker, labels, and domain choices were answered in sequence;
-- the complete draft was shown before any write;
-- all eight canonical owner documents exist and are non-empty;
-- `WORKSPACE_PROTOCOL.md` and `config.model` exist and are non-empty;
-- all selected `docs/agents/` files match the real repository;
-- `docs/agents/domain.md` points to the canonical owner set;
-- the existing `CLAUDE.md` or `AGENTS.md` has one accurate `## Agent skills`
-  block;
-- enabled Paseo workspaces have all three machine-local profile files, the
-  three provider registrations, a launcher target, and an external notebook;
-- downstream skills use the configured tracker, labels, and Paseo role
-  defaults without guessing.
-- fresh agent routes verify `list_providers`, `list_models`, and
-  `get_agent_status → snapshot.runtimeInfo` without silent fallback;
-- Peer prompts use a valid V3 authority block, with invalid/legacy briefs
-  resolving to read-only.
+- `docs/agents/issue-tracker.md` and `docs/agents/domain.md` exist, plus `triage-labels.md` if `triage` is installed.
+- The eight Work Routing documents exist, and any pre-existing ones retain their project-specific doctrine.
+- An `## Agent skills` section appears in the instruction file your harness actually reads, with a one-line summary pointing at each of those files.
+- The tracker it proposed matches the remote you really use, and the label strings match labels that really exist in your tracker.
+- No seed document claims an unverified runtime, protocol, resource, package, or product fact.
+- Afterwards, `/to-tickets` publishes without asking you where issues live, and `/triage` applies labels rather than inventing them.
+- Nothing in the skill files themselves changed. If setup edited a `SKILL.md`, something went wrong.
 
 ## Where it fits
 
-`setup-matt-pocock-skills` is a **run-once setup**. Its neighbours are
-[triage](https://aihero.dev/skills-triage),
-[to-spec](https://aihero.dev/skills-to-spec), and
-[to-tickets](https://aihero.dev/skills-to-tickets), which consume the issue
-tracker and label config. When detached Paseo is enabled, this setup writes
-the machine-local `supervisor.config.toml`, `root.config.toml`, and
-`peer.config.toml` instructions consumed by the runtime profiles. When the
-next step is unclear, [ask-matt](https://aihero.dev/skills-ask-matt) routes you.
+`setup-matt-pocock-skills` is the **run-once setup** for the engineering flow, the precondition everything else assumes rather than a step in the chain. Its neighbours are its readers: [triage](https://aihero.dev/skills-triage), which applies the label vocabulary written here; [to-spec](https://aihero.dev/skills-to-spec) and [to-tickets](https://aihero.dev/skills-to-tickets), which publish into the tracker named here; and [wayfinder](https://aihero.dev/skills-wayfinder), which reads the "Wayfinding operations" section of the same tracker file to know how maps and child [tickets](https://www.aihero.dev/ai-coding-dictionary/ticket) are stored. The domain-doc layout it records is the one [domain-modeling](https://aihero.dev/skills-domain-modeling) fills in later — it creates `CONTEXT.md` and ADRs lazily, when a term or decision actually gets resolved. The Work Routing set becomes the shared project map that implementation, review, research, and planning skills consult before repository-facing work. The seed templates live in [the setup skill's Work Routing directory](https://github.com/mattpocock/skills/tree/main/skills/engineering/setup-matt-pocock-skills/work-routing). For which skill to reach for next, [ask-matt](https://aihero.dev/skills-ask-matt) routes the whole set.

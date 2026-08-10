@@ -5,6 +5,8 @@ disable-model-invocation: true
 argument-hint: "What would you like to learn about?"
 ---
 
+Before repository-facing work, read [`../../WORK-ROUTING.md`](../../WORK-ROUTING.md). It is the shared routing source for project documents, lane selection, plan ownership, and closeout.
+
 The user has asked you to teach them something. This is a stateful request - they intend to learn the topic over multiple sessions.
 
 ## Teaching Workspace

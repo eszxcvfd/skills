@@ -3,6 +3,8 @@ name: setup-pre-commit
 description: Set up Husky pre-commit hooks with lint-staged (Prettier), type checking, and tests in the current repo. Use when user wants to add pre-commit hooks, set up Husky, configure lint-staged, or add commit-time formatting/typechecking/testing.
 ---
 
+Before repository-facing work, read [`../../WORK-ROUTING.md`](../../WORK-ROUTING.md). It is the shared routing source for project documents, lane selection, plan ownership, and closeout.
+
 # Setup Pre-Commit Hooks
 
 ## What This Sets Up

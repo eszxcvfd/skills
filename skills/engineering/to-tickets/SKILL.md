@@ -1,8 +1,10 @@
 ---
 name: to-tickets
-description: Break a plan, spec, or conversation into tracer-bullet tickets with blocking edges, routed architecture context, and required proof, published to the configured tracker.
+description: Break a plan, spec, or the current conversation into a set of tracer-bullet tickets, each declaring its blocking edges, published to the configured tracker — edges as text in one file per ticket locally, or native blocking links on a real tracker.
 disable-model-invocation: true
 ---
+
+Before repository-facing work, read [`../../WORK-ROUTING.md`](../../WORK-ROUTING.md). It is the shared routing source for project documents, lane selection, plan ownership, and closeout.
 
 # To Tickets
 
@@ -18,12 +20,7 @@ Work from whatever is already in the conversation context. If the user passes a 
 
 ### 2. Explore the codebase (optional)
 
-If you have not already explored the codebase, start with Work Routing and
-open only the smallest current set needed: `ARCHITECTURE.md`, `docs/README.md`,
-and `docs/process/DEVELOPMENT.md`, plus `PLANS.md` or the relevant runtime,
-protocol, or resource owner document. Ticket titles and descriptions should
-use the project's domain glossary vocabulary; read only relevant `CONTEXT.md`
-and ADRs.
+If you have not already explored the codebase, do so to understand the current state of the code. Ticket titles and descriptions should use the project's domain glossary vocabulary, and respect ADRs in the area you're touching.
 
 Look for opportunities to prefactor the code to make the implementation easier. "Make the change easy, then make the easy change."
 
@@ -51,7 +48,6 @@ Present the proposed breakdown as a numbered list. For each ticket, show:
 - **Title**: short descriptive name
 - **Blocked by**: which other tickets (if any) must complete first
 - **What it delivers**: the end-to-end behaviour this ticket makes work
-- **Delivery notes**: owner module, affected runtime invariants, and minimum proof required
 
 Ask the user:
 
@@ -82,12 +78,6 @@ Do NOT close or modify any parent issue.
 
 **Status:** ready-for-agent
 
-**Architecture placement:** owner module, allowed dependencies, and public contracts this ticket must respect.
-
-**Affected runtime invariants:** entries from `docs/architecture/RUNTIME.md`, or "None identified".
-
-**Required proof:** minimum evidence from `docs/process/DEVELOPMENT.md`.
-
 - [ ] Acceptance criterion 1
 - [ ] Acceptance criterion 2
 
@@ -108,12 +98,6 @@ The end-to-end behaviour this ticket makes work, from the user's perspective —
 - [ ] Criterion 1
 - [ ] Criterion 2
 
-## Delivery notes
-
-- Architecture placement: owner module, allowed dependencies, and public contracts this ticket must respect.
-- Affected runtime invariants: entries from `docs/architecture/RUNTIME.md`, or "None identified".
-- Required proof: minimum evidence from `docs/process/DEVELOPMENT.md`.
-
 ## Blocked by
 
 - A reference to each blocking ticket, or "None — can start immediately".
@@ -121,5 +105,3 @@ The end-to-end behaviour this ticket makes work, from the user's perspective —
 </issue-template>
 
 In either form, avoid specific file paths or code snippets — they go stale fast. Exception: if a prototype produced a snippet that encodes a decision more precisely than prose can (state machine, reducer, schema, type shape), inline it and note briefly that it came from a prototype. Trim to the decision-rich parts — not a working demo, just the important bits.
-
-Work the frontier one ticket at a time with `/implement`, clearing context between tickets.

@@ -4,6 +4,8 @@ description: Writing, exploit — assemble raw material into a journey of beats,
 disable-model-invocation: true
 ---
 
+Before repository-facing work, read [`../../WORK-ROUTING.md`](../../WORK-ROUTING.md). It is the shared routing source for project documents, lane selection, plan ownership, and closeout.
+
 <what-to-do>
 
 The user has passed (or will pass) a markdown file of raw material. This is **exploit**: the exploring is done, the pile is fixed — commit to a path through it and mine the pile to fill each beat.

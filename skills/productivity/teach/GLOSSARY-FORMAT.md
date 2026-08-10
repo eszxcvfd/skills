@@ -1,5 +1,7 @@
 # GLOSSARY.md Format
 
+> For repository-facing work, consult the shared [`Work Routing`](../../WORK-ROUTING.md) reference before using this document.
+
 `GLOSSARY.md` is the canonical language for this teaching workspace. All explainers, exercises, and learning records should adhere to its terminology. Building it is itself part of learning: compressing a concept into a tight definition is evidence the user understands it.
 
 ## Structure

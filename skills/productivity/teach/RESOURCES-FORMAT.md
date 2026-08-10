@@ -1,5 +1,7 @@
 # RESOURCES.md Format
 
+> For repository-facing work, consult the shared [`Work Routing`](../../WORK-ROUTING.md) reference before using this document.
+
 `RESOURCES.md` is the curated set of trusted sources for this topic. Knowledge for explainers should be drawn from here, not from parametric guesses. Wisdom comes from the communities listed here.
 
 ## Structure

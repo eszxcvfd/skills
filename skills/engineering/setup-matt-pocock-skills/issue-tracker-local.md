@@ -1,6 +1,8 @@
 # Issue tracker: Local Markdown
 
-Issues and specs (you may know a spec as a PRD) for this repo live as markdown files in `.scratch/`.
+> Setup seed: consume this configuration after checking the target repository's Work Routing documents; it does not define a competing project-routing rule.
+
+Issues and specs for this repo live as markdown files in `.scratch/`.
 
 ## Conventions
 

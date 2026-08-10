@@ -3,15 +3,11 @@ name: domain-modeling
 description: Build and sharpen a project's domain model. Use when the user wants to pin down domain terminology or a ubiquitous language, record an architectural decision, or when another skill needs to maintain the domain model.
 ---
 
+Before repository-facing work, read [`../../WORK-ROUTING.md`](../../WORK-ROUTING.md). It is the shared routing source for project documents, lane selection, plan ownership, and closeout.
+
 # Domain Modeling
 
-Actively build and sharpen the project's domain model as you design. Start with
-Work Routing and let `docs/README.md` decide where domain artifacts belong.
-This is the *active* discipline — challenging terms, inventing edge-case
-scenarios, and writing the glossary and decisions down the moment they
-crystallise. (Merely *reading* `CONTEXT.md` for vocabulary is not this skill —
-that's a one-line habit any skill can do. This skill is for when you're
-changing the model, not just consuming it.)
+Actively build and sharpen the project's domain model as you design. This is the *active* discipline — challenging terms, inventing edge-case scenarios, and writing the glossary and decisions down the moment they crystallise. (Merely *reading* `CONTEXT.md` for vocabulary is not this skill — that's a one-line habit any skill can do. This skill is for when you're changing the model, not just consuming it.)
 
 ## File structure
 
@@ -43,10 +39,7 @@ If a `CONTEXT-MAP.md` exists at the root, the repo has multiple contexts. The ma
 │       └── docs/adr/
 ```
 
-Create files lazily — only when you have something to write and only at the
-canonical locations selected by Work Routing. If no `CONTEXT.md` exists,
-create one when the first term is resolved. If no `docs/adr/` exists, create it
-when the first ADR is needed.
+Create files lazily — only when you have something to write. If no `CONTEXT.md` exists, create one when the first term is resolved. If no `docs/adr/` exists, create it when the first ADR is needed.
 
 ## During the session
 

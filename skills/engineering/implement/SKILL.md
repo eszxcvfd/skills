@@ -1,83 +1,77 @@
 ---
 name: implement
-description: "Implement a spec or ticket through Work Routing, TDD, proof, review, and commit."
+description: "Implement a piece of work based on a spec or set of tickets."
 disable-model-invocation: true
 ---
 
-# Implement
+Implement the work described by the user in the spec or tickets.
 
-Implement the work described by the user in the spec or tickets. This is
-execution, not architecture drift: follow Work Routing, prove each claim, then
-commit. Do not create a second project-document system just to support this
-skill.
+## Work Routing
 
-Apply the red-green-refactor loop at pre-agreed seams. Use the promoted `/tdd`
-skill when the task is explicitly test-first; implementation keeps the same
-discipline inline for every proof-sized slice.
+Before writing production code, read the shared [`Work Routing`](../../WORK-ROUTING.md)
+reference. It is the single source of truth for the exact project documents,
+lane selection, plan ownership, and closeout rules; do not replace it with a
+skill-local routing rule.
 
-## Process
+## Test Discipline
 
-### 1. Work-routing preflight
+Tests protect a settled production contract; they do not choose architecture,
+invent owners, or justify a production seam. Use test-first RED/GREEN only for
+deterministic behavior whose contract and owner are already decided.
 
-Before editing production code, open only the smallest current set selected by
-the project's Work Routing:
+Do not add or retain production APIs, state, lifecycle branches, dependency
+features, or instrumentation whose only consumer is a test or proof harness.
 
-- `ARCHITECTURE.md` for placement, ownership, and dependency direction;
-- `docs/README.md` for document ownership and the next routing edge;
-- `docs/process/DEVELOPMENT.md` for the implementation lane and proof;
-- `docs/issues/ROADMAP.md` when the queue or dependency frontier matters;
-- `PLANS.md` when the work is non-trivial or needs durable coordination;
-- `docs/architecture/RUNTIME.md`, `NETCODE.md`, or `CONTENT.md` only when
-  the change touches those concerns;
-- the relevant `CONTEXT.md`, ADR, spec, or ticket.
+Delete tests whose only claim is a retired or forbidden name, source substring,
+help text, file inventory, private call order, phase label, proof-registry
+membership, or generated report shape unless that exact representation is a
+public machine contract.
 
-If a governing document is missing or stale, use the best bounded evidence and
-update its canonical owner when the rule must survive this task. Do not create
-a replacement control document or silently make a structural decision that a
-missing document should have governed.
+After every schema or protocol hard cut, audit every added or modified test and
+fixture. Negative cases must protect current-contract invariants without naming
+or hardcoding deleted fields, tags, widths, values, or other contracts; derive
+invalid inputs from current constants and boundaries such as `WIDTH - 1` and
+`WIDTH + 1`.
 
-If the work would change module ownership, dependency direction, request/event flow, data ownership, public contracts, infrastructure, or another hard-to-reverse choice, stop and run `/architecture-council` before coding.
+Use the diff to discover removed identifiers and values, then search current
+code, tests, and fixtures for them. Never commit a legacy blacklist, tombstone
+registry, or source-substring gate. A hard cut cannot close while historical
+names or literals remain in current tests or fixtures.
 
-### 2. Use the project's plan owner only when needed
+Ask whether each test remains meaningful without Git history; delete or rewrite
+one that only proves a dead contract is rejected. Also remove any production
+API or state that exists only to make such behavior observable.
 
-`PLANS.md` owns the conditions and contents for design notes and checked-in
-plans. When that document says the work needs a durable plan, create or update
-one there (or in the canonical plan location named by `docs/README.md`). For a
-small or owner-neutral change, keep the working checklist in the ticket or
-conversation. Use `.scratch/` only when the repository's own routing permits
-an ephemeral note. Never create a project-wide active-plan file by default.
+Prefer outcome-level tests at the owning boundary. A fixture that constructs a
+parallel game/runtime model proves only the fixture and must not gate the
+production implementation.
 
-### 3. Build in proof-sized slices
+## Hard Cut Rules
 
-Apply the red-green-refactor loop at the pre-agreed seams. For each slice:
+When the governing repository docs identify the product as pre-publication,
+breaking changes are mandatory and legacy versions are not supported. If that
+phase is not explicit, record the bounded inference before applying this rule.
 
-1. Mark the current step in the approved ticket or plan, when one exists.
-2. Write or identify the proof first when `docs/process/DEVELOPMENT.md`
-   requires it.
-3. Make the smallest production change that can satisfy that proof.
-4. Run the targeted verification.
-5. Record the command and outcome in the owner artifact, or report it in the
-   final handoff when no durable plan is required.
+- Keep exactly one current schema, metadata, architecture, protocol, package
+  identity, and compatibility-admission contract. Keep protocol/schema version
+  `1` until first public shipment; replace Version 1 instead of introducing
+  v2/v3.
+- At schema, protocol, metadata, package-identity, and compatibility-admission
+  boundaries, validate the current contract before mutation and reject input
+  that does not match it. Do not interpret older data through a fallback. This
+  rule does not prescribe a wider failure scope for faults after admission.
+- Do not add legacy/current branches, dual read/write paths, compatibility
+  facades, or migration-warning behavior.
+- Update every current shipping producer, consumer, and generated artifact that
+  is compiled, loaded, or otherwise consumed by the product/toolchain in the
+  same contract change. Audit tests, fixtures, validators, reports, snapshots,
+  mocks, and proof output independently; repository ownership alone does not
+  make them synchronization peers.
 
-Run typechecking regularly, single test files regularly, and the full test suite once at the end unless the policy says a narrower proof is enough or the repo cannot run the full suite. If you skip a required check, record why and call the result unverified.
+Use /tdd where possible, at pre-agreed seams.
 
-### 4. Final proof gate
+Run typechecking regularly, single test files regularly, and the full test suite once at the end.
 
-Before saying the work is done, compare the actual evidence against
-`docs/process/DEVELOPMENT.md` and the affected runtime/protocol documents.
+Once done, use /code-review to review the work.
 
-The final summary must include:
-
-- changed files;
-- affected architecture rules and runtime invariants;
-- verification commands actually run with outcomes;
-- required checks not run and why;
-- remaining unverified claims, if any.
-
-Do not claim done while required proof is missing. Say `blocked`, `partial`, or `unverified` instead.
-
-### 5. Review and commit
-
-Once proof is complete, use `/code-review` to review the work.
-
-Then commit your work to the current branch.
+Commit your work to the current branch.

@@ -1,5 +1,7 @@
 # CONTEXT.md Format
 
+> For repository-facing work, consult the shared [`Work Routing`](../../WORK-ROUTING.md) reference before using this document.
+
 ## Structure
 
 ```md

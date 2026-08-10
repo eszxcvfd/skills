@@ -1,5 +1,10 @@
 # Model-invoked vs user-invoked
 
+Before a repository-facing skill acts, its `SKILL.md` pointer leads to the
+shared [`Work Routing`](../skills/WORK-ROUTING.md) reference. Invocation mode
+controls who can reach a skill; Work Routing controls which project documents
+and ownership rules the skill must consult after it is reached.
+
 Every `SKILL.md` in this repo is a skill. The one axis that splits them is **invocation** — who can reach it:
 
 - **User-invoked** — reachable **only by the human typing its name**. Set `disable-model-invocation: true` in the frontmatter (Claude Code) and `policy.allow_implicit_invocation: false` in `agents/openai.yaml` (Codex). The `description` is **human-facing**: a one-line summary read by a person browsing slash-commands. Strip trigger lists ("Use when the user says…").

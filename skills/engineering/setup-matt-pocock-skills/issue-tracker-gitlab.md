@@ -1,6 +1,8 @@
 # Issue tracker: GitLab
 
-Issues and PRDs for this repo live as GitLab issues. Use the [`glab`](https://gitlab.com/gitlab-org/cli) CLI for all operations.
+> Setup seed: consume this configuration after checking the target repository's Work Routing documents; it does not define a competing project-routing rule.
+
+Issues and specs for this repo live as GitLab issues. Use the [`glab`](https://gitlab.com/gitlab-org/cli) CLI for all operations.
 
 ## Conventions
 

@@ -1,14 +1,18 @@
 # In Progress
 
-Skills that are still being developed. They are not ready to ship and are
-excluded from the plugin and top-level README until they graduate to a stable
-bucket.
+Beta. These skills are public on purpose — try them and tell me what breaks. They're excluded from the plugin and the top-level README until they graduate to a stable bucket, they get no docs pages, and they can change or disappear without warning.
 
-- **[loop-me](./loop-me/SKILL.md)** — Grill yourself into implementable workflow specs over multiple sessions.
-- **[writing-beats](./writing-beats/SKILL.md)** — Shape an article as a journey of beats, one beat at a time.
-- **[writing-fragments](./writing-fragments/SKILL.md)** — Mine heterogeneous writing fragments into a durable document.
-- **[writing-shape](./writing-shape/SKILL.md)** — Shape raw material into an article paragraph by paragraph.
-- **[claude-handoff](./claude-handoff/SKILL.md)** — Hand the current conversation to a fresh background agent.
-- **[setup-ts-deep-modules](./setup-ts-deep-modules/SKILL.md)** — Wire dependency-cruiser so TypeScript packages expose deep module entry points.
-- **[to-questionnaire](./to-questionnaire/SKILL.md)** — Turn an unresolved decision into an async questionnaire.
-- **[batch-grill-me](./batch-grill-me/SKILL.md)** — Grill a design tree in rounds instead of one question at a time.
+When a skill here touches a repository, it consults the shared [Work Routing](../WORK-ROUTING.md) reference.
+
+The plugin won't give you these. Install one directly:
+
+```bash
+npx skills@latest add mattpocock/skills --skill=<name>
+```
+
+- **[loop-me](./loop-me/SKILL.md)** — Grill yourself into implementable workflow specs over multiple sessions, using the current directory as a stateful workspace. User-invoked.
+- **[writing-beats](./writing-beats/SKILL.md)** — Shape an article as a journey of beats, choose-your-own-adventure style. Pick a starting beat, write only that beat, then pivot to the next, until the article reaches a natural end.
+- **[writing-fragments](./writing-fragments/SKILL.md)** — Grilling session that mines you for fragments — heterogeneous nuggets of writing — and appends them to a single document as raw material for a future article.
+- **[writing-shape](./writing-shape/SKILL.md)** — Take a markdown file of raw material and shape it into an article paragraph by paragraph, arguing format choices at each step.
+- **[claude-handoff](./claude-handoff/SKILL.md)** — Hand the current conversation off to a fresh background agent that picks up the work immediately, seeded with a handoff summary via `claude --bg`. User-invoked.
+- **[setup-ts-deep-modules](./setup-ts-deep-modules/SKILL.md)** — Wire dependency-cruiser into a TypeScript repo so each package is a deep module — implementation hidden in subfolders, reachable only through its entry-point files, tests exercising it through those. User-invoked.

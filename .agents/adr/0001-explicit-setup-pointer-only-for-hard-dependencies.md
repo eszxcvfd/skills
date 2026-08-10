@@ -2,6 +2,12 @@
 
 Engineering skills depend on per-repo config (issue tracker, triage label vocabulary, domain doc layout) seeded by `/setup-matt-pocock-skills`. Some skills cannot meaningfully function without that config — they have to publish to a specific issue tracker or apply a specific label string. Others only use it to sharpen output (vocabulary, ADR awareness) and degrade gracefully without it.
 
+Work Routing is a separate cross-cutting prerequisite: every repository-facing
+skill points to the shared [`Work Routing`](../../skills/WORK-ROUTING.md)
+reference before acting. That reference owns project-document routing, lane
+selection, plan ownership, and closeout; it does not replace this ADR's
+hard-dependency distinction for setup configuration.
+
 We split these into **hard-dependency** and **soft-dependency** skills:
 
 - **Hard dependency** (`to-tickets`, `to-spec`, `triage`) — include an explicit one-liner: _"… should have been provided to you — run `/setup-matt-pocock-skills` if not."_ Without the mapping, output is wrong, not just fuzzy.

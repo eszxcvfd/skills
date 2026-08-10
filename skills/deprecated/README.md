@@ -1,8 +1,7 @@
 # Deprecated
 
-Skills I no longer use.
+Skills I no longer use. This bucket is currently empty — a retired skill is deleted, and the changeset that removes it names whatever replaced it.
 
-- **[design-an-interface](./design-an-interface/SKILL.md)** — Generate multiple radically different interface designs for a module using parallel sub-agents.
-- **[qa](./qa/SKILL.md)** — Interactive QA session where user reports bugs conversationally and the agent files GitHub issues.
-- **[request-refactor-plan](./request-refactor-plan/SKILL.md)** — Create a detailed refactor plan with tiny commits via user interview, then file it as a GitHub issue.
-- **[ubiquitous-language](./ubiquitous-language/SKILL.md)** — Extract a DDD-style ubiquitous language glossary from the current conversation.
+If a retired skill is ever revived for repository-facing work, it must consult
+the shared [`Work Routing`](../WORK-ROUTING.md) reference like every other
+skill; this bucket does not define a separate routing policy.

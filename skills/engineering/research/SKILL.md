@@ -1,11 +1,11 @@
 ---
 name: research
-description: Investigate a question against high-trust primary sources and capture the findings as a Markdown file in the repo. Use when the user wants a topic researched, docs or API facts gathered, or reading legwork delegated to a focused peer research packet.
+description: Investigate a question against high-trust primary sources and capture the findings as a Markdown file in the repo. Use when the user wants a topic researched, docs or API facts gathered, or reading legwork delegated to a background agent.
 ---
 
-In Paseo, the Lead assigns a `peer` research packet. Outside Paseo, run the
-research in a separate worker only when the harness provides an explicit
-worker; do not use Pi/Codex internal subagents as hidden children.
+Before repository-facing work, read [`../../WORK-ROUTING.md`](../../WORK-ROUTING.md). It is the shared routing source for project documents, lane selection, plan ownership, and closeout.
+
+Spin up a **background agent** to do the research, so you keep working while it reads.
 
 Its job:
 
