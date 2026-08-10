@@ -49,7 +49,7 @@ It's in Claude Code's official marketplace, so there's nothing to add first, and
 <summary><strong>Codex, and other agents</strong></summary>
 
 ```bash
-npx skills@latest add mattpocock/skills
+npx skills@latest add eszxcvfd/skills
 ```
 
 Pick the skills you want, and which coding agents to install them on. **The installer lets you choose which skills to take — make sure `setup-matt-pocock-skills` is one of them.**
@@ -64,26 +64,30 @@ A native Codex plugin is on the roadmap — see [`.agents/adr/0002-ship-as-a-cla
 Use the same installer, on any agent — including Claude Code:
 
 ```bash
-npx skills@latest add mattpocock/skills
+npx skills@latest add eszxcvfd/skills
 ```
 
 It writes the skills into your repo as ordinary files you own and can edit. Nothing updates behind your back; pull my latest changes when you want them with `npx skills update`.
 
 </details>
 
-### Download the repository itself
+### Download this repository itself
 
-To download the complete skill source tree for inspection or development, clone
-the repository directly:
+To download the complete source tree from this fork for inspection or
+development, clone the repository directly:
 
 ```bash
-git clone https://github.com/mattpocock/skills.git
+git clone https://github.com/eszxcvfd/skills.git
 cd skills
 ```
 
 This is a source checkout, not a target-project install. For installing skills
 into another repository, use one of the install methods above, then run
 `/setup-matt-pocock-skills` once in that target repository.
+
+The Claude Code plugin command above installs the official upstream plugin
+(`mattpocock-skills`). Use the fork-specific commands here when you need the
+customized contents of this repository.
 
 ### 2. Run `/setup-matt-pocock-skills`
 
