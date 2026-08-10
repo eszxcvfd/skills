@@ -1,7 +1,0 @@
-{
-  "scripts": {
-    "bootstrap": {
-      "command": "npm ci && claude plugin validate . --strict; exit"
-    }
-  }
-}

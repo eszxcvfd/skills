@@ -1,6 +1,0 @@
-interface:
-  display_name: "Ultra Review"
-  short_description: "Maximum-recall peer review pipeline"
-  default_prompt: "Use $ultra-review with review_name=<slug> and explicit scope to allocate 10 independent peer review workers, preserve every candidate, write docs/ultrareview/<date>-<slug>-round-<n>.md, and print the full report."
-policy:
-  allow_implicit_invocation: false
