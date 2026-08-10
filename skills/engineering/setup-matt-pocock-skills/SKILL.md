@@ -4,7 +4,10 @@ description: Configure this repo for the engineering skills — set up its issue
 disable-model-invocation: true
 ---
 
-Before repository-facing work, read [`../../WORK-ROUTING.md`](../../WORK-ROUTING.md). It is the shared routing source for project documents, lane selection, plan ownership, and closeout.
+Before repository-facing work, read the target repository's `WORK-ROUTING.md`
+when it exists. In this skill source tree, also read the bundled
+[`../../WORK-ROUTING.md`](../../WORK-ROUTING.md), which defines the shared
+pointer and rules used while setup creates the target-local copy.
 
 # Setup Matt Pocock's Skills
 
@@ -28,6 +31,7 @@ Look at the current repo to understand its starting state. Read whatever exists;
 - `CONTEXT.md` and `CONTEXT-MAP.md` at the repo root
 - `docs/adr/` and any `src/*/docs/adr/` directories
 - `docs/agents/` — does this skill's prior output already exist?
+- `WORK-ROUTING.md` — is the target-local routing pointer already present?
 - The Work Routing paths, when present: `ARCHITECTURE.md`, `docs/README.md`,
   `docs/process/DEVELOPMENT.md`, `docs/issues/ROADMAP.md`, `PLANS.md`,
   `docs/architecture/RUNTIME.md`, `docs/architecture/NETCODE.md`, and
@@ -68,10 +72,12 @@ The defaults are the five canonical roles, each label string equal to its name: 
 Offer **multi-context** — a root `CONTEXT-MAP.md` pointing to per-context `CONTEXT.md` files — only when exploration found monorepo signals. Then confirm which layout they want.
 
 **Section D — Work Routing documents.** This section is required; it is not a
-new lane choice. Add the following canonical documents to the target repo:
+new lane choice. Add the target-local `WORK-ROUTING.md` pointer and the
+following canonical owner documents to the target repo:
 
 | Document | Owns |
 | --- | --- |
+| `WORK-ROUTING.md` | shared pointer to the Work Routing set; it owns no project subject |
 | `ARCHITECTURE.md` | orientation and change routing |
 | `docs/README.md` | documentation ownership and routing |
 | `docs/process/DEVELOPMENT.md` | lane selection and proof |
@@ -100,7 +106,8 @@ Show the user a draft of:
 
 - The `## Agent skills` block to add to whichever of `CLAUDE.md` / `AGENTS.md` is being edited (see step 4 for selection rules)
 - The contents of `docs/agents/issue-tracker.md`, `docs/agents/domain.md`, and `docs/agents/triage-labels.md` (the last only when `triage` is installed)
-- The missing Work Routing documents from `work-routing/`, plus any narrowly
+- The missing `WORK-ROUTING.md` pointer and Work Routing owner documents from
+  `work-routing/`, plus any narrowly
   scoped additions proposed for existing Work Routing documents
 
 Let them edit before writing.
@@ -145,20 +152,21 @@ Then write the docs files using the seed templates in this skill folder as a sta
 - [triage-labels.md](./triage-labels.md) — label mapping (only if `triage` is installed)
 - [domain.md](./domain.md) — domain doc consumer rules + layout
 
-Also write the Work Routing documents from the matching files under
-[`work-routing/`](./work-routing/). Create their parent directories as needed.
-Copy a seed only when its target path is missing. For an existing target,
-make only the confirmed, owner-preserving addition; never overwrite the
-document or erase project-specific doctrine. Keep the generated files free of
-unverified product, runtime, protocol, or packaging claims.
+Also write `WORK-ROUTING.md` and the Work Routing owner documents from the
+matching files under [`work-routing/`](./work-routing/). Create their parent
+directories as needed. Copy a seed only when its target path is missing. For
+an existing target, make only the confirmed, owner-preserving addition; never
+overwrite the document or erase project-specific doctrine. Keep the generated
+files free of unverified product, runtime, protocol, or packaging claims.
 
 For "other" issue trackers, write `docs/agents/issue-tracker.md` from scratch using the user's description.
 
 ### 5. Done
 
 Tell the user the setup is complete and which engineering skills will now read
-from these files. Name the Work Routing documents that were created or left
-unchanged because they already existed. Mention they can edit
+from these files. Name the target-local `WORK-ROUTING.md` pointer and the Work
+Routing owner documents that were created or left unchanged because they
+already existed. Mention they can edit
 `docs/agents/*.md` and the Work Routing documents directly later — re-running
 this skill is only necessary if they want to switch issue trackers, change the
 domain layout, or regenerate missing setup seeds.

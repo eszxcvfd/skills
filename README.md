@@ -96,9 +96,9 @@ In your agent, run it once per repo. It will:
 - Ask you which issue tracker you want to use (GitHub, Linear, or local files)
 - Ask you what labels you apply to tickets when you triage them (`/triage` uses labels)
 - Ask you where you want to save any docs we create
-- Create the missing Work Routing documents for orientation, document ownership, lane/proof selection, the work queue, plans, runtime/protocol ownership, and content/package boundaries
+  - Create the missing `WORK-ROUTING.md` pointer and Work Routing documents for orientation, document ownership, lane/proof selection, the work queue, plans, runtime/protocol ownership, and content/package boundaries
 
-The exact document set and ownership rules are defined in [`skills/WORK-ROUTING.md`](./skills/WORK-ROUTING.md). Existing project doctrine is preserved when setup finds one of those documents already present.
+The exact document set and ownership rules are defined in [`skills/WORK-ROUTING.md`](./skills/WORK-ROUTING.md). Existing project doctrine is preserved when setup finds any of these documents already present.
 
 ### 3. Bam - you're ready to go.
 

@@ -2,7 +2,7 @@
 
 Repository-facing runs begin with [Work Routing](https://github.com/mattpocock/skills/blob/main/skills/WORK-ROUTING.md), the shared source for the target repository's document, lane, plan, and closeout routing.
 
-`setup-matt-pocock-skills` answers three questions about one repo — where issues live, what the triage labels are called, and where the domain docs sit — then seeds the Work Routing documents that tell every later skill where orientation, lanes, plans, runtime/protocol ownership, and content boundaries live.
+`setup-matt-pocock-skills` answers three questions about one repo — where issues live, what the triage labels are called, and where the domain docs sit — then seeds the target-local `WORK-ROUTING.md` pointer and owner documents that tell every later skill where orientation, lanes, plans, runtime/protocol ownership, and content boundaries live.
 
 The tracker and domain configuration varies between repos; the Work Routing files provide the shared shape and then become editable repository doctrine. The skills themselves remain identical everywhere: they read the repo's configuration and canonical owner documents at run time. Invoking it with "link the skills to a custom issue tracker" works with anything you can connect to programmatically, with zero changes to the skills.
 
@@ -23,7 +23,7 @@ It writes into the repo you run it in:
 | `issue-tracker.md` | `docs/agents/` |
 | `domain.md` | `docs/agents/` |
 | `triage-labels.md` | `docs/agents/`, only when the `triage` skill is installed |
-| Work Routing documents | `ARCHITECTURE.md`, `docs/README.md`, `docs/process/DEVELOPMENT.md`, `docs/issues/ROADMAP.md`, `PLANS.md`, and `docs/architecture/` |
+| Work Routing documents | the root `WORK-ROUTING.md` pointer, plus `ARCHITECTURE.md`, `docs/README.md`, `docs/process/DEVELOPMENT.md`, `docs/issues/ROADMAP.md`, `PLANS.md`, and `docs/architecture/` |
 | An `## Agent skills` block | whichever of `CLAUDE.md` / `AGENTS.md` already exists |
 
 All of it is committed markdown. There is no user-level or global mode: the config lives in the repo, so every repo gets its own copy.
@@ -40,12 +40,14 @@ It leads each section with the recommended answer, and skips whatever exploratio
 
 ## The Work Routing set
 
-Every setup run checks this exact set. It creates a missing document from the
-seed templates, but preserves an existing document as repository doctrine and
-shows any proposed addition before editing it:
+Every setup run checks the root `WORK-ROUTING.md` pointer and this exact owner
+set. It creates a missing document from the seed templates, but preserves an
+existing document as repository doctrine and shows any proposed addition
+before editing it:
 
 | Document | Owns |
 | --- | --- |
+| `WORK-ROUTING.md` | shared pointer to the Work Routing set; it owns no project subject |
 | `ARCHITECTURE.md` | orientation and change routing |
 | `docs/README.md` | documentation ownership and routing |
 | `docs/process/DEVELOPMENT.md` | lane selection and proof |
@@ -88,7 +90,7 @@ Asked directly after v1.1, Matt said yes. The skill's own closing message is sof
 
 **Will setup overwrite an existing Work Routing document?**
 
-No. A present `ARCHITECTURE.md`, `docs/README.md`, `docs/process/DEVELOPMENT.md`,
+No. A present `WORK-ROUTING.md`, `ARCHITECTURE.md`, `docs/README.md`, `docs/process/DEVELOPMENT.md`,
 `docs/issues/ROADMAP.md`, `PLANS.md`, or architecture owner document is treated
 as editable repository doctrine. Setup proposes only a narrowly scoped missing
 section or addition; it does not replace project-specific content with the
@@ -127,7 +129,7 @@ One long-standing complaint says yes, in these words: *"having a skill to set up
 ## It's working if
 
 - `docs/agents/issue-tracker.md` and `docs/agents/domain.md` exist, plus `triage-labels.md` if `triage` is installed.
-- The eight Work Routing documents exist, and any pre-existing ones retain their project-specific doctrine.
+- `WORK-ROUTING.md` and the eight Work Routing owner documents exist, and any pre-existing ones retain their project-specific doctrine.
 - An `## Agent skills` section appears in the instruction file your harness actually reads, with a one-line summary pointing at each of those files.
 - The tracker it proposed matches the remote you really use, and the label strings match labels that really exist in your tracker.
 - No seed document claims an unverified runtime, protocol, resource, package, or product fact.
@@ -136,4 +138,4 @@ One long-standing complaint says yes, in these words: *"having a skill to set up
 
 ## Where it fits
 
-`setup-matt-pocock-skills` is the **run-once setup** for the engineering flow, the precondition everything else assumes rather than a step in the chain. Its neighbours are its readers: [triage](https://aihero.dev/skills-triage), which applies the label vocabulary written here; [to-spec](https://aihero.dev/skills-to-spec) and [to-tickets](https://aihero.dev/skills-to-tickets), which publish into the tracker named here; and [wayfinder](https://aihero.dev/skills-wayfinder), which reads the "Wayfinding operations" section of the same tracker file to know how maps and child [tickets](https://www.aihero.dev/ai-coding-dictionary/ticket) are stored. The domain-doc layout it records is the one [domain-modeling](https://aihero.dev/skills-domain-modeling) fills in later — it creates `CONTEXT.md` and ADRs lazily, when a term or decision actually gets resolved. The Work Routing set becomes the shared project map that implementation, review, research, and planning skills consult before repository-facing work. The seed templates live in [the setup skill's Work Routing directory](https://github.com/mattpocock/skills/tree/main/skills/engineering/setup-matt-pocock-skills/work-routing). For which skill to reach for next, [ask-matt](https://aihero.dev/skills-ask-matt) routes the whole set.
+`setup-matt-pocock-skills` is the **run-once setup** for the engineering flow, the precondition everything else assumes rather than a step in the chain. Its neighbours are its readers: [triage](https://aihero.dev/skills-triage), which applies the label vocabulary written here; [to-spec](https://aihero.dev/skills-to-spec) and [to-tickets](https://aihero.dev/skills-to-tickets), which publish into the tracker named here; and [wayfinder](https://aihero.dev/skills-wayfinder), which reads the "Wayfinding operations" section of the same tracker file to know how maps and child [tickets](https://www.aihero.dev/ai-coding-dictionary/ticket) are stored. The domain-doc layout it records is the one [domain-modeling](https://aihero.dev/skills-domain-modeling) fills in later — it creates `CONTEXT.md` and ADRs lazily, when a term or decision actually gets resolved. The target-local `WORK-ROUTING.md` pointer and its eight owner documents become the shared project map that implementation, review, research, and planning skills consult before repository-facing work. The seed templates live in [the setup skill's Work Routing directory](https://github.com/mattpocock/skills/tree/main/skills/engineering/setup-matt-pocock-skills/work-routing). For which skill to reach for next, [ask-matt](https://aihero.dev/skills-ask-matt) routes the whole set.

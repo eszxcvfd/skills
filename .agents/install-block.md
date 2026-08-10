@@ -53,7 +53,8 @@ npx skills@latest update <name>
 `skills@latest` is the pinned spelling in all three. The pages under `docs/` used to carry their own copy of these commands; those blocks are now deleted rather than corrected, because the site renders the install commands itself.
 
 After installation, run `/setup-matt-pocock-skills` in each target repo. It
-seeds the missing Work Routing documents defined by
+seeds the target-local `WORK-ROUTING.md` pointer and the missing Work Routing
+owner documents defined by
 [`skills/WORK-ROUTING.md`](../skills/WORK-ROUTING.md) and preserves existing
 project doctrine.
 
