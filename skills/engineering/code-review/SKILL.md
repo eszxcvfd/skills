@@ -8,7 +8,9 @@ Two-axis review of the diff between `HEAD` and a fixed point the user supplies:
 - **Standards** — does the code conform to this repo's documented coding standards and routed owner docs?
 - **Spec** — does the code faithfully implement the originating issue / PRD / spec?
 
-Both axes run as separate review lanes. Under Paseo, root should assign them to independent peer reviewer packets; otherwise run them inline without Pi/Codex internal subagents.
+Both axes run as separate review lanes. Under Paseo, the Lead should assign
+them to independent peer reviewer packets; otherwise run them inline without
+Pi/Codex internal subagents.
 
 The issue tracker should have been provided to you — run `/setup-matt-pocock-skills` if `docs/agents/issue-tracker.md` is missing.
 
@@ -69,7 +71,9 @@ Each smell reads *what it is* → *how to fix*; match it against the diff:
 
 ### 4. Run the two review lanes
 
-Do not use Pi/Codex internal subagents. In a Paseo run, root assigns two `peer` reviewer packets. Outside Paseo, run the Standards lane and Spec lane inline, keeping their notes separate.
+Do not use Pi/Codex internal subagents. In a Paseo run, the Lead assigns two
+`peer` reviewer packets. Outside Paseo, run the Standards lane and Spec lane
+inline, keeping their notes separate.
 
 **Standards lane packet** — include:
 

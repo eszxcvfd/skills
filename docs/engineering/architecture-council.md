@@ -26,7 +26,8 @@ The Lead frames the case, then starts `proposer-a` and `proposer-b` without
 letting either see the other's work. One adjudicator then breaks both
 proposals, marks load-bearing claims `Verified`, `Likely`, `Unverified`, or
 `Contradicted`, and writes the verdict. Reduced mode uses three
-peer/delegated workers. Full or high-risk mode uses three configured Paseo root agents. This keeps the adversarial checks while removing two agent launches and
+peer/delegated workers. Full or high-risk mode uses three configured Paseo root agents
+(the legacy Codex name for the Lead role). This keeps the adversarial checks while removing two agent launches and
 their duplicated context handoffs.
 
 The Council writes its case, two proposals, and a verdict containing the

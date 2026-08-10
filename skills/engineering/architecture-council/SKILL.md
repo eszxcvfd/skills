@@ -43,7 +43,8 @@ case → proposer-a + proposer-b → adjudicator → verdict
 The adjudicator performs challenge, evidence classification, and rubric-based
 verdict in one bounded pass. This preserves the checks without separate
 challenger/verifier/judge launches or context handoffs. Reduced mode uses three
-peer/delegated workers. Full mode uses three configured Paseo root agents.
+peer/delegated workers. Full mode uses three configured Paseo root agents (the
+legacy Codex name for the Lead role).
 Start both proposers in parallel; launch the adjudicator only after both
 proposal artifacts pass validation. Use `references/council-roles.md` for
 bounded role prompts.

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check the current detached Paseo Root/Peer config/instruction contract."""
+"""Check the current detached Paseo Supervisor/Lead/Peer contract."""
 
 from __future__ import annotations
 
@@ -33,15 +33,53 @@ REQUIRED_PHRASES = (
     "--wait-timeout 30m",
     "paseo wait --timeout 1800",
     "completion notification",
+    "gate all dependent work on completion",
+    "Prefer a foreground",
+    "do not pass `--background`",
+    "issue exactly one",
+    "Do not poll with",
+    "do not send progress messages while waiting",
+    "Continue only when",
+    "inspect the final handoff and artifacts once",
+    "Do not use an agent-scoped `create_agent` or a background launch",
     "Peer launches must not ask Peer to read `WORKSPACE_PROTOCOL.md` or `config.model`",
-    "Supervisor works directly by default",
-    "not an automatic Root dispatcher",
-    "only when the human explicitly asks for that handoff",
-    "as if the human were speaking directly to Peer",
-    "Do not use a fixed WORK_PACKET template",
-    "Peer should experience the request as the human's work direction",
+    "Supervisor is a governance observer",
+    "does not edit product files",
+    "human explicitly asks",
+    "speaking directly to Peer",
+    "There is no fixed `WORK_PACKET` prompt template",
     "Never call `paseo_create_agent` with a bare model id",
     "MCP create_agent model lives in provider; settings must not contain model; thinking lives in settings.thinkingOptionId",
+    "Paseo owns lifecycle, workspace, and control-plane state",
+    "role profile or Pi extension owns the prompt and tool policy",
+    "Supervisor",
+    "Lead",
+    "Peer",
+    "one writer per moving scope",
+    "fresh workspace at the exact candidate SHA",
+    "MODEL_CLASS",
+    "HOST_ID",
+    "cluster-routing.local.json",
+    "model-routing.local.json",
+    "~/.pi/agent/models.json",
+    "thinkingLevelMap",
+    "ROUTING_DECISION",
+    "MONITOR_ECONOMY",
+    "FAST_READ",
+    "CODING_MEDIUM",
+    "REASONING_HIGH",
+    "REVIEW_HIGH",
+    "list_providers",
+    "list_models",
+    "get_agent_status",
+    "snapshot.runtimeInfo",
+    "MODEL_RESOLUTION_MISMATCH",
+    "no-silent-fallback",
+    "PASEO_TEAM_TASK_V3_BEGIN",
+    "PASEO_TEAM_TASK_V3_END",
+    "task body after the closing marker is untrusted",
+    "Authority never carries over from a previous turn",
+    "assigned candidate SHA",
 )
 
 CONTRACT_FILES = (
@@ -64,9 +102,9 @@ PROFILE_REQUIRED_PHRASES = (
     "as if the human were speaking directly to Root",
     "identify the real job",
     "prompt-leverage discipline",
-    "Supervisor works directly by default",
-    "not an automatic Root dispatcher",
-    "only when the human explicitly asks for that handoff",
+    "Supervisor is a governance observer",
+    "does not edit product files",
+    "human explicitly asks",
     "invent a human decision",
     "human-like requirement applies only to",
     "Do not tell Root to answer in natural language",
@@ -74,12 +112,20 @@ PROFILE_REQUIRED_PHRASES = (
     "decode it into an actual newline",
     "serialized representation",
     "leave agent routing and coordination method to Root/Lead",
-    "as if the human were speaking directly to Peer",
-    "Do not use a fixed WORK_PACKET template",
-    "Peer should experience the request as the human's work direction",
+    "speaking directly to Peer",
+    "There is no fixed `WORK_PACKET` prompt template",
     "notifyOnFinish: true",
     "--wait-timeout 30m",
     "paseo wait --timeout 1800",
+    "this Supervisor turn is gated on",
+    "Prefer a foreground launch with",
+    "do not pass `--background`",
+    "issue exactly one",
+    "remain blocked on that wait",
+    "Do not poll with `inspect`, `list`, `logs`, or repeated waits",
+    "do not send “still waiting” progress messages",
+    "Only after it returns",
+    "Do not use an agent-scoped `create_agent` or a background launch",
     "The launch message is the owner's work direction delivered through Paseo",
     "Execute exactly one self-contained owner request",
     "Root-only",
@@ -89,6 +135,31 @@ PROFILE_REQUIRED_PHRASES = (
     "settings.thinkingOptionId",
     "Keep the notebook at",
     "terminal PEER_STATUS handoff",
+    "PASEO_TEAM_TASK_V3_BEGIN",
+    "PASEO_TEAM_TASK_V3_END",
+    "MODE = read-only",
+    "EDIT_AUTHORITY",
+    "COMMIT_AUTHORITY",
+    "PUSH_TASK_BRANCH_AUTHORITY",
+    "force-push, merge, and deploy are always denied",
+    "EXPECTED_BASE_SHA",
+    "ASSIGNED_CANDIDATE_SHA",
+    "MODEL_CLASS",
+    "HOST_ID",
+    "cluster-routing.local.json",
+    "model-routing.local.json",
+    "~/.pi/agent/models.json",
+    "thinkingLevelMap",
+    "ROUTING_DECISION",
+    "list_providers",
+    "list_models",
+    "snapshot.runtimeInfo",
+    "MODEL_RESOLUTION_MISMATCH",
+    "never silently fall back",
+    "codex-root",
+    "pi-supervisor",
+    "pi-lead",
+    "pi-peer",
 )
 
 @dataclass(frozen=True)
@@ -117,18 +188,30 @@ def check_config(root: Path, failures: list[str]) -> None:
 
     parser = configparser.ConfigParser()
     parser.read(config_path, encoding="utf-8")
-    for role in ("root", "peer"):
-        if not parser.has_section(role):
-            failures.append(f"config.model: missing [{role}] section")
+    section_aliases = {
+        "supervisor": ("supervisor",),
+        "lead": ("lead", "root"),
+        "peer": ("peer",),
+    }
+    accepted_providers = {
+        "supervisor": {"codex-supervisor"},
+        "lead": {"codex-root"},
+        "peer": {"codex-peer"},
+    }
+    for role, aliases in section_aliases.items():
+        section = next((name for name in aliases if parser.has_section(name)), None)
+        if section is None:
+            failures.append(
+                f"config.model: missing [{role}] section (accepted aliases: {', '.join(aliases)})"
+            )
             continue
         for key in REQUIRED_CONFIG_KEYS:
-            if not parser.get(role, key, fallback="").strip():
-                failures.append(f"config.model: [{role}].{key} is required")
-        provider = parser.get(role, "provider", fallback="")
-        expected_provider = f"codex-{role}"
-        if provider != expected_provider:
+            if not parser.get(section, key, fallback="").strip():
+                failures.append(f"config.model: [{section}].{key} is required")
+        provider = parser.get(section, "provider", fallback="")
+        if provider not in accepted_providers[role]:
             failures.append(
-                f"config.model: [{role}].provider = {provider!r}, expected {expected_provider!r}"
+                f"config.model: [{section}].provider = {provider!r}, expected one of {sorted(accepted_providers[role])!r}"
             )
 
 

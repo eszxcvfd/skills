@@ -1,0 +1,12 @@
+{
+  "$comment": "Legacy single-host input. Copy to ~/.paseo-pi-team/model-routing.local.json and fill exact host models.",
+  "version": 1,
+  "hostId": "replace-me-host-id",
+  "routes": {
+    "MONITOR_ECONOMY": { "paseoProvider": "pi-supervisor", "model": "<pi-provider>/<model-id>", "thinking": "low" },
+    "FAST_READ": { "paseoProvider": "pi-peer", "model": "<pi-provider>/<model-id>", "thinking": "low" },
+    "CODING_MEDIUM": { "paseoProvider": "pi-peer", "model": "<pi-provider>/<model-id>", "thinking": "medium" },
+    "REASONING_HIGH": { "paseoProvider": "pi-peer", "model": "<pi-provider>/<model-id>", "thinking": "high" },
+    "REVIEW_HIGH": { "paseoProvider": "pi-peer", "model": "<pi-provider>/<model-id>", "thinking": "high" }
+  }
+}

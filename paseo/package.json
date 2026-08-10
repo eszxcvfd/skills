@@ -1,0 +1,14 @@
+{
+  "name": "paseo-role-pack",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "test:policy": "node --test test/policy.test.mjs",
+    "test:routing": "node --test test/model-routing.test.mjs",
+    "preflight": "node scripts/preflight.mjs --strict"
+  }
+}

@@ -17,8 +17,10 @@ Non-Claude agents can install the skill set with `npx skills@latest add eszxcvfd
 engineering skills need in one pass: canonical architecture, process, roadmap,
 plan, runtime, protocol, and content documents; issue-tracker settings; triage
 labels; domain-doc routing; and the Paseo SLP project contract. When detached
-Paseo is enabled, it also prepares the three machine-local role profiles,
-provider registration, launcher target, and external Supervisor notebook.
+Paseo is enabled, it also prepares the three machine-local Supervisor/Lead/Peer
+role profiles, provider registration, launcher target, and external Supervisor
+notebook. The Codex adapter calls its Lead provider `codex-root`; the Pi
+equivalent is `pi-lead`.
 
 It explores the repository, asks about the issue tracker, triage labels, and
 domain layout in sequence, then shows a complete draft before writing. It
@@ -26,19 +28,21 @@ follows the repository's Work Routing and does not create a second document
 system or hard-code a model into a prompt.
 
 Its Paseo profiles keep the roles separate while leaving the workflow flexible:
-Supervisor works like a normal agent by default and only launches a detached
-Root when the human explicitly asks for that handoff. Root/Lead owns
-coordination method and acceptance once chosen, and Peer executes one bounded
-owner-facing request. Root reads the Root-only `WORKSPACE_PROTOCOL.md`; Peer
-never reads or requests it. The profiles use role-scoped capability guidance
-rather than fixed prompt templates. When delegation is explicitly requested,
-Supervisor carries the owner's request to Root as if the owner were speaking
-directly, preserving intent and uncertainty without inventing decisions. Root
-does the same when it asks Peer to work: the message contains only the context,
-outcome, scope, constraints, non-goals, relevant files/rules, proof, and done
-condition needed for that request, without mentioning an upstream role. Neither
-handoff imposes a response style. Delegated runs use native completion
-notification with a 30-minute wait bound. Prompt transport remains lossless:
+Supervisor is a governance observer and only starts or recovers a detached Lead
+when the human explicitly asks. Lead owns model/workspace routing, coordination
+method, and acceptance; Peer executes one bounded current-turn V3 brief. Lead
+reads the Lead-only `WORKSPACE_PROTOCOL.md`; Peer never reads or requests it.
+The profiles use role-scoped capability guidance rather than fixed prompt
+templates. When delegation is explicitly requested, Supervisor carries the
+owner's request to Lead as if the owner were speaking directly, preserving
+intent and uncertainty without inventing decisions. Lead does the same when it
+asks Peer to work: the message contains only the context, outcome, scope,
+constraints, non-goals, relevant files/rules, proof, and done condition needed
+for that request, without mentioning an upstream role. Neither handoff imposes
+a response style. Delegated runs use native completion
+notification with a 30-minute wait bound: the parent uses a foreground wait, or
+one background `paseo wait --timeout 1800` fallback, and does no polling or
+progress chatter before the wait returns. Prompt transport remains lossless:
 prose `\\n` escapes become real newlines before launch or handoff, while
 escapes inside code, regexes, paths, and JSON examples are preserved.
 
@@ -87,11 +91,15 @@ not established yet rather than guessed.
   `docs/agents/triage-labels.md` when `triage` is installed.
 - **Domain routing** — `docs/agents/domain.md`, with a root `CONTEXT.md` and
   `docs/adr/` created lazily when there is content to record.
-- **Paseo workspace** — `WORKSPACE_PROTOCOL.md` is the Root/Peer coordination
-  contract and `config.model` is the per-project provider/model/thinking choice
-  for those two roles. Root owns its coordination method and may adapt it to
-  the task; Supervisor normally works directly and only becomes the Root
-  handoff point when the human explicitly asks for that delegation. The three
+- **Paseo workspace** — `WORKSPACE_PROTOCOL.md` is the Lead/Peer coordination
+  contract and `config.model` is the Codex adapter's provider/model/thinking
+  choice for those roles. Host-specific Pi routes use logical `MODEL_CLASS`
+  values and `HOST_ID` from the controller-local
+  `cluster-routing.local.json`; the single-host `model-routing.local.json` is
+  only legacy resolver input. Neither route is committed. Lead owns its
+  coordination method and may adapt it to the task;
+  Supervisor remains read-only and only becomes the Lead handoff point when the
+  human explicitly asks for that delegation. The three
   role profile TOMLs, provider registration,
   launcher, and Supervisor notebook are machine-local and remain outside the
   repository.
@@ -113,6 +121,10 @@ term or consequential decision actually exists, not as empty setup metadata.
   three provider registrations, a launcher target, and an external notebook;
 - downstream skills use the configured tracker, labels, and Paseo role
   defaults without guessing.
+- fresh agent routes verify `list_providers`, `list_models`, and
+  `get_agent_status → snapshot.runtimeInfo` without silent fallback;
+- Peer prompts use a valid V3 authority block, with invalid/legacy briefs
+  resolving to read-only.
 
 ## Where it fits
 

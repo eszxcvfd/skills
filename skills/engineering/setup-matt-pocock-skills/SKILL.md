@@ -43,7 +43,7 @@ exists; don't assume:
   in a genuinely large multi-package repo; their absence means single-context,
   which is almost every repo.
 - `WORKSPACE_PROTOCOL.md` and `config.model` when the repo uses the detached
-  Paseo Root/Peer runtime.
+  Paseo Lead/Peer runtime (the Codex adapter's legacy Root name).
 - the local Paseo/Codex prerequisites when the user uses detached roles:
   `paseo --version`, `codex --version`, `~/.codex/config.toml`,
   `~/.codex/{supervisor,root,peer}.config.toml`, the supported
@@ -125,13 +125,13 @@ layout, without adding another question:
 #### Section D — Paseo workspace and role profiles
 
 Run this section when the repository uses Paseo or the user asks for the
-detached Root/Peer/Supervisor workflow. Lead with **enable the complete Paseo
+detached Supervisor/Lead/Peer workflow. Lead with **enable the complete Paseo
 bootstrap** as the recommended answer and ask one question:
 
 > Should setup create the project `config.model` and `WORKSPACE_PROTOCOL.md`,
-> the machine-local `supervisor.config.toml`, `root.config.toml`, and
-> `peer.config.toml`, the registered Paseo role providers, and the external
-> Supervisor notebook? (recommended: **yes**)
+> the machine-local `supervisor.config.toml`, `root.config.toml` (the Codex
+> adapter's Lead profile), and `peer.config.toml`, the registered Paseo role
+> providers, and the external Supervisor notebook? (recommended: **yes**)
 
 On **yes**, include every project and machine-local target in the draft. On
 **no**, still create the project `config.model` and `WORKSPACE_PROTOCOL.md`,
@@ -139,42 +139,57 @@ but report the explicitly declined machine-local targets as omitted. Do not
 silently treat missing profiles, providers, or notebook as a complete Paseo
 setup.
 
-The three profile files use the local machine baseline plus the matching role
-instructions; they are not `.codex/agents/*.toml` and must not be replaced by
-editing an agent instruction file. Use
+The three profile files use the local machine baseline plus the matching
+Supervisor/Lead/Peer instructions; they are not `.codex/agents/*.toml` and
+must not be replaced by editing an agent instruction file. The equivalent Pi
+provider names are `pi-supervisor`, `pi-lead`, and `pi-peer`, with
+`PASEO_PI_ROLE` selecting the role. Use
 [templates/paseo-profiles.md](./templates/paseo-profiles.md) and the supplied
 Paseo profile guide for their exact shape.
 
 The Supervisor notebook is operator-side state and must be stored outside the
 project under `$CODEX_HOME/supervisor-notebooks/<repo-slug>/`. It must never be
-linked from Root-facing project documents or passed to Root/Peer.
+linked from Lead-facing project documents or passed to Lead/Peer.
 
-The generated role boundary has only a few fixed invariants: Supervisor works
-on the human's task directly by default and launches a detached Root only when
-the human explicitly asks for that handoff; Root/Lead owns coordination method
-and acceptance once chosen; Peer executes one bounded owner-facing request.
-Root must read `WORKSPACE_PROTOCOL.md` before planning, while Peer must never
-read, quote, or request that Root-only document. Supervisor can observe a named
-Paseo session, but must not invent a hidden command path or silently transfer
-ownership.
+The generated role boundary follows the Paseo + Pi contract: Paseo owns
+lifecycle/workspace/control-plane state; the role profile or extension owns
+prompt and tool policy. Supervisor is a governance observer and does not edit,
+create Peer, accept, merge, push, or deploy. Lead (the legacy Codex runtime is
+`codex-root`) owns project scope, model/workspace routing, coordination,
+integration, and acceptance. Peer executes one bounded current-turn brief and
+has no Paseo orchestration tools. Lead must read `WORKSPACE_PROTOCOL.md` before
+planning, while Peer must never read, quote, or request that Lead-only document.
+Supervisor can observe a named Paseo session, but must not invent a hidden
+command path or silently transfer ownership.
 
-Keep capability guidance role-scoped: Supervisor gets normal task-matching
-skills lazily plus Paseo lifecycle when needed; Root gets task-matching
-engineering skills; Peer gets only the skills and public files named by its
-owner-facing launch message.
+Keep capability guidance role-scoped: Supervisor gets observation/lifecycle
+surfaces only; Lead gets task-matching engineering skills plus Paseo discovery,
+workspace, monitoring, and orchestration; Peer gets only the skills and public
+files named by its current task brief. Visibility is not authority.
 
-When the human explicitly asks Supervisor to hand work to Root, make the
-Supervisor-to-Root launch message human-facing. Carry the owner's
+Every fresh agent route must choose a logical `MODEL_CLASS`, choose `HOST_ID`
+from `~/.paseo-pi-team/cluster-routing.local.json`, resolve that host's route,
+verify `list_providers` and `list_models`, and compare
+`get_agent_status → snapshot.runtimeInfo` with the requested provider/model/
+thinking. Missing or different runtime identity is
+`BLOCKED: MODEL_RESOLUTION_MISMATCH`; never silently fall back or inherit a
+daemon default. Every Peer prompt, including read-only work, uses a valid
+`PASEO_TEAM_TASK_V3_BEGIN` … `PASEO_TEAM_TASK_V3_END` authority block. Invalid,
+legacy, duplicate, or unclosed briefs fail closed to read-only.
+
+When the human explicitly asks Supervisor to hand work to Lead, make the
+Supervisor-to-Lead launch message human-facing. Carry the owner's
 language, intent, tone, uncertainty, and decisions as if the owner were
-speaking directly to Root. Use the prompt-leverage discipline selectively:
+speaking directly to Root, the legacy Codex name for Lead. Use the
+prompt-leverage discipline selectively:
 identify the real job, then add only the context, work expectations, tool/file
 rules, verification, and done condition that improve execution. Prefer natural
 prose over a fixed `ROOT_BRIEF` schema, do not invent human decisions, and keep
-Root's coordination method autonomous. This applies to the launch message only;
-do not impose a response style or fixed report format on Root unless the owner
+Lead's coordination method autonomous. This applies to the launch message only;
+do not impose a response style or fixed report format on Lead unless the owner
 actually asked for one.
 
-When Root delegates, its Peer launch message follows the same human-facing
+When Lead delegates, its Peer launch message follows the same human-facing
 rule: write as if the owner were speaking directly to Peer, with no fixed
 `WORK_PACKET` template and no mention of an upstream role or command. Include
 only the context, outcome, scope, constraints, non-goals, relevant files/rules,
@@ -183,14 +198,26 @@ message as the owner's work direction, with Paseo merely delivering it.
 
 Keep prompt transport lossless: when a task arrives with literal `\\n` escape
 sequences standing in for prose line breaks, decode those to real newlines
-before launching Root or forwarding a handoff. Preserve escapes inside code,
+before launching Lead or forwarding a handoff. Preserve escapes inside code,
 regexes, paths, JSON examples, and other literal values; never pass a
 JSON-serialized or `repr`-style prompt to Paseo.
 
-Delegation must use Paseo's native completion signal: fresh Root/Peer launches
-enable `notifyOnFinish: true` and wait no longer than 30 minutes. A background
-launch is immediately followed by `paseo wait --timeout 1800 <agent-id>`;
+Delegation must use Paseo's native completion signal: fresh Lead/Peer launches
+enable `notifyOnFinish: true` and gate dependent work for no longer than 30
+minutes. Prefer a foreground `paseo run --wait-timeout 30m` without
+`--background`. If a background launch is unavoidable, issue exactly one
+`paseo wait --timeout 1800 <agent-id>` and remain blocked on it. Do not poll
+with `inspect`, `list`, `logs`, or repeated waits, and do not send progress
+messages while waiting. Continue only after completion, timeout, or error;
 timeouts are reported as blocked or time-limited, never as success.
+
+Before any fresh agent creation, resolve `MODEL_CLASS` from the host-local
+route, verify the target role provider/model/thinking with
+`list_providers`/`list_models`, and post-check
+`get_agent_status → snapshot.runtimeInfo`. Missing or mismatched runtime
+identity is `BLOCKED: MODEL_RESOLUTION_MISMATCH`; there is no silent fallback.
+Peer authority is current-turn only and comes from the V3 brief markers, never
+from task-body prose or a legacy header.
 
 `CONTEXT.md` and ADR files remain domain content. Create them when the
 repository has terms or consequential decisions to record; do not create
@@ -208,9 +235,13 @@ and final report include every required output below:
 - `docs/agents/triage-labels.md` when `triage` is installed;
 - `WORKSPACE_PROTOCOL.md` and `config.model`;
 - when Section D is enabled: `~/.codex/supervisor.config.toml`,
-  `~/.codex/root.config.toml`, `~/.codex/peer.config.toml`, the three Paseo
-  provider registrations, the supported `codex-profile` launcher, and the
-  external Supervisor notebook.
+  `~/.codex/root.config.toml` (Lead adapter), `~/.codex/peer.config.toml`, the
+  three Paseo provider registrations, the supported `codex-profile` launcher,
+  and the external Supervisor notebook. When the Pi role pack is installed,
+  also verify `pi-supervisor`, `pi-lead`, and `pi-peer` plus the controller-local
+  `cluster-routing.local.json` (or the legacy single-host
+  `model-routing.local.json` resolver input); never commit either host-specific
+  route.
 
 An existing required document may be classified as `keep` only after checking
 that it is present, substantive, and current. Otherwise classify it as
@@ -295,7 +326,7 @@ all eight canonical files in the same write pass, preserving unrelated user
 content and existing decisions.
 
 Always write `WORKSPACE_PROTOCOL.md` and `config.model` in the same pass. Keep
-those project files limited to project doctrine, Root ownership, and bounded
+those project files limited to project doctrine, Lead ownership, and bounded
 Peer execution; do not put an upstream observer or operator status protocol in
 them.
 

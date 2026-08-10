@@ -1,6 +1,13 @@
-# Paseo detached Root/Peer model config for this project.
+# Paseo detached Lead/Peer model config for this project.
 # Edit this file at the repo root after running /setup-matt-pocock-skills.
 # provider = Paseo provider alias. model/thinking come from `paseo provider models <provider> --json`.
+# [root] is the Codex adapter spelling for the Lead role. The Supervisor,
+# Root, and Peer entries select the three Paseo Codex role providers.
+
+[supervisor]
+provider=codex-supervisor
+model=gpt-5.6-luna
+thinking=medium
 
 [root]
 provider=codex-root

@@ -73,17 +73,31 @@ Sau khi cài:
 
 1. `/setup-matt-pocock-skills`
 2. `/ask-matt` nếu không chắc skill nào.
-3. External Paseo observer starts a detached `codex-root`; Root creates
-   `codex-peer` only for bounded packets. The project itself manages only
-   Root/Peer routing.
+3. The optional Paseo Supervisor observes or starts a detached Lead. The Codex
+   adapter uses `codex-root` as the legacy Lead provider and `codex-peer` only
+   for bounded V3 briefs; the Pi equivalent is `pi-lead`/`pi-peer`. Paseo owns
+   lifecycle/workspace/control-plane state, while role profiles/extensions own
+   prompt and tool policy.
 4. Với flow nhỏ: `/grill-with-docs` → `/implement` → `/code-review`; effort lớn hoặc còn mù đường bắt đầu bằng `/wayfinder`.
 
-Project execution is deliberately small: task prompt → detached Root →
-bounded Peer. Root owns project doctrine, planning, integration, and
-acceptance; Peer owns task-local execution and evidence. The external observer
-is configured outside the repository and does not add a project document,
-callback, or authority path. Root reads `WORKSPACE_PROTOCOL.md`; Peer does
-not. `config.model` contains only Root/Peer defaults.
+Project execution is deliberately small: task prompt → optional Supervisor
+observation → Lead → bounded Peer. Lead owns project doctrine, model/workspace
+routing, planning, integration, and acceptance; Peer owns task-local execution
+and evidence. The Supervisor is read-only and configured outside the repository.
+Lead reads `WORKSPACE_PROTOCOL.md`; Peer does not. Every Peer turn uses a V3
+authority block, and invalid/legacy briefs fail closed to read-only.
+
+### Paseo role pack
+
+The runnable Foundation + Pi policy pack lives in [`paseo/`](./paseo/). It
+contains the role policy core, V3 brief template, multi-host routing examples,
+Foundation admission manifest, prompts, preflight, and Node tests. It does not
+replace the Paseo daemon or add a second CLI.
+
+The Codex runtime adapter is implemented by [`scripts/codex-room`](./scripts/codex-room)
+and [`scripts/codex-room-sync`](./scripts/codex-room-sync); it isolates the
+Supervisor, Root, and Peer `CODEX_HOME` directories while reusing the existing
+Codex role config files.
 
 ---
 

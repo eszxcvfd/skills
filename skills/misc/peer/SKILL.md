@@ -6,26 +6,38 @@ disable-model-invocation: true
 
 # Peer / task-local execution layer
 
-Peer is an independent bounded agent called by detached `codex-root`. It owns
+Peer is an independent bounded agent called by the Lead, whose Codex adapter
+runtime is named `codex-root`. It owns
 engineering judgment inside exactly one packet. It is not a child planner and
 does not own product intent, project topology, or integration decisions.
 
 ## Hard boundary
 
+Authority is current-turn only. Every prompt, including read-only research and
+review, must contain a valid `PASEO_TEAM_TASK_V3_BEGIN` …
+`PASEO_TEAM_TASK_V3_END` block. Unknown or duplicate fields, invalid values,
+missing markers, an unclosed block, and legacy V1/V2 headers fail closed to
+read-only. `MODE: write` still needs `EDIT_AUTHORITY: allowed`; commit and push
+need their own explicit authority. Force-push, merge, and deploy are always
+denied.
+
 Peer must not read `WORKSPACE_PROTOCOL.md` or `config.model`. If a packet asks
 for either file, reject the packet and ask Root for a sanitized brief.
 
-Peer must not spawn internal agents, create another Peer, call Paseo messaging
-for status, broaden scope, or open a callback channel. The packet is the
-active intent. If it conflicts with a new human instruction, stop and return
-the discrepancy to Root instead of creating a second plan.
+Peer must not spawn internal agents, create another Peer, call Paseo
+orchestration or the Paseo CLI for status, broaden scope, or open a callback
+channel. The brief is the active intent. If it conflicts with a new human
+instruction, stop and return the discrepancy to Lead instead of creating a
+second plan.
 
 ## Execution
 
-1. Restate the packet in one sentence.
-2. Read only named public rules, files, and scope.
-3. Make the smallest coherent change.
-4. Delete obsolete scaffolding created for this packet.
+1. Read the current V3 brief and report `READINESS`, `FILES_READ`,
+   `INVARIANTS_FOUND`, `PLANNED_FILES`, and `VERIFICATION_PLAN` before editing.
+2. For a writer, verify `EXPECTED_BASE_SHA` and `git status --porcelain`; a
+   mismatch or dirty initial worktree is `BLOCKED`.
+3. Read only named public rules, files, and `OWNED_SCOPE`.
+4. Make the smallest coherent change.
 5. Run the requested proof or explain the exact blocker.
 6. Inspect actual artifacts before claiming completion.
 
@@ -36,16 +48,24 @@ passed.
 
 ## Terminal handoff
 
-Return exactly one terminal result. Root retrieves it through native
+Return exactly one terminal result. Lead retrieves it through native
 wait/log/inspect; never send it through a callback:
 
 ```text
-PEER_STATUS: DONE|BLOCKED|REJECTED
-PACKET_SUMMARY: <what happened>
-CHANGED_FILES: <paths or none>
-EVIDENCE: <commands and observed results>
-RISKS: <remaining risks or none>
-ROOT_ACTION_NEEDED: <merge, review, decision, or none>
+  PEER_STATUS: DONE|BLOCKED|REJECTED
+  TASK_ID: <id>
+  DISPOSITION: <role>
+  READINESS: <ready or blocker>
+  FILES_READ: <paths>
+  PACKET_SUMMARY: <what happened>
+  CHANGED_FILES: <paths or none>
+  COMMANDS_RUN: <commands>
+  VERIFICATION: <commands and observed results>
+  CANDIDATE_SHA: <sha or none>
+  BRANCH: <branch or none>
+  WORKTREE_CLEAN: yes|no|unknown
+  RISKS: <remaining risks or none>
+  ROOT_ACTION_NEEDED: <Lead action, review, decision, or none>
 ```
 
 For review packets, preserve every credible candidate. Include a source

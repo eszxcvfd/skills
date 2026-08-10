@@ -14,13 +14,15 @@ Non-Claude agents can install the skill set with `npx skills@latest add eszxcvfd
 ## What it does
 
 `ask-matt` is the router over the promoted engineering skills and the Paseo
-workflow profiles. It decides whether the next owner is a detached Root for
-project planning, a Peer for one bounded packet, an external observer for
-lifecycle work, or a standalone workflow skill.
+workflow profiles. It decides whether the next owner is a detached Lead (the
+legacy Codex runtime is `codex-root`) for project planning, a Peer for one
+bounded V3 brief, a Supervisor for read-only lifecycle governance, or a
+standalone workflow skill. Paseo owns lifecycle/workspace/control-plane state;
+role profiles or Pi extensions own prompt/tool policy.
 
 It does no implementation itself. Its defining constraint is that project
-routing stays small and local: task prompt → detached Root → bounded Peer.
-Observer concerns remain outside the project documents.
+routing stays small and local: task prompt → optional Supervisor observation →
+Lead → bounded Peer. Observer concerns remain outside the project documents.
 
 ## When to reach for it
 
@@ -36,7 +38,7 @@ observation.
 ## The map
 
 ```text
-task prompt → detached Root → bounded Peer
+task prompt → Supervisor observation (optional) → Lead → bounded Peer
 ```
 
 The runtime profile calls the autonomous Lead `codex-root`. The normal
@@ -46,10 +48,11 @@ small-work chain remains:
 /grill-with-docs → /to-spec → /to-tickets → /implement → /code-review
 ```
 
-Role boundary: Root owns the coordination method and may adapt it to the task.
-The external observer does not approve or micromanage that method; it alerts
-the human only when the final result materially deviates from the directive or
-locked boundaries.
+Role boundary: Lead owns model/workspace routing, coordination method, and
+acceptance. Supervisor does not edit product files or create Peer; it observes
+evidence and alerts the human only when the final result materially deviates
+from the directive or locked boundaries. Peer has no Paseo orchestration tools
+and writes only when the current V3 brief grants authority.
 
 The router also covers architecture council, deep-module design, frontend/UI
 design through [impeccable](https://aihero.dev/skills-impeccable), domain
@@ -63,7 +66,8 @@ there is one source of truth.
 `ask-matt` is the router above the skill set. Every skill page can point back to
 it instead of redrawing the graph. For the Andrew Ng comparison, it treats
 reflection, tool use, planning, and multi-agent collaboration as workflow
-patterns, then adds detached Root ownership, bounded Peer packets, and
+patterns, then adds detached Lead ownership (with Root as the legacy Codex
+runtime name), bounded Peer packets, and
 evidence handback as the project execution layer. The role instructions stay
 in the generated config profiles rather than becoming another promoted skill
 surface.

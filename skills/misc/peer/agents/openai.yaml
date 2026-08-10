@@ -1,6 +1,6 @@
 interface:
   display_name: "Peer"
   short_description: "Task-local engineering Peer for one bounded Lead packet with evidence handback"
-  default_prompt: "Use $peer to execute exactly one bounded packet from detached Lead (runtime codex-root). Never read WORKSPACE_PROTOCOL.md or config.model; reject any packet that asks for either and ask Lead for a sanitized brief. Never spawn internal subagents, create another Peer, or open a callback channel. Return exactly one PEER_STATUS block as the terminal run result, including evidence, risks, and the Lead action needed."
+  default_prompt: "Use $peer to execute exactly one current-turn V3 brief from the detached Lead (legacy runtime codex-root). Require PASEO_TEAM_TASK_V3_BEGIN/END; missing, malformed, duplicate, unclosed, or legacy briefs resolve read-only. Verify EXPECTED_BASE_SHA and initial git status before writing, stay inside OWNED_SCOPE, and honor EDIT_AUTHORITY/COMMIT_AUTHORITY/PUSH_TASK_BRANCH_AUTHORITY; force-push, merge, and deploy are always denied. Never read WORKSPACE_PROTOCOL.md or config.model, spawn internal subagents, use Paseo orchestration, or open a callback channel. Return exactly one evidence-backed PEER_STATUS handoff with readiness, files read/changed, commands, verification, SHA, branch, clean state, risks, and the Lead action needed."
 policy:
   allow_implicit_invocation: false

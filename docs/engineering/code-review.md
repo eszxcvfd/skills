@@ -48,7 +48,12 @@ hard violation. **Spec** asks the orthogonal question — does the code do what
 the issue or spec actually asked for, without missing requirements or
 smuggling in scope creep?
 
-They remain separate lanes so neither pollutes the other's context; in Paseo, root can assign them to peer reviewers, and the final report presents them under separate `## Standards` and `## Spec` headings. The added `## Proof Gate` section checks whether the required evidence was actually provided; missing proof prevents a "done" verdict even when the two axes are clean. There is deliberately no single winner across axes.
+They remain separate lanes so neither pollutes the other's context; in Paseo, the
+Lead can assign them to peer reviewers, and the final report presents them under
+separate `## Standards` and `## Spec` headings. The added `## Proof Gate` section
+checks whether the required evidence was actually provided; missing proof
+prevents a "done" verdict even when the two axes are clean. There is deliberately
+no single winner across axes.
 
 ## It's working if
 

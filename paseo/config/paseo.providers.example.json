@@ -1,0 +1,53 @@
+{
+  "$comment": "Merge these provider entries into ~/.paseo/config.json. Do not add secrets or a second CLI.",
+  "version": 1,
+  "daemon": {
+    "mcp": {
+      "enabled": true,
+      "injectIntoAgents": true
+    }
+  },
+  "agents": {
+    "providers": {
+      "pi-supervisor": {
+        "extends": "pi",
+        "label": "Pi Supervisor",
+        "env": {
+          "PASEO_PI_ROLE": "supervisor"
+        }
+      },
+      "pi-lead": {
+        "extends": "pi",
+        "label": "Pi Lead",
+        "env": {
+          "PASEO_PI_ROLE": "lead"
+        }
+      },
+      "pi-peer": {
+        "extends": "pi",
+        "label": "Pi Peer",
+        "env": {
+          "PASEO_PI_ROLE": "peer"
+        }
+      },
+      "codex-supervisor": {
+        "extends": "codex",
+        "label": "Codex Supervisor",
+        "description": "Codex governance observer with isolated CODEX_HOME",
+        "command": ["codex-room", "supervisor"]
+      },
+      "codex-root": {
+        "extends": "codex",
+        "label": "Codex Root",
+        "description": "Codex autonomous Lead with isolated CODEX_HOME",
+        "command": ["codex-room", "root"]
+      },
+      "codex-peer": {
+        "extends": "codex",
+        "label": "Codex Peer",
+        "description": "Codex bounded Peer with isolated CODEX_HOME",
+        "command": ["codex-room", "peer"]
+      }
+    }
+  }
+}
